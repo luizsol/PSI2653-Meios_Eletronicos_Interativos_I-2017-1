@@ -13,7 +13,7 @@
 
 // Declaracao das variaveis de condicao:
 pthread_mutex_t  mutex;
-
+pthread_cond_t filacheia, filavazia;
 Fila f;
 
 
@@ -26,24 +26,24 @@ void produtor(int id)
 	printf("Inicio produtor %d \n",id);
 	while (i < 10)
 	    {
+            
             //produzir item
 	    item = i + (id*1000);
-
+            pthread_mutex_lock(&mutex);
             do
 	        {
-                pthread_mutex_lock(&mutex);
 	        aguardar = FALSE;
 	        if (FilaCheia(&f))
 		    {
 		    aguardar = TRUE;
-	            pthread_mutex_unlock(&mutex);
+		    pthread_cond_wait(&filacheia, &mutex);
 		    }
 		} while (aguardar == TRUE);
 
 	    //inserir item
             printf("Produtor %d inserindo item %d\n", id, item); 
             InserirFila(&f,item);
-	    
+	    pthread_cond_signal(&filavazia);
 	    pthread_mutex_unlock(&mutex);
 	    i++;
 	    sleep(2);
@@ -60,17 +60,18 @@ void consumidor(int id)
 	while (1)
 	    {
             // retirar item da fila
-            do
+            pthread_mutex_lock(&mutex);
+		do
 		{
-                pthread_mutex_lock(&mutex);
 	        aguardar = FALSE;
 	        if (FilaVazia(&f))
 		    {
 	            aguardar = TRUE;
-		    pthread_mutex_unlock(&mutex);
+		    pthread_cond_wait(&filavazia, &mutex);
 		    }
 	        } while (aguardar == TRUE);
 	    item = RetirarFila(&f);
+	    pthread_cond_signal(&filacheia);
 	    pthread_mutex_unlock(&mutex);
 
 	    // processar item
@@ -84,6 +85,9 @@ void consumidor(int id)
 int main()
 { 
 	InitFila(&f);
+	
+	pthread_cond_init(&filacheia,NULL);
+	pthread_cond_init(&filavazia,NULL);
 
 	pthread_t prod1;
 	pthread_t prod2;
