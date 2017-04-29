@@ -2,7 +2,7 @@
 
 Este programa tem por objetivo implementar uma sala de chat para múltiplos usuários, a exemplo de programas como o [mIRC](https://pt.wikipedia.org/wiki/MIRC).
 
-## Requisitos
+## Requisitos de Projeto
 Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser implementados tanto o cliente como o servidor, e ambos deverão respeitar um protocolo de comunicação predeterminado.
 
 ### Servidor
@@ -18,18 +18,18 @@ Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser im
 ### Cliente
 * **Porta de comunicação**: Deve enviar datagramas UDP para a porta 10.000 do servidor chat
 * **Threads de comunicação**: Deve possuir dois threads:
- * Thread transmissor: Obtém a mensagem do usuário e a transmite ao servidor
- * Thread receptor: Aguarda mensagens do servidor e apresenta no terminal
+  * Thread transmissor: Obtém a mensagem do usuário e a transmite ao servidor
+  * Thread receptor: Aguarda mensagens do servidor e apresenta no terminal
 * **Apresentação**: A tela de recepção deve apresentar as mensagens para o usuário da seguinte forma:
- * `Maria__> Olá a todos`
- * `Ricardo> Olá Maria`
- * `Jose__> Olá Maria, seja bem vinda`
+  * `Maria__> Olá a todos`
+  * `Ricardo> Olá Maria`
+  * `Jose__> Olá Maria, seja bem vinda`
 * **Heartbeat**: Deve, a cada 30s, encaminhar mensagem `TESTE` ao servidor com a finalidade de verificar se a conexão está ativa ou se o servidor está ativo. Caso duas mensagens de teste não sejam respondidas, deve mostrar na tela do usuário e terminar o programa.
 
 ### Comunicação
 * **Formato da Mensagens**:
- * A mensagem utilizada na comunicação entre o cliente e servidor é codificada em ASCII.
- * A mensagem possui duas partes:
+  * A mensagem utilizada na comunicação entre o cliente e servidor é codificada em ASCII.
+  * A mensagem possui duas partes:
      * Comando: tamanho de 5 caracteres
      * Dado: tamanho variável, de 1 a 90 bytes (incluindo caractere `\0`)
 * **Mensagens do Cliente**:
@@ -37,27 +37,68 @@ Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser im
 Nome | Descrição | Formato | Dimensões | Comportamentos esperados | Possíveis Mensagens de Resposta 
 --- | --- | --- | --- | --- | ---
 `USER` | Primeira mensagem enviada do cliente ao servidor. Serve como uma solicitação de entrada na sala de chat. | `USER:<nome do usuário>\0` | `USER:`[5 bytes]; `<nome do usuário>`[1 a 10 bytes]; `\0`[1 byte] | 1) Servidor deve armazenar o nome e o `socketaddress` do novo usuário; 2) O servidor deve enviar uma resposta ao usuário | `OKOK`(Sucesso), `BUSY`(Número de usuários excedido) 
-`UP` | Envio de texto de mensagem do cliente ao servidor. | `UP :<texto da mensagem>\0` | `UP :`[5 bytes]; `<texto da mensagem>`[1 a 79 bytes]; `\0`[1 byte] | -
-`EXIT` | Pedido de saída do Chat | `EXIT:\0` | `EXIT:`[5 bytes]; `\0`[1 byte] | `BYE` (Sucesso)
+`UP` | Envio de texto de mensagem do cliente ao servidor. | `UP :<texto da mensagem>\0` | `UP :`[5 bytes]; `<texto da mensagem>`[1 a 79 bytes]; `\0`[1 byte] | 1) O servidor deve obter o nome do usuário de sua tabela de controle a partir do `socketaddress` da mensagem recebida. | -
+`EXIT` | Pedido de saída do Chat | `EXIT:\0` | `EXIT:`[5 bytes]; `\0`[1 byte] | 1) Servidor deve liberar slot ocupado pelo usuário; 2) Servidor deve gerar mensagem `DOWN` a todos clientes com o conteúdo `<usuário> saiu.` | `BYE` (Sucesso)
+`TEST` | Pedido de teste de conexão | `TEST:\0` | `TEST:`[5 bytes]; `\0`[1 byte] | 1) Receptor da mensagem `TEST` deve responder com mensagem `OKOK`; 2) A mensagem deve ser enviada a cada 30s | -
+`OKOK` | Resposta de um teste de conexão. | `OKOK:\0` | `OKOK:`[5 bytes]; `\0`[1 byte] | - | -
 
- * __*USER*__: primeira mensagem enviada do cliente ao servidor. Serve como uma solicitação de entrada na sala de chat
-     * **Formato**: 
+* **Mensagens do Servidor**:
 
-Mensagem | Conteúdo | `\0`
---- | --- | --- 
-5 bytes | Max 10 bytes | 1 byte
---- | --- | ---
-`USER:` | `<nome do usuário>` | `\0`
- 
- * teste
+Nome | Descrição | Formato | Dimensões | Comportamentos esperados | Possíveis Mensagens de Resposta 
+--- | --- | --- | --- | --- | ---
+`DOWN` | Envio de texto de mensagem do servidor ao cliente. | `DOWN:<nome do usuário> :<texto da mensagem>\0` | `DOWN:`[5 bytes]; `<nome do usuário>`[10 bytes]; `<texto da mensagem>`[1 a 79 bytes] ; `\0`[1 byte] | - | -
+`BUSY` | Indicação de excesso de usuários. | `BUSY:\0` | `BUSY:`[5 bytes]; `\0`[1 byte] | - | -
+`BYE` | Confirmação de saida de cliente | `BYE :\0` | `BYE :`[5 bytes]; `\0`[1 byte] | - | -
+`TEST` | Pedido de teste de conexão | `TEST:\0` | `TEST:`[5 bytes]; `\0`[1 byte] | 1) Receptor da mensagem `TEST` deve responder com mensagem `OKOK`; 2) A mensagem deve ser enviada a cada 30s | -
+`OKOK` | Resposta de um teste de conexão. | `OKOK:\0` | `OKOK:`[5 bytes]; `\0`[1 byte] | - | -
+
+## Estrutura do Projeto
+### cliente.c | cliente.h
+Implementam o programa do cliente
+
+### servidor.c | servidor.h
+Implementam o programa do servidor
+
+### lista.c | lista.h
+Implementam as estruturas e funções de filas com suporte a concorrência.
+
+### fila.c | fila.h
+Implementam as estruturas e funções de filas com suporte a concorrência.
+
+### rede.c | rede.h
+Implementam as estruturas e funções de acesso aos sockets de rede com suporte a concorrência.
+
+### arquivo.c | arquivo.h
+Implementam as estruturas e funções de manipulação de arquivos com suporte a concorrência.
+
+### gui.c | gui.h
+Implementam as estruturas e funções da interface homem-máquina com suporte a concorrência.
 
 ## Utilização
 
 ### Pre-requisitos
+* Sistema Operacional: Linux 
+* Compilador: GCC 6.2 ou maior
+* Bibliotecas: Pthreads
 
 ### Compilação
+* Compilação de cliente e servidor: `make`
+* Compilação do cliente: `make cliente`
+* Compilação do servidor: `make servidor`
+* Apagar todos os arquivos gerados pela compilação: `make clean`
 
 ### Execução do servidor
+* Nome do binário: `servidor-chat`
+* Sinopse: `servidor-chat [-p |-P <porta>] [-c | -C <max_cl>] [-v | -V <verbose>] [-o | -O <arquivo>]`
+* Opções
+  * `-p <porta>` Porta a ser utilizada pelo servidor (padrão: 10000)
+  * `-c <max_cl>` Número máximo de clientes simultâneos (padrão: 3)
+  * `-v <verbose>` Opção para mostrar o log de conversa durante a execução do programa (padrão: 1 (sim))
+  * `-o <arquivo>` Arquivo para armazenamento do log de conversa (padrão: nenhum)
 
-###Execução do cliente###
-
+### Execução do cliente###
+* Nome do binário: `cliente-chat`
+* Sinopse: `cliente-chat [-p |-P <porta>] [-o | -O <arquivo>]`
+* Opções
+  * `-p <porta>` Porta a ser utilizada pelo cliente (padrão: 10000)
+  * `-o <arquivo>` Arquivo para armazenamento do log de conversa (padrão: nenhum)
