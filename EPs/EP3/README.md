@@ -9,7 +9,7 @@ Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser im
 * **Porta de comunicação**: Deve aguardar requisições na porta 10.000/UDP
 * **Capacidade da sala**: Deve permitir sessões de chat com até 3 usuários simultaneamente
 * **Mensagem de lotação**: Deve apresentar a mensagem `Número de usuários excedido` quando exceder a capacidade de 3 usuários de chat (3 clientes chat)
-* **Armazenamento do socketaddress**: Deve guardar o `socketaddress` do cliente quando receber mensagem de pedido de entrada no chat (USER)
+* **Armazenamento do socketaddress**: Deve guardar o `socketaddress` do cliente quando receber mensagem de pedido de entrada no chat (`USER`)
 * **Armazenamento do nome de usuário**:Deve armazenar o nome do usuário
 * **Verificação do socketaddress**: Deve verificar, para cada mensagem recebida, o `socketaddress` de origem.
 * **Heartbeat**: Deve, a cada 30s, encaminhar mensagem `TESTE` a cada usuário com a finalidade de verificar se ainda está ativo. Caso duas mensagens de teste não sejam respondidas, deve realizar a saída do usuário do Chat
@@ -96,7 +96,7 @@ Implementam as estruturas e funções da interface homem-máquina com suporte a 
   * `-v <verbose>` Opção para mostrar o log de conversa durante a execução do programa (padrão: 1 (sim))
   * `-o <arquivo>` Arquivo para armazenamento do log de conversa (padrão: nenhum)
 
-### Execução do cliente###
+### Execução do cliente
 * Nome do binário: `cliente-chat`
 * Sinopse: `cliente-chat [-p |-P <porta>] [-o | -O <arquivo>]`
 * Opções
