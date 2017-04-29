@@ -1,11 +1,11 @@
-#Exercício Programa 3: Chat UDP
+#Exercício Programa 3: Chat UDP#
 
 Este programa tem por objetivo implementar uma sala de chat para múltiplos usuários, a exemplo de programas como o [mIRC](https://pt.wikipedia.org/wiki/MIRC).
 
-##Requisitos
+##Requisitos##
 Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser implementados tanto o cliente como o servidor, e ambos deverão respeitar um protocolo de comunicação predeterminado.
 
-###Servidor
+###Servidor###
 * **Porta de comunicação**: Deve aguardar requisições na porta 10.000/UDP
 * **Capacidade da sala**: Deve permitir sessões de chat com até 3 usuários simultaneamente
 * **Mensagem de lotação**: Deve apresentar a mensagem `Número de usuários excedido` quando exceder a capacidade de 3 usuários de chat (3 clientes chat)
@@ -15,7 +15,7 @@ Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser im
 * **Heartbeat**: Deve, a cada 30s, encaminhar mensagem `TESTE` a cada usuário com a finalidade de verificar se ainda está ativo. Caso duas mensagens de teste não sejam respondidas, deve realizar a saída do usuário do Chat
 * **Mensagem de Logout**: Quando receber uma mensagem `EXIT` deve enviar a seguinte mensagem a todos os clientes `<user>: Saiu`
 
-###Cliente
+###Cliente###
 * **Porta de comunicação**: Deve enviar datagramas UDP para a porta 10.000 do servidor chat
 * **Threads de comunicação**: Deve possuir dois threads:
  * Thread transmissor: Obtém a mensagem do usuário e a transmite ao servidor
@@ -26,7 +26,7 @@ Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser im
  * `Jose__> Olá Maria, seja bem vinda`
 * **Heartbeat**: Deve, a cada 30s, encaminhar mensagem `TESTE` ao servidor com a finalidade de verificar se a conexão está ativa ou se o servidor está ativo. Caso duas mensagens de teste não sejam respondidas, deve mostrar na tela do usuário e terminar o programa.
 
-###Comunicação
+###Comunicação###
 * **Formato da Mensagens**:
  * A mensagem utilizada na comunicação entre o cliente e servidor é codificada em ASCII.
  * A mensagem possui duas partes:
@@ -51,13 +51,13 @@ Mensagem | Conteúdo | `\0`
  
  * teste
 
-##Utilização
+##Utilização##
 
-###Pre-requisitos
+###Pre-requisitos##
 
-###Compilação
+###Compilação###
 
-###Execução do servidor
+###Execução do servidor###
 
-###Execução do cliente
+###Execução do cliente###
 
