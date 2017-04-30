@@ -1,9 +1,9 @@
-/** @file 	teste_lista.c
- *  @brief 	Programa produtor-consumidor para testar a biblioteca lista.h
+/** @file 	teste_fila.c
+ *  @brief 	Programa produtor-consumidor para testar a biblioteca fila.h
  *			
- *			Esse programa implementa o EP2 com a biblioteca lista.h
+ *			Esse programa implementa o EP2 com a biblioteca fila.h
  *              
- * 			./teste_lista -p <numero de produtores> -c <numero de consumidores>
+ * 			./teste_fila -p <numero de produtores> -c <numero de consumidores>
  *
  *         	Source: PSI2653 - Meios Eletrônicos Interativos I
  *         	Repository: https://github.com/luizsol/MEI
@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include "lista.h"
+#include "fila.h"
 
 #define TOTAL_PROD 99
 
@@ -32,8 +32,8 @@
 #define PRINT_FILA //Imprime o estado da fila em um intervalo regular de tempo
 
 
-//Lista a ser utilizada pelos produtores e consumidores
-Lista * L;
+//Fila a ser utilizada pelos produtores e consumidores
+Fila * F;
 
 //Prototipos das funcoes
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
 	//pthread_join(consumidores[0],NULL); //Nunca vai acontercer. Garante a espera
 	
 	while(1){
-		PrintLista(L);
+		PrintFila(F);
 		sleep(1);	
 	}
 	
@@ -97,7 +97,7 @@ void * produtor(void* iid){
 	while (i < TOTAL_PROD){
 		item = malloc(sizeof(int));
 		*item = i + (id*1000); //item produzido nessa iteração
-		while(ERRO == PushFim(L, (void*)item)){}
+		while(ERRO == PushFila(F, (void*)item)){}
 		printf("Produtor %d inseriu item %d\n", id, *item);
 		i++;
 		sleep(1);
@@ -123,7 +123,7 @@ void * consumidor(void* iid){
 		
 		item = NULL;
 		while(item == NULL){
-			item = (int*)PopInicio(L);
+			item = (int*)PopFila(F);
 		}
 		printf("Consumidor %d consumiu item %d\n", id, *item);
 		free(item);
@@ -214,7 +214,7 @@ void processa_parametros(int argc, char* argv[]){
 	printf("Numero de produtores: %d\n", n_produtores);
 	printf("Numero de consumidores: %d\n", n_consumidores);
 	
-	L = NewLista(); //Inicializando a lista
+	F = NewFila(); //Inicializando a lista
 	cria_consumidores(n_consumidores); //Inicializando Consumidores
 	cria_produtores(n_produtores); //Inicializando Produtores
 

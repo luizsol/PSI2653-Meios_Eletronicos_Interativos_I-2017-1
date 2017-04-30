@@ -4,7 +4,7 @@
  *         	
  *         	Repository: https://github.com/luizsol/MEI/tree/master/EPs/EP3
  *  @author	Luiz Sol (luizedusol@gmail.com)
- *  @date	2017/04/29
+ *  @date	2017/04/30
  */
 
 #ifndef __LISTA__H
@@ -18,7 +18,7 @@
 #include <semaphore.h>
 
 /**
- *  Estrutura que implementa um item de uma lista duplamente ligada
+ *  Estrutura que implementa um item de uma lista ligada
  */
 typedef struct item {
 	/*@{*/
@@ -28,7 +28,7 @@ typedef struct item {
 } Item;
 
 /**
- *  Estrutura que implementa uma lista duplamente ligada
+ *  Estrutura que implementa uma lista ligada
  */
 typedef struct lista {
 	/*@{*/

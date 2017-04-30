@@ -23,19 +23,27 @@ LIBS=-lpthread
 
 .DEFAULT_GOAL := main
 
+### LISTA
 $(ODIR)/lista.o: $(IDIR)/lista.c $(IDIR)/lista.h
 	$(CC) $(CFLAGS) -c $(IDIR)/lista.c -o $(ODIR)/lista.o
 
+#Teste da biblioteca de listas
 $(ODIR)/teste_lista.o: $(IDIR)/lista.h $(TDIR)/teste_lista.c
 	$(CC) $(CFLAGS) -c $(TDIR)/teste_lista.c -o $(ODIR)/teste_lista.o
-
-#Teste da biblioteca de listas
 lista: $(ODIR)/teste_lista.o $(ODIR)/lista.o
 	$(CC) $(CFLAGS) $(ODIR)/teste_lista.o $(ODIR)/lista.o -o teste_lista $(LIBS)
 
-fila $(ODIR)/fila.o: $(IDIR)/fila.c $(IDIR)/fila.h $(ODIR)/lista.h
+### FILA
+$(ODIR)/fila.o: $(IDIR)/fila.c $(IDIR)/fila.h $(IDIR)/lista.h
 	$(CC) $(CFLAGS) -c $(IDIR)/fila.c -o $(ODIR)/fila.o
 
+#Teste da biblioteca de filas
+$(ODIR)/teste_fila.o: $(IDIR)/fila.h $(TDIR)/teste_fila.c
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_fila.c -o $(ODIR)/teste_fila.o
+fila: $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o -o teste_fila $(LIBS)
+
+### GUI
 gui $(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(ODIR)/lista.o $(ODIR)/fila.o
 	$(CC) $(CFLAGS) -c $(IDIR)/gui.c -o $(ODIR)/gui.o
 
@@ -48,4 +56,4 @@ gui $(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(ODIR)/lista.o $(ODIR)/fila.o
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/* cliente-chat servidor-chat teste_lista
+	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila
