@@ -18,7 +18,7 @@ CFLAGS +=-std=gnu99
 CFLAGS +=-pedantic
 
 #Biblioteca a ser utilizada (Pthread)
-LIBS=-lpthread
+LIBS=-lpthread -lncurses
 
 
 .DEFAULT_GOAL := main
@@ -44,8 +44,14 @@ fila: $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o -o teste_fila $(LIBS)
 
 ### GUI
-gui $(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(ODIR)/lista.o $(ODIR)/fila.o
+$(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h
 	$(CC) $(CFLAGS) -c $(IDIR)/gui.c -o $(ODIR)/gui.o
+
+#Teste da biblioteca de filas
+$(ODIR)/teste_gui.o: $(IDIR)/gui.h $(IDIR)/fila.h $(TDIR)/teste_gui.c
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_gui.c -o $(ODIR)/teste_gui.o
+gui: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o -o teste_gui $(LIBS)
 
 #main.o: fila.o main.c
 #	gcc -std=gnu11 -Wall -pedantic -c main.c 
@@ -56,4 +62,4 @@ gui $(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(ODIR)/lista.o $(ODIR)/fila.o
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila
+	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui
