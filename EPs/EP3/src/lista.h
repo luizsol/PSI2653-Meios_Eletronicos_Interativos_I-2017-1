@@ -2,7 +2,7 @@
  *  @brief 	Implementa a estrutura de dados lista com suporte
  *          a concorrência
  *         	
- *         	Repository: https://github.com/luizsol/MEI
+ *         	Repository: https://github.com/luizsol/MEI/tree/master/EPs/EP3
  *  @author	Luiz Sol (luizedusol@gmail.com)
  *  @date	2017/04/29
  */
@@ -14,6 +14,7 @@
 #define OK 1
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <semaphore.h>
 
 /**
@@ -21,7 +22,6 @@
  */
 typedef struct item {
 	/*@{*/
-	struct item * anterior; /**< Ponteiro para o item anterior */
 	void * conteudo; /**< Ponteiro para o conteúdo do item */
 	struct item * proximo; /**< Ponteiro para o próximo item */
 	/*@}*/
@@ -33,37 +33,18 @@ typedef struct item {
 typedef struct lista {
 	/*@{*/
 	Item * inicio; /**< Ponteiro para o primeiro item da lista */
-	Item * fim; /**< Ponteiro para o último item da lista */
-	int nitens; /**< Quantidade atual de elementos na lista */
+	int nitens; /**< Quantidade de elementos na lista */
 	sem_t sem_mutex; /**< Semáforo para controle de acesso à fila */
+	sem_t sem_nitens; /**< Semaforo para controle de elementos na lista */
 	/*@}*/
 } Lista;
 
-/** @brief cria um novo item já inicializada
- *  
- *  @param conteudo o ponteiro para o conteúdo a ser inserido
- *  @return o ponteiro para um objeto inicializada
- */
-Item * NewItem(void * conteudo);
-
-/** @brief inicializa uma nova Fila
- *
- *  @param I ponteiro para um item a ser inicializada
- *  @param conteudo o ponteiro para o conteúdo a ser inserido
- */
-void InitItem(Item *I, void * conteudo);
 
 /** @brief cria uma nova lista já inicializada
  *
  *  @return o ponteiro para uma lista inicializada
  */
 Lista * NewLista();
-
-/** @brief inicializa uma nova Fila
- *
- *  @param L ponteiro para a Lista a ser inicializada
- */
-void InitLista(Lista *L);
 
 /** @brief adiciona um novo item a uma lista em uma posição
  *         predeterminada
@@ -121,16 +102,6 @@ void * PopInicio(Lista *L);
  */
 void * PopFim(Lista *L);
 
-/** @brief determina o ponteiro para um item em um determinado
- *         índice da lista
- *
- *  OBS: o primeiro indice da lista é 0
- *
- *  @param L ponteiro para a Lista a ser modificada
- *  @return ponteiro para o item requisitado (NULL em caso de erro)
- */
-Item * GetItemIndice(Lista *L, int indice);
-
 /** @brief determina o ponteiro para o conteúdo de um item em 
  *         um determinado índice da lista
  *
@@ -140,6 +111,19 @@ Item * GetItemIndice(Lista *L, int indice);
  *  @return ponteiro para o conteúdo requisitado (NULL em caso de erro)
  */
 void * GetConteudoIndice(Lista *L, int indice);
+
+/** @brief imprime o estado atual da lista
+ *
+ *  @param L ponteiro para a Lista a ser impressa
+ */
+void PrintLista(Lista *L);
+
+/** @brief determina o tamanho da lista
+ *
+ *  @param L ponteiro para a Lista a ser avaliada
+ *  @return o tamanho da lista
+ */
+int TamLista(Lista *L);
 
 
 #endif

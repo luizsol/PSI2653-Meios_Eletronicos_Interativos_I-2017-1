@@ -1,4 +1,19 @@
+/** @file 	lista.c
+ *  @brief 	Implementa a estrutura de dados lista com suporte
+ *          a concorrência
+ *         	
+ *         	Repository: https://github.com/luizsol/MEI/tree/master/EPs/EP3
+ *  @author	Luiz Sol (luizedusol@gmail.com)
+ *  @date	2017/04/29
+ */
+
 #include "lista.h"
+
+//Assinaturas de funcoes de uso exclusivamente interno
+Item * NewItem(void * conteudo);
+void InitItem(Item *I, void * conteudo);
+void InitLista(Lista *L);
+Item * GetItemIndice(Lista *L, int indice);
 
 /** @brief cria um novo item já inicializada
  *  
@@ -17,7 +32,7 @@ Item * NewItem(void * conteudo){
  *  @param conteudo o ponteiro para o conteúdo a ser inserido
  */
 void InitItem(Item *I, void * conteudo){
-	I->anterior = I->proximo = NULL;
+	I->proximo = NULL;
 	I->conteudo = conteudo;
 }
 
@@ -36,8 +51,8 @@ Lista * NewLista(){
  *  @param L ponteiro para a Lista a ser inicializada
  */
 void InitLista(Lista *L){
-	L->inicio = L->fim = NULL;
-	L->nitens = 0;
+	L->inicio = NULL;
+	sem_init(&(L->sem_nitens), 0, 0);
 	sem_init(&(L->sem_mutex), 0, 1);
 }
 
@@ -54,22 +69,30 @@ void InitLista(Lista *L){
 int InsereNovoItemIndice(Lista *L, void * conteudo, int indice){
 	Item * nItem = NewItem(conteudo); //Criando novo item a ser add
 	sem_wait(&(L->sem_mutex));
-	if(indice >= L->nitens){ //Índice inválido
+	if(indice > TamLista(L)){ //Índice inválido
 		free(nItem); //Apagando item criado
-		sem_post(&(F->sem_mutex));
+		sem_post(&(L->sem_mutex));
 		return ERRO;
 	}
-	
-	Item * addr = GetItemIndice(L, indice);
-
-	addr->anterior->proximo = nItem; /*Fazendo com que o valor "proximo"
-	do item anterior a esse seja igual ao endereço do item sendo inserido*/
-	nItem->anterior = addr->anterior; /*Fazendo com que o valor "anterior"
-	do novo item seja igual ao valor "anterior" do item sendo deslocado*/
-	addr->anterior = nItem;
-	nItem->proximo = addr;
+	if(TamLista(L) == 0){//Lista vazia
+		L->inicio = nItem;
+		L->nitens++;
+		sem_post(&(L->sem_nitens));
+		sem_post(&(L->sem_mutex));
+		return OK;
+	}
+	if(indice != 0){ //Indice nao e 0 nem a lista nao esta vazia
+		Item * addr = GetItemIndice(L, indice-1);
+		nItem->proximo = addr->proximo;
+		addr->proximo = nItem;
+	} else { //Indice e 0 e a lista nao esta vazia
+		nItem->proximo = L->inicio;
+		L->inicio = nItem;
+	}
 	L->nitens++;
-	sem_post(&(F->sem_mutex));
+	sem_post(&(L->sem_mutex));
+	sem_post(&(L->sem_nitens));
+	
 	return OK;
 }
 
@@ -92,15 +115,19 @@ int PushInicio(Lista *L, void * conteudo){
 int PushFim(Lista *L, void * conteudo){
 	Item * nItem = NewItem(conteudo); //Criando novo item a ser add
 	sem_wait(&(L->sem_mutex));
-	/*TODO: otimizar essa parte criando uma opção de percorrer a lista
-	de trás para frente a depender do indice e do tamanho da lista*/
-	Item * addr = GetItemIndice(L, L->nitens - 1);
-
+	if(TamLista(L) == 0){//Lista vazia
+		L->inicio = nItem;
+		L->nitens++;
+		sem_post(&(L->sem_nitens));
+		sem_post(&(L->sem_mutex));
+		return OK;
+	}
+	//Lista nao vazia
+	Item * addr = GetItemIndice(L, TamLista(L)-1);
 	addr->proximo = nItem;
-	nItem->anterior = addr;
-
 	L->nitens++;
-	sem_post(&(F->sem_mutex));
+	sem_post(&(L->sem_nitens));
+	sem_post(&(L->sem_mutex));
 	return OK;
 }
 
@@ -115,27 +142,26 @@ int PushFim(Lista *L, void * conteudo){
  *                   (NULL em caso de erro)
  */
 void * RemoveItemIndice(Lista *L, int indice){
-	sem_wait(&(L->sem_mutex));
-	if(indice >= L->nitens - 1){
-		sem_post(&(F->sem_mutex));
+	if(indice >= TamLista(L)){
 		return NULL;
 	}
-
-	Item * addr = GetItemIndice(L, indice);
-
-	/*Linkando os itens anterior e próximo a esse 
-	um ao outro*/
-	addr->anterior->proximo = addr->proximo;
-	addr->proximo->anterior = addr->anterior;
-
-	//Guardando o endereço do conteúdo contido nesse item
-	void * conteudo = addr->conteudo;
-	//Apagando o item
-	free(addr);
-	//Atualizando o tamanho da lista
+	sem_wait(&(L->sem_nitens));
+	sem_wait(&(L->sem_mutex));
+	Item * deletado;
+	if(indice == 0){
+		deletado = L->inicio;
+		L->inicio = L->inicio->proximo;
+	} else { 
+		Item * addr = GetItemIndice(L, indice-1);
+		deletado = addr->proximo;
+		addr->proximo = deletado->proximo;
+	}
 	L->nitens--;
-
-	sem_post(&(F->sem_mutex));
+	sem_post(&(L->sem_mutex));
+	//Guardando o endereço do conteúdo contido nesse item
+	void * conteudo = deletado->conteudo;
+	//Apagando o item
+	free(deletado);
 	return conteudo;
 }
 
@@ -156,25 +182,26 @@ void * PopInicio(Lista *L){
  *                   (NULL em caso de erro)
  */
 void * PopFim(Lista *L){
+	sem_wait(&(L->sem_nitens));
 	sem_wait(&(L->sem_mutex));
-	if(L->nitens == 0){
-		sem_post(&(F->sem_mutex));
-		return NULL;
+	Item * deletado;
+	if(TamLista(L) == 1){ /* Removendo o unico elemento da
+	lista */
+		deletado = L->inicio;
+		L->inicio = NULL;
+	} else {/* Removendo o ultimo elemento de uma lista com 
+	mais de 1 elemento */
+		Item * addr = GetItemIndice(L, TamLista(L) - 2);
+		/* Item anterior ao que vamos remover*/
+		deletado = addr->proximo;
+		addr->proximo = NULL;
 	}
-
-	Item * addr = GetItemIndice(L, L->nitens-1);
-
-	/*Atualizando a referência do índice anterior*/
-	addr->anterior->proximo = NULL;
-
+	L->nitens--;	
+	sem_post(&(L->sem_mutex));
 	//Guardando o endereço do conteúdo contido nesse item
-	void * conteudo = addr->conteudo;
+	void * conteudo = deletado->conteudo; //Erro!
 	//Apagando o item
-	free(addr);
-	//Atualizando o tamanho da lista
-	L->nitens--;
-
-	sem_post(&(F->sem_mutex));
+	free(deletado);
 	return conteudo;
 }
 
@@ -187,11 +214,6 @@ void * PopFim(Lista *L){
  *  @return ponteiro para o item requisitado (NULL em caso de erro)
  */
 Item * GetItemIndice(Lista *L, int indice){
-	if(indice >= L->nitens){
-		return NULL;
-	}
-	/*TODO: otimizar essa parte criando uma opção de percorrer a lista
-	de trás para frente a depender do indice e do tamanho da lista*/
 	Item * addr = L->inicio;
 	for(int i = 0; i < indice; i++){
 		addr = addr->proximo;
@@ -211,9 +233,36 @@ void * GetConteudoIndice(Lista *L, int indice){
 	sem_wait(&(L->sem_mutex));
 	Item * addr = GetItemIndice(L, indice);
 	if(addr == NULL){
-		sem_post(&(F->sem_mutex));
+		sem_post(&(L->sem_mutex));
 		return NULL;
 	}
-	sem_post(&(F->sem_mutex));
+	sem_post(&(L->sem_mutex));
 	return addr->conteudo;
+}
+
+/** @brief imprime o estado atual da lista
+ *
+ *  @param L ponteiro para a Lista a ser impressa
+ */
+void PrintLista(Lista *L){
+	sem_wait(&(L->sem_mutex));
+	printf("[");
+	for(int i = 0; i < TamLista(L);){
+		int item = *((int*)(GetItemIndice(L, i)->conteudo));
+		printf("%d", item);
+		i++;
+		if(i <TamLista(L))
+			printf(",");
+	}
+	printf("]\n");
+	sem_post(&(L->sem_mutex));
+}
+
+/** @brief determina o tamanho da lista
+ *
+ *  @param L ponteiro para a Lista a ser avaliada
+ *  @return o tamanho da lista
+ */
+int TamLista(Lista *L){
+	return L->nitens;
 }

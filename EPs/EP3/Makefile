@@ -3,6 +3,8 @@ CC=gcc
 
 #Local dos arquivos fonte
 IDIR =src
+#Local dos arquivos de teste
+TDIR =test
 #Destino dos arquivos .o
 ODIR=obj
 
@@ -11,7 +13,7 @@ CFLAGS =-I $(IDIR)
 #Flag para que o compilador mostre todos os warnings e erros
 CFLAGS +=-Wall
 #Flag para o standard de C que utilizaremos
-CFLAGS +=-std=c99
+CFLAGS +=-std=gnu99
 #Flag para ser extra rigoroso com a compilacao
 CFLAGS +=-pedantic
 
@@ -21,10 +23,17 @@ LIBS=-lpthread
 
 .DEFAULT_GOAL := main
 
-lista $(ODIR)/lista.o: $(IDIR)/lista.c $(IDIR)/lista.h
+$(ODIR)/lista.o: $(IDIR)/lista.c $(IDIR)/lista.h
 	$(CC) $(CFLAGS) -c $(IDIR)/lista.c -o $(ODIR)/lista.o
 
-fila $(ODIR)/fila.o: $(IDIR)/fila.c $(IDIR)/fila.h $(ODIR)/lista.o
+$(ODIR)/teste_lista.o: $(IDIR)/lista.h $(TDIR)/teste_lista.c
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_lista.c -o $(ODIR)/teste_lista.o
+
+#Teste da biblioteca de listas
+lista: $(ODIR)/teste_lista.o $(ODIR)/lista.o
+	$(CC) $(CFLAGS) $(ODIR)/teste_lista.o $(ODIR)/lista.o -o teste_lista $(LIBS)
+
+fila $(ODIR)/fila.o: $(IDIR)/fila.c $(IDIR)/fila.h $(ODIR)/lista.h
 	$(CC) $(CFLAGS) -c $(IDIR)/fila.c -o $(ODIR)/fila.o
 
 gui $(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(ODIR)/lista.o $(ODIR)/fila.o
@@ -39,4 +48,4 @@ gui $(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(ODIR)/lista.o $(ODIR)/fila.o
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/* cliente-chat servidor-chat
+	rm -f $(ODIR)/* cliente-chat servidor-chat teste_lista
