@@ -60,8 +60,8 @@ $(ODIR)/rede.o: $(IDIR)/rede.c $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h
 #Teste da biblioteca GUI sem sockets
 $(ODIR)/teste_rede.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(TDIR)/teste_rede.c
 	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede.c -o $(ODIR)/teste_rede.o
-rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o $(ODIR)/rede.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_gui.o -o teste_rede $(LIBS)
+rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede.o -o teste_rede $(LIBS)
 
 #Servidor UDP de echo
 $(ODIR)/echo_rede.o: $(TDIR)/echo_rede.c
