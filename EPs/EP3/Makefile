@@ -63,6 +63,12 @@ $(ODIR)/teste_rede.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(TDIR)/test
 rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o $(ODIR)/rede.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_gui.o -o teste_rede $(LIBS)
 
+#Servidor UDP de echo
+$(ODIR)/echo_rede.o: $(TDIR)/echo_rede.c
+	$(CC) $(CFLAGS) -c $(TDIR)/echo_rede.c -o $(ODIR)/echo_rede.o
+echo: $(ODIR)/echo_rede.o
+	$(CC) $(CFLAGS) $(ODIR)/echo_rede.o -o echo_rede $(LIBS)
+
 #main.o: fila.o main.c
 #	gcc -std=gnu11 -Wall -pedantic -c main.c 
 
@@ -72,4 +78,4 @@ rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o $(ODIR)/r
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede
+	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede echo_rede
