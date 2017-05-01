@@ -1,3 +1,12 @@
+/** @file       teste_gui.c
+ *  @brief      Programa para testar a biblioteca gui.h sem 
+ *              sockets
+ *                      
+ *              Repository: https://github.com/luizsol/MEI
+ *  @author     Luiz Sol (luizedusol@gmail.com)
+ *  @date       2017/05/01
+ */
+
 #include "gui.h"
 
 

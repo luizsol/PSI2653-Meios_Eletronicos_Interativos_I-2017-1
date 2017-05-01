@@ -10,6 +10,7 @@
 
 #include "gui.h"
 
+/* Cabecalhos de funcoes nao declaradas no .h 				*/
 void AtualizaChat();
 void RemoveTextoChat();
 void * InputManager(void * arg);
@@ -22,7 +23,8 @@ void InputErase();
  */
 void InitGUI(int modo){
 
-    execGUI = 1;
+    execGUI = 1;	/* Flag de execucao da GUI 				*/
+
 	sem_init(&sem_chat, 0, 1);	/* Inicializando semaforo 	*
 								 * de controle da GUI 		*/
 
@@ -48,8 +50,8 @@ void InitGUI(int modo){
 				 * isso desativa as interrupcoes de teclado	*
 				 * como ^C 									*/
 
-	noecho();
-	curs_set(0);
+	noecho();	/* Desativando o echo do terminal 			*/
+	curs_set(0);	/* Desativando o cursor 				*/
 
 	keypad(stdscr, TRUE);	/* Habilitando as teclas F1..F12*/
 
@@ -59,6 +61,7 @@ void InitGUI(int modo){
     refresh();	/* Atualizando o terminal para mostrar as 	*
     			 * janelas 									*/
 
+	/* Inicializando Janelas 								*/
 	GUIjanelaTitulo = NovaJanela(alturaTitulo, larguraTitulo,
 								inicioYTitulo, inicioXTitulo);
 
@@ -66,8 +69,7 @@ void InitGUI(int modo){
     							inicioYChat, inicioXChat);
     if(modo == MODOCLIENTE){
 		GUIjanelaInput = NovaJanela(alturaInput, larguraInput, 
-									inicioYInput, inicioXInput
-									);
+								inicioYInput, inicioXInput);
 
 		mvwprintw(GUIjanelaTitulo, 1, (COLS-2-27)/2, 
 					"Cliente Chat (F1 para sair)");
@@ -75,7 +77,10 @@ void InitGUI(int modo){
     	mvwprintw(GUIjanelaTitulo, 1 , (COLS-2-27)/2,
     				"Servidor Chat (F1 para sair)");
     }
+
     wrefresh(GUIjanelaTitulo);
+
+    /* Inicializando a thread de manipulacao de input 		*/
     inputThread = malloc(sizeof(pthread_t));
     pthread_create(inputThread, NULL, InputManager, NULL);
 }
@@ -179,9 +184,7 @@ void RemoveTextoChat(){
  */
 void AtualizaChat(){
 	werase(GUIjanelaChat);
-	box(GUIjanelaChat, 0 , 0);	/* 0, 0 gives default 		*
-							 * characters for the vertical	*
-							 * and horizontal lines			*/
+	box(GUIjanelaChat, 0 , 0);
 
 	int tamLista = TamLista(textosChat);
 	int xCursor = 1;
@@ -304,7 +307,8 @@ void * InputManager(void * arg){
 				}
 				break;
 			case 10: /* \n */
-				conteudo =malloc((TAMMAXINPUT+1)*sizeof(char));
+				conteudo =
+					malloc((TAMMAXINPUT+1)*sizeof(char));
 				strcpy(conteudo, inputBuffer);
 				PushFila(filaInput, conteudo);
 				InputErase();
@@ -322,7 +326,7 @@ void * InputManager(void * arg){
 		}
 	}
 	execGUI = 0;
-	endwin();                       /* End curses mode  */
+	endwin();	/* Termina modo curses 						*/
 	exit(0);
 	
 	return NULL;

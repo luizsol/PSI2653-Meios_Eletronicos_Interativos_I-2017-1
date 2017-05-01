@@ -44,14 +44,24 @@ fila: $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o -o teste_fila $(LIBS)
 
 ### GUI
-$(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h
+$(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(IDIR)/fila.h
 	$(CC) $(CFLAGS) -c $(IDIR)/gui.c -o $(ODIR)/gui.o
 
-#Teste da biblioteca de filas
+#Teste da biblioteca GUI sem sockets
 $(ODIR)/teste_gui.o: $(IDIR)/gui.h $(IDIR)/fila.h $(TDIR)/teste_gui.c
 	$(CC) $(CFLAGS) -c $(TDIR)/teste_gui.c -o $(ODIR)/teste_gui.o
 gui: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o -o teste_gui $(LIBS)
+
+### REDE
+$(ODIR)/rede.o: $(IDIR)/rede.c $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h
+	$(CC) $(CFLAGS) -c $(IDIR)/rede.c -o $(ODIR)/rede.o
+
+#Teste da biblioteca GUI sem sockets
+$(ODIR)/teste_rede.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(TDIR)/teste_rede.c
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede.c -o $(ODIR)/teste_rede.o
+rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o $(ODIR)/rede.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_gui.o -o teste_rede $(LIBS)
 
 #main.o: fila.o main.c
 #	gcc -std=gnu11 -Wall -pedantic -c main.c 
@@ -62,4 +72,4 @@ gui: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui
+	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede
