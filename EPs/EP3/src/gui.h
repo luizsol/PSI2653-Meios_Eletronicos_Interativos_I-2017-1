@@ -5,7 +5,7 @@
  *         	Repository: 
  *			https://github.com/luizsol/MEI/tree/master/EPs/EP3
  *  @author	Luiz Sol (luizedusol@gmail.com)
- *  @date	2017/04/30
+ *  @date	2017/05/01
  */
 
 #ifndef __GUI__H
@@ -16,7 +16,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "lista.h"
+#include <pthread.h>
+#include "fila.h"
 
 #define TAMMAXINPUT 79	/* Tamanho maximo do texto de 		*
 						 * usuario							*/
@@ -25,7 +26,7 @@
 #define MODOSERVIDOR 1
 
 WINDOW * GUIjanelaTitulo;	/* Janela para descricao e 		*
-							 * instucoes do programa		*/
+							 * instrucoes do programa		*/
 
 WINDOW * GUIjanelaChat;	/* Janela de apresentacao do texto	* 
 						 * do chat							*/
@@ -48,11 +49,20 @@ int alturaInput, larguraInput, inicioYInput, inicioXInput;
 
 Lista * textosChat;	/* Textos que serao apresentados no chat*/
 
+Fila * filaInput; 	/* Fila contendo os inputs gerados pelo *
+					 * usuario 								*/
+
 int numLinhasChat; /* Numero de linhas ja ocupadas na janela*
 					* de chat 								*/
 
 sem_t sem_chat; 	/* Semaforo de controle da janela de 	*
 					 * chat 								*/
+
+char * inputBuffer;	/* Variavel de armazenamento do input 	*/
+
+pthread_t * inputThread; /* Thread de processamento de input*/
+
+volatile int execGUI;
 
 /** @brief Inicializa as janelas da interface
  *

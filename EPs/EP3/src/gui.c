@@ -5,13 +5,16 @@
  *         	Repository: 
  *			https://github.com/luizsol/MEI/tree/master/EPs/EP3
  *  @author	Luiz Sol (luizedusol@gmail.com)
- *  @date	2017/04/30
+ *  @date	2017/05/01
  */
 
 #include "gui.h"
 
 void AtualizaChat();
 void RemoveTextoChat();
+void * InputManager(void * arg);
+void InputUpdate();
+void InputErase();
 
 /** @brief Inicializa as janelas da interface
  *
@@ -19,7 +22,19 @@ void RemoveTextoChat();
  */
 void InitGUI(int modo){
 
-	sem_init(&sem_chat, 0, 1);
+    execGUI = 1;
+	sem_init(&sem_chat, 0, 1);	/* Inicializando semaforo 	*
+								 * de controle da GUI 		*/
+
+	if(modo == MODOCLIENTE){
+		/* Inicializando a variavel de buffer de entrada 	*/
+		inputBuffer = malloc((TAMMAXINPUT+1)*sizeof(char));
+		InputErase();
+		filaInput = NewFila();
+	}
+
+	/* Inicializando a variavel de buffer de entrada 		*/
+	inputBuffer = malloc((TAMMAXINPUT+1)*sizeof(char));
 	textosChat = NewLista();	/* Inicializando a lista de *	
 								 * textos que serao 		*
 								 * mostrados na janela de 	*
@@ -32,6 +47,9 @@ void InitGUI(int modo){
 				 * queremos tratar todas as entradas. Aviso:*
 				 * isso desativa as interrupcoes de teclado	*
 				 * como ^C 									*/
+
+	noecho();
+	curs_set(0);
 
 	keypad(stdscr, TRUE);	/* Habilitando as teclas F1..F12*/
 
@@ -58,6 +76,8 @@ void InitGUI(int modo){
     				"Servidor Chat (F1 para sair)");
     }
     wrefresh(GUIjanelaTitulo);
+    inputThread = malloc(sizeof(pthread_t));
+    pthread_create(inputThread, NULL, InputManager, NULL);
 }
 
 /** @brief Inicializa as janelas da interface
@@ -70,7 +90,7 @@ void AtualizaDimPos(int modo){
 	inicioXInput = 0;
 
 	if(modo == MODOCLIENTE){
-		alturaInput = 2+((COLS-2)/TAMMAXINPUT +1);
+		alturaInput = 2 + (TAMMAXINPUT/(COLS-2) + 1);
 		larguraInput = COLS;
 		inicioYInput = LINES-alturaInput;  
 		inicioXInput = 0;
@@ -198,7 +218,7 @@ void AtualizaChat(){
 		
 
 		/* Caso esse texto use mais que uma linha 			*/
-		for(int j = 0; j < nLinhas-1; j++, yCursor--){
+		for(int j = 0; j < nLinhas-1; j++){
 			xCursor = padding + 1;	/* Movendo o cursor para*/
 			yCursor++;				/* a proxima linha 		*
 									 * levando em 			*
@@ -214,7 +234,7 @@ void AtualizaChat(){
 
 							/* caracteres impressos nas 	*
 							 * outras linhas 				*/
-							+ j*(larguraChat - 2 - padding);
+							+ j*((larguraChat - 2) - padding);
 
 			/* Imprimindo o restante do texto 				*/
 			mvwprintw(GUIjanelaChat, 
@@ -227,6 +247,83 @@ void AtualizaChat(){
 			xCursor = 1;
 		}
 		xCursor = 1;
+		yCursor -= (nLinhas-1);
 	}
 	wrefresh(GUIjanelaChat);
+}
+
+/** @brief Apaga todo o conteudo do buffer de input
+ *
+ */
+void InputErase(){
+	for(int i = 0; i < (TAMMAXINPUT+1); i++){
+		*(inputBuffer + i) = '\0';
+	}
+}
+
+/** @brief Funcao responsavel por atualizar a janela de input
+ *
+ */
+void InputUpdate(){
+	int xCursor = 1;
+	int yCursor = 1;
+	int tamBuffer = strlen(inputBuffer);
+	int nLinhas = tamBuffer/(larguraInput - 2);
+	if(strlen(inputBuffer)%(larguraInput - 2) > 0){
+		nLinhas++;
+	}
+	werase(GUIjanelaInput);
+	box(GUIjanelaInput, 0 , 0);
+
+	for(int i = 0; i < nLinhas; i++, yCursor++){
+		mvwprintw(GUIjanelaInput, 
+					yCursor, 
+					xCursor, 
+					"%.*s", 
+					larguraChat - 2, 
+					inputBuffer + i*(larguraInput - 2));
+	}
+
+	wrefresh(GUIjanelaInput);
+}
+
+/** @brief Funcao responsavel por tratar inputs do usuario
+ *
+ */
+void * InputManager(void * arg){
+	int ch;
+	int idx = 0;
+	char * conteudo;
+	while((ch = getch()) != KEY_F(1)){
+		switch(ch){
+			case KEY_BACKSPACE:
+				if(idx > 0){
+					idx--;
+					*(inputBuffer + idx) = '\0';
+					InputUpdate();
+				}
+				break;
+			case 10: /* \n */
+				conteudo =malloc((TAMMAXINPUT+1)*sizeof(char));
+				strcpy(conteudo, inputBuffer);
+				PushFila(filaInput, conteudo);
+				InputErase();
+				idx = 0;
+				InputUpdate();
+				break;
+			default:
+				if(ch > 31 && ch < 127	/* Caracteres ASCII */
+					&& idx < TAMMAXINPUT-1){
+					*(inputBuffer + idx) = ch;
+					idx++;
+					InputUpdate();
+				}
+				break;
+		}
+	}
+	execGUI = 0;
+	endwin();                       /* End curses mode  */
+	exit(0);
+	
+	return NULL;
 }
