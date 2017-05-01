@@ -64,7 +64,7 @@ void InitLista(Lista *L){
  *  @param L ponteiro para a Lista a ser modificada
  *  @param conteudo endereço do conteúdo a ser inserido
  *  @param indice indice em que o novo item deve ser inserido
- *  @return status da operação (OK ou ERRO)
+ *  @return status da operação (L_OK ou L_ERRO)
  */
 int InsereNovoItemIndice(Lista *L, void * conteudo, int indice){
 	Item * nItem = NewItem(conteudo); //Criando novo item a ser add
@@ -72,14 +72,14 @@ int InsereNovoItemIndice(Lista *L, void * conteudo, int indice){
 	if(indice > TamLista(L)){ //Índice inválido
 		free(nItem); //Apagando item criado
 		sem_post(&(L->sem_mutex));
-		return ERRO;
+		return L_ERRO;
 	}
 	if(TamLista(L) == 0){//Lista vazia
 		L->inicio = nItem;
 		L->nitens++;
 		sem_post(&(L->sem_nitens));
 		sem_post(&(L->sem_mutex));
-		return OK;
+		return L_OK;
 	}
 	if(indice != 0){ //Indice nao e 0 nem a lista nao esta vazia
 		Item * addr = GetItemIndice(L, indice-1);
@@ -93,14 +93,14 @@ int InsereNovoItemIndice(Lista *L, void * conteudo, int indice){
 	sem_post(&(L->sem_mutex));
 	sem_post(&(L->sem_nitens));
 	
-	return OK;
+	return L_OK;
 }
 
 /** @brief adiciona um novo item ao início de uma lista
  *
  *  @param L ponteiro para a Lista a ser modificada
  *  @param conteudo endereço do conteúdo a ser inserido
- *  @return status da operação (OK ou ERRO)
+ *  @return status da operação (L_OK ou L_ERRO)
  */
 int PushInicio(Lista *L, void * conteudo){
 	return InsereNovoItemIndice(L, conteudo, 0);
@@ -110,7 +110,7 @@ int PushInicio(Lista *L, void * conteudo){
  *
  *  @param L ponteiro para a Lista a ser modificada
  *  @param conteudo endereço do conteúdo a ser inserido
- *  @return status da operação (OK ou ERRO)
+ *  @return status da operação (L_OK ou L_ERRO)
  */
 int PushFim(Lista *L, void * conteudo){
 	Item * nItem = NewItem(conteudo); //Criando novo item a ser add
@@ -120,7 +120,7 @@ int PushFim(Lista *L, void * conteudo){
 		L->nitens++;
 		sem_post(&(L->sem_nitens));
 		sem_post(&(L->sem_mutex));
-		return OK;
+		return L_OK;
 	}
 	//Lista nao vazia
 	Item * addr = GetItemIndice(L, TamLista(L)-1);
@@ -128,7 +128,7 @@ int PushFim(Lista *L, void * conteudo){
 	L->nitens++;
 	sem_post(&(L->sem_nitens));
 	sem_post(&(L->sem_mutex));
-	return OK;
+	return L_OK;
 }
 
 /** @brief remove um item de uma lista em uma posição
@@ -139,7 +139,7 @@ int PushFim(Lista *L, void * conteudo){
  *  @param L ponteiro para a Lista a ser modificada
  *  @param indice indice do item a ser removido
  *  @return ponteiro para o conteúdo do item removido 
- *                   (NULL em caso de erro)
+ *                   (NULL em caso de L_ERRO)
  */
 void * RemoveItemIndice(Lista *L, int indice){
 	if(indice >= TamLista(L)){
@@ -169,7 +169,7 @@ void * RemoveItemIndice(Lista *L, int indice){
  *
  *  @param L ponteiro para a Lista a ser modificada
  *  @return ponteiro para o conteúdo do item removido 
- *                   (NULL em caso de erro)
+ *                   (NULL em caso de L_ERRO)
  */
 void * PopInicio(Lista *L){
 	return RemoveItemIndice(L, 0);
@@ -179,7 +179,7 @@ void * PopInicio(Lista *L){
  *
  *  @param L ponteiro para a Lista a ser modificada
  *  @return ponteiro para o conteúdo do item removido 
- *                   (NULL em caso de erro)
+ *                   (NULL em caso de L_ERRO)
  */
 void * PopFim(Lista *L){
 	sem_wait(&(L->sem_nitens));
@@ -199,7 +199,7 @@ void * PopFim(Lista *L){
 	L->nitens--;	
 	sem_post(&(L->sem_mutex));
 	//Guardando o endereço do conteúdo contido nesse item
-	void * conteudo = deletado->conteudo; //Erro!
+	void * conteudo = deletado->conteudo; //L_ERRO!
 	//Apagando o item
 	free(deletado);
 	return conteudo;
@@ -211,7 +211,7 @@ void * PopFim(Lista *L){
  *  OBS: o primeiro indice da lista é 0
  *
  *  @param L ponteiro para a Lista a ser modificada
- *  @return ponteiro para o item requisitado (NULL em caso de erro)
+ *  @return ponteiro para o item requisitado (NULL em caso de L_ERRO)
  */
 Item * GetItemIndice(Lista *L, int indice){
 	Item * addr = L->inicio;
@@ -227,7 +227,7 @@ Item * GetItemIndice(Lista *L, int indice){
  *  OBS: o primeiro indice da lista é 0
  *
  *  @param L ponteiro para a Lista a ser modificada
- *  @return ponteiro para o conteúdo requisitado (NULL em caso de erro)
+ *  @return ponteiro para o conteúdo requisitado (NULL em caso de L_ERRO)
  */
 void * GetConteudoIndice(Lista *L, int indice){
 	sem_wait(&(L->sem_mutex));

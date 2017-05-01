@@ -79,7 +79,7 @@ Implementam as estruturas e funções da interface homem-máquina com suporte a 
 ### Pre-requisitos
 * Sistema Operacional: Linux 
 * Compilador: GCC 6.2 ou maior
-* Bibliotecas: Pthreads
+* Bibliotecas: Pthreads e Ncurses
 
 ### Compilação
 * Compilação de cliente e servidor: `make`

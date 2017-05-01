@@ -10,8 +10,8 @@
 #ifndef __LISTA__H
 #define __LISTA__H
 
-#define ERRO 0
-#define OK 1
+#define L_ERRO 0
+#define L_OK 1
 
 #include <stdlib.h>
 #include <stdio.h>
