@@ -15,7 +15,7 @@
  *  @author Volnys Borges Bernal
  * 			Luiz Sol (luizedusol@gmail.com)
  *			Caio Vinícius Batista Pereira
- *  @date	2017/04/26
+ *  @date	2017/05/04
  */
 
 #include <stdio.h>
@@ -47,6 +47,7 @@ void produtor(int id);
 void cria_consumidores(int n);
 void cria_produtores(int n);
 void processa_parametros(int argc, char* argv[]);
+void produzir(int* item, int cont, int id);
 
 //Array das threads de produtores e consumidores
 pthread_t* produtores[MAX_PRODUTORES];
@@ -83,6 +84,22 @@ int main(int argc, char* argv[]){
 	printf("Terminado processo Produtor-Consumidor.\n\n");
 }
 
+/** @brief produz um item
+ *
+ *  
+ *  
+ *  Produz um item baseado na cont e no id do produtor 
+ *  
+ *  @param item produzido , cont é a contagem atual
+ *  id do produtor 
+ */ 
+
+void produzir (int* item, int cont, int id)
+{
+item = cont + (id*1000); //item produzido nessa iteração
+}
+
+
 /** @brief simula um produtor
  *
  *  Essa função quando executada como uma thread simula
@@ -99,9 +116,12 @@ void produtor(int id){
 
 	printf("Inicio produtor %d \n",id);
 
+
+	produzir(&item);
+
 	while (i < TOTAL_PROD){
-		item = i + (id*1000); //item produzido nessa iteração
-		
+
+		produzir(&item,i,id);  //item produzido nessa iteração
 		InserirFila(&f,item);
 		printf("Produtor %d inseriu item %d\n", id, item);
 		i++;
