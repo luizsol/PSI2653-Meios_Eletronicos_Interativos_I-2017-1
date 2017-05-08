@@ -30,5 +30,6 @@ int main(int argc, char *argv[]){
 
 			InsereTextoChat(conteudo);
 		}
+	}
 	return 0;
 }

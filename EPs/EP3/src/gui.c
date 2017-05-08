@@ -35,7 +35,7 @@ void InitGUI(int modo){
 		filaInput = NewFila();
 	}
 
-	/* Inicializando a variavel de buffer de entrada 		*/
+	/* Inicializando a variavel de buffer do chat 			*/
 	inputBuffer = malloc((TAMMAXINPUT+1)*sizeof(char));
 	textosChat = NewLista();	/* Inicializando a lista de *	
 								 * textos que serao 		*
@@ -325,8 +325,8 @@ void * InputManager(void * arg){
 				break;
 		}
 	}
-	execGUI = 0;
 	endwin();	/* Termina modo curses 						*/
+	execGUI = 0;
 	exit(0);
 	
 	return NULL;
