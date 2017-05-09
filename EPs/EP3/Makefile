@@ -54,14 +54,20 @@ gui: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o -o teste_gui $(LIBS)
 
 ### REDE
-$(ODIR)/rede.o: $(IDIR)/rede.c $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h
+$(ODIR)/rede.o: $(IDIR)/rede.c $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h
 	$(CC) $(CFLAGS) -c $(IDIR)/rede.c -o $(ODIR)/rede.o
 
-#Teste da biblioteca GUI sem sockets
-$(ODIR)/teste_rede.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(TDIR)/teste_rede.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede.c -o $(ODIR)/teste_rede.o
-rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede.o -o teste_rede $(LIBS)
+#Teste da biblioteca Rede-cliente
+$(ODIR)/teste_rede_cliente.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $(TDIR)/teste_rede_cliente.c
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede_cliente.c -o $(ODIR)/teste_rede_cliente.o
+rede-cliente: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_cliente.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_cliente.o -o teste_rede-cliente $(LIBS)
+
+#Teste da biblioteca Rede-cliente
+$(ODIR)/teste_rede_servidor.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $(TDIR)/teste_rede_servidor.c
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede_cliente.c -o $(ODIR)/teste_rede_servidor.o
+rede-servidor: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_servidor.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_servidor.o -o teste_rede-servidor $(LIBS)
 
 #Servidor UDP de echo
 $(ODIR)/echo_rede.o: $(TDIR)/echo_rede.c
@@ -78,4 +84,4 @@ echo: $(ODIR)/echo_rede.o
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede echo_rede
+	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede-cliente teste_rede_servidor echo_rede

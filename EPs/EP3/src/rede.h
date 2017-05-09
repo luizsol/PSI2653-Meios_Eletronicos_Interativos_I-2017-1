@@ -45,15 +45,16 @@
 #include <string.h>
 #include <pthread.h>
 #include "fila.h"
+#include "gui.h"
 
 
 /* Definição de parâmetros de rede 							*/
 #define STDPORTA 		10000	/* Porta padrao 			*/
 #define IPMAXSTRSIZE   	16
 #define BROADCAST 		"0.0.0.0"	/* IP de broadcast 		*/
-#define MODOTX 			1
-#define MODORX 			0
 #define MAXTENTATIVAS	3
+#define PERIODOTEST		30
+#define MAXHOSTS		3
 
 /* Definição dos tipos de mensagens 						*/
 #define USER 			91
@@ -90,30 +91,37 @@ typedef struct chatSocket{
 typedef struct rawMsg{
 	/*@{*/
 	char msg[MAXMSGSIZE];	/**< Conteúdo da mensagem 		*/
-	struct sockaddr_in fromTo;	/**< IP da mensagem				*/
+	struct sockaddr_in fromTo;	/**< IP da mensagem			*/
 	/*@}*/
 } RawMsg;
 
-ChatSocket * socketTXRX;
+/**
+ *  Estrutura armazena um host conectado
+ */
+typedef struct chatHost{
+	/*@{*/
+	unsigned long s_addr;	/**< IP do host 				*/
+	unsigned short sin_port;	/**< porta de comunicação	*/
+	char nome[MAXNAMESIZE];	/**< Nome do Host				*/
+	volatile int alive;	/**< Status da conexão com o host	*/
+	pthread_t * keepAlive;
+	/*@}*/
+} ChatHost;
 
+ChatSocket * socketTXRX;
 Fila * inbox;
 Fila * outbox;
 Lista * listaHosts;
+sem_t sem_mutex_listaHosts;
+
+volatile int conectadoSRV;
 
 pthread_t * threadCorreios;
+pthread_t * threadCliente;
 
-Fila * filaMensagens;	/* Fila de mensagens a serem 		*
-						 * apresentadas pelo chat. Quando	*
-						 * inicializado deve conter o 		*
-						 * endereco da filaInput do GUI 	*/
+void InitCliente(char * srvIP, char * porta, char * nome);
 
-/** @brief Inicializa um socket de comunicacao
- *
- *  @param porta porta de comunicacao
- *  @param modo modo de operação do socket 
- *  @return status da operação
- */
-int  InitSocket(int porta);
+void InitServidor(char * porta);
 
 /** @brief Cria e adiciona uma RawMsg à fila de envios
  *

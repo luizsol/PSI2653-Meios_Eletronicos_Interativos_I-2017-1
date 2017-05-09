@@ -4,4 +4,7 @@ teste_lista
 teste_fila
 teste_gui
 teste_rede
+teste_rede-cliente
+teste_rede-servidor
 echo_rede
+.vscode
