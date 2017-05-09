@@ -45,7 +45,7 @@ void InitCliente(char * srvIP, char * porta, char * nome){
 	pkt[0] = '\0';
 	strcat(pkt, "USER:");
 	strcat(pkt, nome);
-	EnviaRawMsg(pkt, inet_addr(srvIP),htons(atoi(porta)));
+	BroadcastMsg(pkt);
 }
 
 void InitServidor(char * porta){
