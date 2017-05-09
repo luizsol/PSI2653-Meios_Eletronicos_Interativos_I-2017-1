@@ -29,6 +29,7 @@ void * _ThreadCorreios(void * arg);
 
 void InitCliente(char * srvIP, char * porta, char * nome){
 	InitGUI(MODOCLIENTE);
+	InsereTextoChat("InitCliente");
 	//Iniciando Socket
 	InitSocket(htons(atoi(porta)));
 	//Adiciona Servido a lista de hosts
@@ -48,6 +49,7 @@ void InitCliente(char * srvIP, char * porta, char * nome){
 
 void InitServidor(char * porta){
 	InitGUI(MODOSERVIDOR);
+	InsereTextoChat("InitServidor");
 	InitSocket(htons(atoi(porta)));
 	conectadoSRV = L_ERRO;
 }
@@ -58,6 +60,7 @@ void InitServidor(char * porta){
  *  @return status da operação
  */
 int  InitSocket(int porta){
+	InsereTextoChat("InitSocket");
 	conectadoSRV = L_ERRO;
 	ChatSocket * chatSocket;
 	sem_init(&sem_mutex_listaHosts, 0, 1);
@@ -81,6 +84,9 @@ int  InitSocket(int porta){
 	
 	if(chatSocket->sd < 0){	/* Erro na criacao do socket 	*/
 		free(chatSocket);
+		endwin();	/* Termina modo curses 						*/
+		execGUI = 0;
+		puts("Erro no socket()");
 		return L_ERRO;
 	}
 
@@ -91,6 +97,9 @@ int  InitSocket(int porta){
 	if(chatSocket->status != 0){	/* Erro ao conectar o 	*
 									 * socket 				*/
 		free(chatSocket);
+		endwin();	/* Termina modo curses 						*/
+		execGUI = 0;
+		puts("Erro no bind()");
 		return L_ERRO;
 	}
 
@@ -103,6 +112,7 @@ int  InitSocket(int porta){
 	pthread_create(chatSocket->socketThreadTX, NULL,
 			_ThreadTX, NULL);
     
+    InsereTextoChat("deu bom");
 	return L_OK;
 }
 
@@ -115,15 +125,17 @@ int  InitSocket(int porta){
  */
 int EnviaRawMsg(char * mensagem, unsigned long s_addr,
 	 unsigned short sin_port){
-		RawMsg * nMsg = malloc(sizeof(RawMsg));
-		nMsg->msg[0] = '\0';
-		strcpy(nMsg->msg, mensagem);
 
-		nMsg->fromTo.sin_family = AF_INET;
-		nMsg->fromTo.sin_port = sin_port;
-		nMsg->fromTo.sin_addr.s_addr = s_addr;
+	InsereTextoChat("EnviaRawMsg");
+	RawMsg * nMsg = malloc(sizeof(RawMsg));
+	nMsg->msg[0] = '\0';
+	strcpy(nMsg->msg, mensagem);
 
-		return PushFila(outbox, (void *) nMsg);
+	nMsg->fromTo.sin_family = AF_INET;
+	nMsg->fromTo.sin_port = sin_port;
+	nMsg->fromTo.sin_addr.s_addr = s_addr;
+
+	return PushFila(outbox, (void *) nMsg);
 }
 
 /** @brief Determina o tipo da mensagem recebida
@@ -132,6 +144,7 @@ int EnviaRawMsg(char * mensagem, unsigned long s_addr,
  *  @return o tipo da mensagem
  */
 int TipoRawMsg(char * conteudo){
+	InsereTextoChat("TipoRawMsg");
 	if(conteudo[0] == 'B'){ /* BUSY ou BYE 					*/
 		if(conteudo[1] == 'U'){
 			return BUSY;
@@ -179,6 +192,7 @@ int TipoRawMsg(char * conteudo){
  */
 int AdicionaHost(char * nome, unsigned long s_addr,
 	 unsigned short sin_port){
+	InsereTextoChat("AdicionaHost");
 	ChatHost * nHost = malloc(sizeof(ChatHost));
 	nHost->s_addr = s_addr;
 	nHost->sin_port = sin_port;
@@ -216,6 +230,7 @@ int AdicionaHost(char * nome, unsigned long s_addr,
  *  @return o ponteiro para o host
  */
 ChatHost * BuscaHostPorIP(unsigned long s_addr){
+	InsereTextoChat("BuscaHostPorIP");
 	ChatHost * host = NULL;
 	sem_wait(&sem_mutex_listaHosts);
 	for(int i = 0; 
@@ -240,6 +255,7 @@ ChatHost * BuscaHostPorIP(unsigned long s_addr){
  *  @return o status da operação
  */
 int RemoveHostPorIP(unsigned long s_addr){
+	InsereTextoChat("RemoveHostPorIP");
 	sem_wait(&sem_mutex_listaHosts);
 	for(int i = 0; i < TamLista(listaHosts); i++){
 		if(((ChatHost * )
@@ -271,6 +287,7 @@ int RemoveHostPorIP(unsigned long s_addr){
  *  @param msg a mensagem a ser enviada
  */
 void BroadcastMsg(char * msg){
+	InsereTextoChat("BroadcastMsg");
 	ChatHost * host;
 	sem_wait(&sem_mutex_listaHosts);
 	for(int i = 0; i < TamLista(listaHosts); i++){
@@ -286,6 +303,7 @@ void BroadcastMsg(char * msg){
  *  @param mensagem a mensagem a ser processada
  */
 char * ParseMensagemUP(RawMsg * mensagem){
+	InsereTextoChat("ParseMensagemUP");
 	ChatHost * host = 
 				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
 	char * texto = malloc(MAXMSGSIZE*sizeof(char));
@@ -305,6 +323,7 @@ char * ParseMensagemUP(RawMsg * mensagem){
  *  @param mensagem a mensagem a ser processada
  */
 void ParseMensagemDOWN(RawMsg * mensagem){
+	InsereTextoChat("ParseMensagemDOWN");
 	ChatHost * host = 
 				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
 	if(host != NULL){
@@ -324,6 +343,7 @@ void ParseMensagemDOWN(RawMsg * mensagem){
  *  @param mensagem a mensagem a ser processada
  */
 void ParseMensagemOKOK(RawMsg * mensagem){
+	InsereTextoChat("ParseMensagemOKOK");
 	ChatHost * host = 
 				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
 	if(host != NULL){
@@ -337,6 +357,7 @@ void ParseMensagemOKOK(RawMsg * mensagem){
  *  @return NULL
  */
 void * _threadKeepAlive(void * host){
+	InsereTextoChat("_threadKeepAlive");
 	ChatHost * myHost = (ChatHost *) host;
 	unsigned long myHostIP = myHost->s_addr;
 	while(BuscaHostPorIP(myHostIP) != NULL &&
@@ -364,6 +385,7 @@ void * _threadKeepAlive(void * host){
  *  @return NULL
  */
 void * _ThreadRX(void * arg){
+	InsereTextoChat("_ThreadRX");
 	unsigned int sizeSock = sizeof(struct sockaddr_in);
 	int sizeMsg = MAXMSGSIZE * sizeof(char);
 	int status = -1;
@@ -392,6 +414,7 @@ void * _ThreadRX(void * arg){
  *  @return NULL
  */
 void * _ThreadTX(void * arg){
+	InsereTextoChat("_ThreadTX");
 	int status = -1;
 	RawMsg * nMsg;
 	int sizeSock = sizeof(struct sockaddr);
@@ -425,6 +448,7 @@ void * _ThreadTX(void * arg){
  *  @return NULL
  */
 void * _ThreadCliente(void * servidor){
+	InsereTextoChat("_ThreadCliente");
 	char msg[MAXMSGSIZE];
 	ChatHost * srv = (ChatHost *) servidor;
 	while(conectadoSRV == L_OK){
@@ -443,6 +467,7 @@ void * _ThreadCliente(void * servidor){
  *  @return NULL
  */
 void * _ThreadCorreios(void * arg){
+	InsereTextoChat("_ThreadCorreios");
 	RawMsg * nMsg;
 	ChatHost * host;
 	while(socketTXRX->status == 0){

@@ -63,9 +63,9 @@ $(ODIR)/teste_rede_cliente.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(ID
 rede-cliente: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_cliente.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_cliente.o -o teste_rede-cliente $(LIBS)
 
-#Teste da biblioteca Rede-cliente
+#Teste da biblioteca Rede-servidor
 $(ODIR)/teste_rede_servidor.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $(TDIR)/teste_rede_servidor.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede_cliente.c -o $(ODIR)/teste_rede_servidor.o
+	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede_servidor.c -o $(ODIR)/teste_rede_servidor.o
 rede-servidor: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_servidor.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_servidor.o -o teste_rede-servidor $(LIBS)
 
@@ -84,4 +84,4 @@ echo: $(ODIR)/echo_rede.o
 all main: $(ODIR)/lista.o
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede-cliente teste_rede_servidor echo_rede
+	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede-cliente teste_rede-servidor teste_rede techo_rede

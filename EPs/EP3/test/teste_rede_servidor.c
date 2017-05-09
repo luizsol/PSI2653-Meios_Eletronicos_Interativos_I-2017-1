@@ -13,4 +13,6 @@ extern int    errno;
 
 int main(){  
     InitServidor("10000");
+    while(execGUI){}
+    return 0;
 }

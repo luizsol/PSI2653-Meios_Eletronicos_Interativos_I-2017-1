@@ -28,11 +28,13 @@ void InitGUI(int modo){
 	sem_init(&sem_chat, 0, 1);	/* Inicializando semaforo 	*
 								 * de controle da GUI 		*/
 
+	inputEnable = 0;
 	if(modo == MODOCLIENTE){
 		/* Inicializando a variavel de buffer de entrada 	*/
 		inputBuffer = malloc((TAMMAXINPUT+1)*sizeof(char));
 		InputErase();
 		filaInput = NewFila();
+		inputEnable = 1;
 	}
 
 	/* Inicializando a variavel de buffer do chat 			*/
@@ -298,31 +300,33 @@ void * InputManager(void * arg){
 	int idx = 0;
 	char * conteudo;
 	while((ch = getch()) != KEY_F(1)){
-		switch(ch){
-			case KEY_BACKSPACE:
-				if(idx > 0){
-					idx--;
-					*(inputBuffer + idx) = '\0';
+		if(inputEnable){
+			switch(ch){
+				case KEY_BACKSPACE:
+					if(idx > 0){
+						idx--;
+						*(inputBuffer + idx) = '\0';
+						InputUpdate();
+					}
+					break;
+				case 10: /* \n */
+					conteudo =
+						malloc((TAMMAXINPUT+1)*sizeof(char));
+					strcpy(conteudo, inputBuffer);
+					PushFila(filaInput, conteudo);
+					InputErase();
+					idx = 0;
 					InputUpdate();
-				}
-				break;
-			case 10: /* \n */
-				conteudo =
-					malloc((TAMMAXINPUT+1)*sizeof(char));
-				strcpy(conteudo, inputBuffer);
-				PushFila(filaInput, conteudo);
-				InputErase();
-				idx = 0;
-				InputUpdate();
-				break;
-			default:
-				if(ch > 31 && ch < 127	/* Caracteres ASCII */
-					&& idx < TAMMAXINPUT-1){
-					*(inputBuffer + idx) = ch;
-					idx++;
-					InputUpdate();
-				}
-				break;
+					break;
+				default:
+					if(ch > 31 && ch < 127	/* Caracteres ASCII */
+						&& idx < TAMMAXINPUT-1){
+						*(inputBuffer + idx) = ch;
+						idx++;
+						InputUpdate();
+					}
+					break;
+			}
 		}
 	}
 	endwin();	/* Termina modo curses 						*/

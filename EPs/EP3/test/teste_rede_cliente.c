@@ -13,4 +13,6 @@ extern int    errno;
 
 int main(){  
     InitCliente("192.168.1.36", "10000", "Sol");
+    while(execGUI){}
+    return 0;
 }

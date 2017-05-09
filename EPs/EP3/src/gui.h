@@ -64,6 +64,8 @@ pthread_t * inputThread; /* Thread de processamento de input*/
 
 volatile int execGUI;
 
+int inputEnable;
+
 /** @brief Inicializa as janelas da interface
  *
  *  @param modo MODOCLIENTE OU MODOSERVIDOR
