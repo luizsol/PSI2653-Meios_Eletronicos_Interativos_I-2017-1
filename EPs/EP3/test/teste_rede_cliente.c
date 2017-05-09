@@ -11,8 +11,8 @@
 
 extern int    errno;
 
-int main(){  
-    InitCliente("192.168.1.36", "10000", "Sol");
+int main(int argc, char * argv[]){  
+    InitCliente(argv[1], "10000", "Sol");
     while(execGUI){}
     return 0;
 }
