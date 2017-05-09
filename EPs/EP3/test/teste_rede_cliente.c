@@ -12,7 +12,7 @@
 extern int    errno;
 
 int main(int argc, char * argv[]){  
-    InitCliente(argv[1], "10000", "Sol");
+    InitCliente(argv[1], "10000", "SOL");
     while(execGUI){}
     return 0;
 }

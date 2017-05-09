@@ -36,16 +36,16 @@ void InitCliente(char * srvIP, char * porta, char * nome){
 	//Adiciona Servido a lista de hosts
 	AdicionaHost(NOMESRV,inet_addr(srvIP),htons(atoi(porta)));
 	//Solicitando entrada na sala
-	char pkt[MAXMSGSIZE];
-	pkt[0] = '\0';
-	strcat(pkt, "USER:");
-	strcat(pkt, nome);
-	EnviaRawMsg(pkt, inet_addr(srvIP),htons(atoi(porta)));
 	conectadoSRV = L_OK;
 	threadCliente = malloc(sizeof(pthread_t));
 	pthread_create(threadCliente, NULL,
 			_ThreadCliente,
 			 (void * ) BuscaHostPorIP(inet_addr(srvIP)));
+	char pkt[MAXMSGSIZE];
+	pkt[0] = '\0';
+	strcat(pkt, "USER:");
+	strcat(pkt, nome);
+	EnviaRawMsg(pkt, inet_addr(srvIP),htons(atoi(porta)));
 }
 
 void InitServidor(char * porta){
@@ -77,6 +77,7 @@ int  InitSocket(int porta){
 	struct sockaddr_in mylocal_addr;
 	mylocal_addr.sin_family = AF_INET;
 	mylocal_addr.sin_addr.s_addr = INADDR_ANY;
+	//mylocal_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
 	mylocal_addr.sin_port = htons(porta); //TODO pode ter erro aqui!
 	chatSocket->status = -1;
 	
@@ -87,7 +88,7 @@ int  InitSocket(int porta){
 		free(chatSocket);
 		endwin();	/* Termina modo curses 						*/
 		execGUI = 0;
-		puts("Erro no socket()");
+		InsereTextoChat("Erro no socket()");
 		return L_ERRO;
 	}
 
@@ -100,7 +101,7 @@ int  InitSocket(int porta){
 		free(chatSocket);
 		endwin();	/* Termina modo curses 						*/
 		execGUI = 0;
-		puts("Erro no bind()");
+		InsereTextoChat("Erro no bind()");
 		return L_ERRO;
 	}
 
@@ -357,6 +358,7 @@ void ParseMensagemOKOK(RawMsg * mensagem){
  *  @param mensagem a mensagem a ser processada
  */
 void ParseMensagemUSER(RawMsg * mensagem){
+	InsereTextoChat("ParseMensagemUSER");
 	if(conectadoSRV == L_OK){	/* Rodando no modo cliente.		*/
 		return;
 	}
@@ -421,11 +423,12 @@ void * _ThreadRX(void * arg){
 		nMsg->msg[0] = '\0';
 		
 		status = recvfrom(socketTXRX->sd, 
-						nMsg->msg,
-						sizeMsg,
-						0,
-						(struct sockaddr *)&(nMsg->fromTo),
-						&sizeSock);
+					nMsg->msg,
+					sizeMsg,
+					0,
+					(struct sockaddr *)&(nMsg->fromTo),
+					&sizeSock);
+
 		if(status > 0){
 			InsereTextoChat("Mensagem recebida:");
 			InsereTextoChat(nMsg->msg);
@@ -539,6 +542,9 @@ void * _ThreadCorreios(void * arg){
 			case OKOK:
 				ParseMensagemOKOK(nMsg);
 				conectadoSRV = 1;
+				break;
+			default:
+				InsereTextoChat("Mensagem Invalida.");
 				break;
 			}
 			free(nMsg);
