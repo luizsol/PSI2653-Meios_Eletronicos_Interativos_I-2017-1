@@ -43,7 +43,7 @@ void InitCliente(char * srvIP, char * porta, char * nome){
 	conectadoSRV = L_OK;
 	threadCliente = malloc(sizeof(pthread_t));
 	pthread_create(threadCliente, NULL,
-			_ThreadRX,
+			_ThreadCliente,
 			 (void * ) BuscaHostPorIP(inet_addr(srvIP)));
 }
 
@@ -106,12 +106,15 @@ int  InitSocket(int porta){
 
 	chatSocket->socketThreadTX = malloc(sizeof(pthread_t));
 	chatSocket->socketThreadRX = malloc(sizeof(pthread_t));
+	threadCorreios = malloc(sizeof(pthread_t));
 
 
 	pthread_create(chatSocket->socketThreadRX, NULL,
 			_ThreadRX, NULL);
 	pthread_create(chatSocket->socketThreadTX, NULL,
 			_ThreadTX, NULL);
+	pthread_create(threadCorreios, NULL,
+			_ThreadCorreios, NULL);
     
     InsereTextoChat("deu bom");
 	return L_OK;
@@ -146,37 +149,37 @@ int EnviaRawMsg(char * mensagem, unsigned long s_addr,
  */
 int TipoRawMsg(char * conteudo){
 	InsereTextoChat("TipoRawMsg");
-	if(conteudo[0] == 'B'){ /* BUSY ou BYE 					*/
-		if(conteudo[1] == 'U'){
+	if(*(conteudo) == 'B'){ /* BUSY ou BYE 					*/
+		if(*(conteudo + 1) == 'U'){
 			return BUSY;
-		} else if(conteudo[1] == 'Y'){
+		} else if(*(conteudo + 1) == 'Y'){
 			return BYE;
 		}
 		return -1;
-	} else if(conteudo[0] == 'U'){ /* USER ou UP			*/
-		if(conteudo[1] == 'S'){
+	} else if(*(conteudo) == 'U'){ /* USER ou UP			*/
+		if(*(conteudo + 1)  == 'S'){
 			return USER;
 		} else if(conteudo[1] == 'P'){
 			return UP;
 		}
 		return -1;
-	} else if(conteudo[0] == 'E'){ /* EXIT 					*/
-		if(conteudo[1] == 'X'){
+	} else if(*(conteudo)  == 'E'){ /* EXIT 					*/
+		if(*(conteudo + 1) == 'X'){
 			return EXIT;
 		}
 		return -1;
-	} else if(conteudo[0] == 'T'){ /* TEST 					*/
-		if(conteudo[1] == 'E'){
+	} else if(*(conteudo) == 'T'){ /* TEST 					*/
+		if(*(conteudo + 1)  == 'E'){
 			return TEST;
 		}
 		return -1;
-	} else if(conteudo[0] == 'O'){ /* OKOK 					*/
-		if(conteudo[1] == 'K'){
+	} else if(*(conteudo) == 'O'){ /* OKOK 					*/
+		if(*(conteudo + 1) == 'K'){
 			return OKOK;
 		}
 		return -1;
-	} else if(conteudo[0] == 'D'){ /* DOWN 					*/
-		if(conteudo[1] == 'O'){
+	} else if(*(conteudo) == 'D'){ /* DOWN 					*/
+		if(*(conteudo + 1) == 'O'){
 			return DOWN;
 		}
 		return -1;
@@ -459,10 +462,13 @@ void * _ThreadCliente(void * servidor){
 	while(conectadoSRV == L_OK){
 		msg[0] = '\0';
 		char * texto = (char * ) PopFila(filaInput);
-		strcat(msg, "UP  :");
-		strcat(msg, texto);
-		EnviaRawMsg(msg, srv->s_addr, srv->sin_port);
+		if(texto != NULL){
+			strcat(msg, "UP  :");
+			strcat(msg, texto);
+			EnviaRawMsg(msg, srv->s_addr, srv->sin_port);
+		}
 	}
+
 	return NULL;
 }
 
@@ -477,48 +483,50 @@ void * _ThreadCorreios(void * arg){
 	ChatHost * host;
 	while(socketTXRX->status == 0){
 		nMsg = (RawMsg *) PopFila(inbox);
-		switch(TipoRawMsg(nMsg->msg)){
-		case USER:
-			if(TamLista(listaHosts) >= MAXHOSTS){
-				EnviaRawMsg("BUSY:", nMsg->fromTo.sin_addr.s_addr,
-					 nMsg->fromTo.sin_port);
-			} else {
-				AdicionaHost(nMsg->msg + 5,	/* O nome começa no i=5	*/
-					nMsg->fromTo.sin_addr.s_addr,
-					nMsg->fromTo.sin_port);
+		if (nMsg != NULL){
+			switch(TipoRawMsg(nMsg->msg)){
+			case USER:
+				if(TamLista(listaHosts) >= MAXHOSTS){
+					EnviaRawMsg("BUSY:", nMsg->fromTo.sin_addr.s_addr,
+						 nMsg->fromTo.sin_port);
+				} else {
+					AdicionaHost(nMsg->msg + 5,	/* O nome começa no i=5	*/
+						nMsg->fromTo.sin_addr.s_addr,
+						nMsg->fromTo.sin_port);
+				}
+				break;
+			case UP:
+				host = BuscaHostPorIP(nMsg->fromTo.sin_addr.s_addr);
+				if(host	!= NULL){ /* Host está de fato registrado		*/
+					char * text = ParseMensagemUP(nMsg);
+					BroadcastMsg(text);
+					free(text);
+				}
+				break;
+			case EXIT:
+				RemoveHostPorIP(nMsg->fromTo.sin_addr.s_addr);
+				break;
+			case TEST:
+				EnviaRawMsg("OKOK:", nMsg->fromTo.sin_addr.s_addr,
+						 nMsg->fromTo.sin_port);
+				break;
+			case DOWN:
+				ParseMensagemDOWN(nMsg);
+				break;
+			case BUSY:
+				printf("Servidor cheio. Tente mais tarde.\n");
+			case BYE:
+				endwin();	/* Termina modo curses 						*/
+				execGUI = 0;
+				exit(0);
+				break;
+			case OKOK:
+				ParseMensagemOKOK(nMsg);
+				conectadoSRV = 1;
+				break;
 			}
-			break;
-		case UP:
-			host = BuscaHostPorIP(nMsg->fromTo.sin_addr.s_addr);
-			if(host	!= NULL){ /* Host está de fato registrado		*/
-				char * text = ParseMensagemUP(nMsg);
-				BroadcastMsg(text);
-				free(text);
-			}
-			break;
-		case EXIT:
-			RemoveHostPorIP(nMsg->fromTo.sin_addr.s_addr);
-			break;
-		case TEST:
-			EnviaRawMsg("OKOK:", nMsg->fromTo.sin_addr.s_addr,
-					 nMsg->fromTo.sin_port);
-			break;
-		case DOWN:
-			ParseMensagemDOWN(nMsg);
-			break;
-		case BUSY:
-			printf("Servidor cheio. Tente mais tarde.\n");
-		case BYE:
-			endwin();	/* Termina modo curses 						*/
-			execGUI = 0;
-			exit(0);
-			break;
-		case OKOK:
-			ParseMensagemOKOK(nMsg);
-			conectadoSRV = 1;
-			break;
+			free(nMsg);
 		}
-		free(nMsg);
 	}
 	return NULL;
 }
