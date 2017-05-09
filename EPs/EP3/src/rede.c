@@ -77,12 +77,11 @@ int  InitSocket(int porta){
 	struct sockaddr_in mylocal_addr;
 	mylocal_addr.sin_family = AF_INET;
 	mylocal_addr.sin_addr.s_addr = INADDR_ANY;
-	//mylocal_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
 	mylocal_addr.sin_port = htons(porta); //TODO pode ter erro aqui!
 	chatSocket->status = -1;
 	
 	/* Criacao do socket 	 								*/
-	chatSocket->sd = socket(PF_INET,SOCK_DGRAM,0);
+	chatSocket->sd = socket(AF_INET,SOCK_DGRAM,0);
 	
 	if(chatSocket->sd < 0){	/* Erro na criacao do socket 	*/
 		free(chatSocket);
@@ -91,6 +90,8 @@ int  InitSocket(int porta){
 		InsereTextoChat("Erro no socket()");
 		return L_ERRO;
 	}
+
+	//fcntl(chatSocket->sd, F_SETFL, O_ASYNC);
 
 	chatSocket->status = bind(chatSocket->sd,
 						(struct sockaddr *) &mylocal_addr,
@@ -403,6 +404,7 @@ void * _threadKeepAlive(void * host){
 
 		}
 	}
+	InsereTextoChat("FIM _threadKeepAlive");
 	return NULL;
 }
 
@@ -494,6 +496,7 @@ void * _ThreadCliente(void * servidor){
 			EnviaRawMsg(msg, srv->s_addr, srv->sin_port);
 		}
 	}
+	InsereTextoChat("FIM _ThreadCliente");
 	return NULL;
 }
 

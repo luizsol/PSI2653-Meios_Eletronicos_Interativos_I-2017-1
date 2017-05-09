@@ -13,6 +13,8 @@ extern int    errno;
 
 int main(int argc, char * argv[]){  
     InitCliente(argv[1], "10000", "SOL");
+    EnviaRawMsg("UP  :SOL", inet_addr(argv[1]),
+		htons(atoi("10000")));
     while(execGUI){}
     return 0;
 }

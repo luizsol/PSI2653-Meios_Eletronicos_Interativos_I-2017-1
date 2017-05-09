@@ -44,6 +44,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/fcntl.h>
 #include "fila.h"
 #include "gui.h"
 
