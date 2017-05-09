@@ -484,12 +484,15 @@ void * _ThreadCorreios(void * arg){
 	while(socketTXRX->status == 0){
 		nMsg = (RawMsg *) PopFila(inbox);
 		if (nMsg != NULL){
+			InsereTextoChat("Mensagem Recebida");
 			switch(TipoRawMsg(nMsg->msg)){
 			case USER:
 				if(TamLista(listaHosts) >= MAXHOSTS){
+					InsereTextoChat("Novo usuario recusado");
 					EnviaRawMsg("BUSY:", nMsg->fromTo.sin_addr.s_addr,
 						 nMsg->fromTo.sin_port);
 				} else {
+					InsereTextoChat("Novo usuario adicionado");
 					AdicionaHost(nMsg->msg + 5,	/* O nome começa no i=5	*/
 						nMsg->fromTo.sin_addr.s_addr,
 						nMsg->fromTo.sin_port);
