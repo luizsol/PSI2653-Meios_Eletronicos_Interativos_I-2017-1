@@ -20,6 +20,7 @@ void BroadcastMsg(char * msg);
 char * ParseMensagemUP(RawMsg * mensagem);
 void ParseMensagemDOWN(RawMsg * mensagem);
 void ParseMensagemOKOK(RawMsg * mensagem);
+void ParseMensagemUSER(RawMsg * mensagem);
 void * _threadKeepAlive(void * host);
 void * _ThreadRX(void * arg);
 void * _ThreadTX(void * arg);
@@ -61,7 +62,6 @@ void InitServidor(char * porta){
  */
 int  InitSocket(int porta){
 	InsereTextoChat("InitSocket");
-	conectadoSRV = L_ERRO;
 	ChatSocket * chatSocket;
 
 	chatSocket = socketTXRX = malloc(sizeof(ChatSocket));
@@ -115,8 +115,6 @@ int  InitSocket(int porta){
 			_ThreadTX, NULL);
 	pthread_create(threadCorreios, NULL,
 			_ThreadCorreios, NULL);
-    
-    InsereTextoChat("deu bom");
 	return L_OK;
 }
 
@@ -204,7 +202,6 @@ int AdicionaHost(char * nome, unsigned long s_addr,
 	strcpy(nHost->nome, nome);
 
 	if(PushFim(listaHosts, nHost) == L_OK){
-		EnviaRawMsg("OKOK:", nHost->s_addr, nHost->sin_port);
 		nHost->keepAlive = malloc(sizeof(pthread_t));
 		pthread_create(nHost->keepAlive, NULL,
 			_threadKeepAlive, (void * ) nHost);
@@ -355,6 +352,30 @@ void ParseMensagemOKOK(RawMsg * mensagem){
 	}
 }
 
+/** @brief Processa as mensagens USER
+ *
+ *  @param mensagem a mensagem a ser processada
+ */
+void ParseMensagemUSER(RawMsg * mensagem){
+	if(conectadoSRV == L_OK){	/* Rodando no modo cliente.		*/
+		return;
+	}
+
+	if(TamLista(listaHosts) >= MAXHOSTS){
+		InsereTextoChat("Novo usuario recusado");
+		EnviaRawMsg("BUSY:", mensagem->fromTo.sin_addr.s_addr,
+			mensagem->fromTo.sin_port);
+	} else {
+		InsereTextoChat("Novo usuario adicionado");
+		AdicionaHost(mensagem->msg + 5,	/* O nome começa no i=5	*/
+			mensagem->fromTo.sin_addr.s_addr,
+			mensagem->fromTo.sin_port);
+		EnviaRawMsg("OKOK:",
+			mensagem->fromTo.sin_addr.s_addr, 
+			mensagem->fromTo.sin_port);
+	}
+}
+
 /** @brief Continuamente verifica se o host está online
  *
  *  @param host ponteiro para o host a ser monitorado
@@ -411,6 +432,7 @@ void * _ThreadRX(void * arg){
 			PushFila(inbox, (void *) nMsg);
 		}
 	}
+	InsereTextoChat("FIM _ThreadRX");
 	return NULL;
 }
 
@@ -447,6 +469,7 @@ void * _ThreadTX(void * arg){
 			free(nMsg);
 		}
 	}
+	InsereTextoChat("FIM _ThreadRX");
 	return NULL;
 }
 
@@ -468,7 +491,6 @@ void * _ThreadCliente(void * servidor){
 			EnviaRawMsg(msg, srv->s_addr, srv->sin_port);
 		}
 	}
-
 	return NULL;
 }
 
@@ -487,16 +509,7 @@ void * _ThreadCorreios(void * arg){
 			InsereTextoChat("Mensagem Recebida");
 			switch(TipoRawMsg(nMsg->msg)){
 			case USER:
-				if(TamLista(listaHosts) >= MAXHOSTS){
-					InsereTextoChat("Novo usuario recusado");
-					EnviaRawMsg("BUSY:", nMsg->fromTo.sin_addr.s_addr,
-						 nMsg->fromTo.sin_port);
-				} else {
-					InsereTextoChat("Novo usuario adicionado");
-					AdicionaHost(nMsg->msg + 5,	/* O nome começa no i=5	*/
-						nMsg->fromTo.sin_addr.s_addr,
-						nMsg->fromTo.sin_port);
-				}
+				ParseMensagemUSER(nMsg);
 				break;
 			case UP:
 				host = BuscaHostPorIP(nMsg->fromTo.sin_addr.s_addr);
@@ -531,5 +544,6 @@ void * _ThreadCorreios(void * arg){
 			free(nMsg);
 		}
 	}
+	InsereTextoChat("FIM _ThreadCorreios");
 	return NULL;
 }
