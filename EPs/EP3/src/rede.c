@@ -63,11 +63,12 @@ int  InitSocket(int porta){
 	InsereTextoChat("InitSocket");
 	conectadoSRV = L_ERRO;
 	ChatSocket * chatSocket;
-	sem_init(&sem_mutex_listaHosts, 0, 1);
 
 	chatSocket = socketTXRX = malloc(sizeof(ChatSocket));
 	outbox = NewFila();
 	inbox = NewFila();
+	listaHosts = NewLista();
+	sem_init(&sem_mutex_listaHosts, 0, 1);
 	//TODO colocar o DestroyFila correspondente
 	
 
@@ -402,6 +403,8 @@ void * _ThreadRX(void * arg){
 						(struct sockaddr *)&(nMsg->fromTo),
 						&sizeSock);
 		if(status > 0){
+			InsereTextoChat("Mensagem recebida:");
+			InsereTextoChat(nMsg->msg);
 			PushFila(inbox, (void *) nMsg);
 		}
 	}
@@ -435,6 +438,8 @@ void * _ThreadTX(void * arg){
 							0,
 							(struct sockaddr *) &(nMsg->fromTo),
 							sizeSock);
+				InsereTextoChat("Mensagem enviada:");
+				InsereTextoChat(nMsg->msg);
 			}
 			free(nMsg);
 		}
