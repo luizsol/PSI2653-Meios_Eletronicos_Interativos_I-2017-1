@@ -1,81 +1,18 @@
 #Makefile
-CC=gcc
-
-#Local dos arquivos fonte
-IDIR =src
-#Local dos arquivos de teste
-TDIR =test
-#Destino dos arquivos .o
-ODIR=obj
-
-#Flag de localizacao do codigo fonte
-CFLAGS =-I $(IDIR) 
-#Flag para que o compilador mostre todos os warnings e erros
-CFLAGS +=-Wall
-#Flag para o standard de C que utilizaremos
-CFLAGS +=-std=gnu99
-#Flag para ser extra rigoroso com a compilacao
-CFLAGS +=-pedantic
-
-#Biblioteca a ser utilizada (Pthread)
-LIBS=-lpthread -lncurses
-
 
 .DEFAULT_GOAL := main
 
-### LISTA
-$(ODIR)/lista.o: $(IDIR)/lista.c $(IDIR)/lista.h
-	$(CC) $(CFLAGS) -c $(IDIR)/lista.c -o $(ODIR)/lista.o
+elemento.o: elemento.c elemento.o
+	gcc -std=gnu11 -Wall -pedantic -c elemento.c
 
-#Teste da biblioteca de listas
-$(ODIR)/teste_lista.o: $(IDIR)/lista.h $(TDIR)/teste_lista.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_lista.c -o $(ODIR)/teste_lista.o
-lista: $(ODIR)/teste_lista.o $(ODIR)/lista.o
-	$(CC) $(CFLAGS) $(ODIR)/teste_lista.o $(ODIR)/lista.o -o teste_lista $(LIBS)
+fila.o: elemento.o fila.c
+	gcc -std=gnu11 -Wall -pedantic -c fila.c
 
-### FILA
-$(ODIR)/fila.o: $(IDIR)/fila.c $(IDIR)/fila.h $(IDIR)/lista.h
-	$(CC) $(CFLAGS) -c $(IDIR)/fila.c -o $(ODIR)/fila.o
+ex.o: fila.o ex.c
+	gcc -std=gnu11 -Wall -pedantic -c ex.c 
 
-#Teste da biblioteca de filas
-$(ODIR)/teste_fila.o: $(IDIR)/fila.h $(TDIR)/teste_fila.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_fila.c -o $(ODIR)/teste_fila.o
-fila: $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/teste_fila.o $(ODIR)/fila.o -o teste_fila $(LIBS)
-
-### GUI
-$(ODIR)/gui.o: $(IDIR)/gui.c $(IDIR)/gui.h $(IDIR)/fila.h
-	$(CC) $(CFLAGS) -c $(IDIR)/gui.c -o $(ODIR)/gui.o
-
-#Teste da biblioteca GUI sem sockets
-$(ODIR)/teste_gui.o: $(IDIR)/gui.h $(IDIR)/fila.h $(TDIR)/teste_gui.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_gui.c -o $(ODIR)/teste_gui.o
-gui: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o -o teste_gui $(LIBS)
-
-### REDE
-$(ODIR)/rede.o: $(IDIR)/rede.c $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h
-	$(CC) $(CFLAGS) -c $(IDIR)/rede.c -o $(ODIR)/rede.o
-
-#Teste da biblioteca GUI sem sockets
-$(ODIR)/teste_rede.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(TDIR)/teste_rede.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede.c -o $(ODIR)/teste_rede.o
-rede: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede.o -o teste_rede $(LIBS)
-
-#Servidor UDP de echo
-$(ODIR)/echo_rede.o: $(TDIR)/echo_rede.c
-	$(CC) $(CFLAGS) -c $(TDIR)/echo_rede.c -o $(ODIR)/echo_rede.o
-echo: $(ODIR)/echo_rede.o
-	$(CC) $(CFLAGS) $(ODIR)/echo_rede.o -o echo_rede $(LIBS)
-
-#main.o: fila.o main.c
-#	gcc -std=gnu11 -Wall -pedantic -c main.c 
-
-#all main: main.o fila.o
-#	gcc -std=gnu11 -Wall -pedantic fila.o main.o -o prod_cons -lpthread
-
-all main: $(ODIR)/lista.o
+all main: ex.o fila.o
+	gcc -std=gnu11 -Wall -pedantic fila.o ex.o -o ex -lpthread
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede echo_rede
+	rm -f *.o ex

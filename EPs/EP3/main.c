@@ -32,6 +32,72 @@ int serverport; //porta
 char stringIP[20]; //endereço ip
 
 
+//protótipos das funções
+void receptor(int sd);
+void transmissor(int sd);
+
+
+
+
+
+
+/** @brief função main
+ *
+ *  Instancia e executa a simulação
+ *
+ *  @param argc números de parâmetros na chamada do programa
+ *  @param argv parâmetros utilizadas na chamada do programa
+ */
+
+
+int main(int argc, char* argv[]){
+	//InitFila(&f);//Inicializando a Fila
+	
+	//Inicializando as variáveis de condição
+	//pthread_cond_init(&filacheia,NULL);
+	//pthread_cond_init(&filavazia,NULL);
+
+	//Declaração das threads de transmissores e receptores
+	pthread_t tx1;
+	pthread_t rx1;
+
+	printf("Programa Produtor-Consumidor\n");
+
+	//printf("Iniciando variaveis de sincronizacao.\n");
+	//pthread_mutex_init(&mutex,NULL);
+	
+	int sd; //socket descriptor - não global
+		//o socket é gerado na main para gerar varios clientes com sd distintos
+	sd=socket(PF_INET, SOCK_DGRAM,0);
+	if (sd== -1)
+		{
+		perror("Erro na chamada socket");
+		exit(1);
+		}
+
+		
+
+
+	printf("Digite a porta UDP:");
+	scanf("%d",&serverport);
+	printf("Digite o endereco IP do servidor: ");
+	scanf("%s",stringIP);
+
+
+	printf("Disparando threads transmissores\n");
+	pthread_create(&tx1, NULL, (void*) transmissor,sd);
+	
+	printf("Disparando threads receptores\n");
+	pthread_create(&rx1, NULL, (void*) receptor,sd);
+
+	//Aguardando o fim das threads para encerrar o programa
+	pthread_join(tx1,NULL);
+	pthread_join(rx1,NULL);
+	
+	printf("Terminado processo .\n\n");
+}
+
+
 
 
 //RECEPTOR
@@ -155,73 +221,3 @@ if(status == -1)
 
 
 
-
-//Mutex que será utilizado para controlar o acesso à região crítica
-//pthread_mutex_t  mutex;
-
-//Declaracao das variaveis de condicao:
-//pthread_cond_t filacheia, filavazia;
-
-//Fila a ser utilizada pelos produtores e consumidores
-//Fila f;
-
-
-
-
-
-
-/** @brief função main
- *
- *  Instancia e executa a simulação
- *
- *  @param argc números de parâmetros na chamada do programa
- *  @param argv parâmetros utilizadas na chamada do programa
- */
-
-
-int main(int argc, char* argv[]){
-	//InitFila(&f);//Inicializando a Fila
-	
-	//Inicializando as variáveis de condição
-	//pthread_cond_init(&filacheia,NULL);
-	//pthread_cond_init(&filavazia,NULL);
-
-	//Declaração das threads de transmissores e receptores
-	pthread_t tx1;
-	pthread_t rx1;
-
-	printf("Programa Produtor-Consumidor\n");
-
-	//printf("Iniciando variaveis de sincronizacao.\n");
-	//pthread_mutex_init(&mutex,NULL);
-	
-	int sd; //socket descriptor - não global
-		//o socket é gerado na main para gerar varios clientes com sd distintos
-	sd=socket(PF_INET, SOCK_DGRAM,0);
-	if (sd== -1)
-		{
-		perror("Erro na chamada socket");
-		exit(1);
-		}
-
-		
-
-
-	printf("Digite a porta UDP:");
-	scanf("%d",&serverport);
-	printf("Digite o endereco IP do servidor: ");
-	scanf("%s",stringIP);
-
-
-	printf("Disparando threads transmissores\n");
-	pthread_create(&tx1, NULL, (void*) transmissor,sd);
-	
-	printf("Disparando threads receptores\n");
-	pthread_create(&rx1, NULL, (void*) receptor,sd);
-
-	//Aguardando o fim das threads para encerrar o programa
-	pthread_join(tx1,NULL);
-	pthread_join(rx1,NULL);
-	
-	printf("Terminado processo .\n\n");
-}

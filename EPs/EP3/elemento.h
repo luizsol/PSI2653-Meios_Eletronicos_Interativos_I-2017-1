@@ -9,8 +9,8 @@
  *  @date	2017/05/11
  */
 
-#ifndef __ELEMENTO__H
-#define __ELEMENTO__H
+//#ifndef __ELEMENTO__H
+//#define __ELEMENTO__H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +35,8 @@ typedef struct elemento {
  *         as variaveis internas do elemento
  *  @param estado, nome, sd
  */
-
+ 
+void InitElem(Elemento *e, int s, int socket);
 
 int Get_estado(Elemento *e);
 

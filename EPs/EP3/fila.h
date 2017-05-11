@@ -70,14 +70,14 @@ int FilaCheia(Fila *F);
  *  @param F ponteiro para a Fila a ser modificada
  *  @param item valor a ser inserido na fila
  */
-void InserirFila(Fila *F, *Elemento item);
+void InserirFila(Fila *F, Elemento* item);
 
 /** @brief remove um item do início da fila
  *
  *  @param F ponteiro para a Fila a ser modificada
  *  @return o valor do elemento retirado da fila
  */
-int RetirarFila(Fila *F);
+Elemento* RetirarFila(Fila *F);
 
 #endif
 

@@ -84,7 +84,7 @@ int FilaCheia(Fila *F){
  *  @param F ponteiro para a Fila a ser modificada
  *  @param item valor a ser inserido na fila
  */
-void InserirFila(Fila *F, *Elemento item){
+void InserirFila(Fila *F, Elemento *item){
 	sem_wait(&(F->sem_fila_cheia));
 	sem_wait(&(F->sem_mutex));
 
@@ -106,7 +106,7 @@ void InserirFila(Fila *F, *Elemento item){
  *  @param F ponteiro para a Fila a ser modificada
  *  @return o valor do elemento retirado da fila
  */
-int RetirarFila(Fila *F){
+Elemento* RetirarFila(Fila *F){
 	Elemento* item;
 	sem_wait(&(F->sem_fila_vazia)); /* ... e aguarde a
 	a sinalização de fila não vazia */

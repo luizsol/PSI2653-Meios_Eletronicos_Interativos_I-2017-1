@@ -9,12 +9,42 @@
  *  @date	2017/05/11
  */
 
-#include "element.h"
+#include "elemento.h"
 
 /** @brief funcoes para obter e configurar os 
  *         as variaveis internas do elemento
  *  @param estado, nome, sd
  */
+void InitElem(Elemento *e, int s, int socket){
+// inicializa elemento
+	e->estado=s; // inicializa estadp
+	
+	//inicializa nome
+	printf("Digite o nome do usuario:");
+	char data[11];
+	fgets(data,sizeof(data),stdin);
+	printf("%s ",data);	
+	
+	int i;
+	for(i=0;i<sizeof(data);){
+		
+		e->nome[i]=data[i];
+		i++;
+	}
+
+	//inicializa socket descriptor
+
+	e->sd=socket;
+	
+
+
+
+
+
+}
+
+
+
 
 int Get_estado(Elemento *e){
 	return e->estado;
@@ -32,10 +62,16 @@ char* Get_nome(Elemento *e){
 
 void Set_nome(Elemento *e){
 	printf("Digite o nome do usuario:");
-	char data[64];
-	fgets(data,sizeof data,stdin);
+	char data[11];
+	fgets(data,sizeof(data),stdin);
 	printf("%s ",data);	
-	e->nome=data;
+	
+	int i;
+	for(i=0;i<sizeof(data);){
+		
+		e->nome[i]=data[i];
+		i++;
+	}
 }
 
 int Get_sd(Elemento *e){
