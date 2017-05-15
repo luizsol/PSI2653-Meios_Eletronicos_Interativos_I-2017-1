@@ -2,6 +2,8 @@
 
 Este programa tem por objetivo implementar uma sala de chat para múltiplos usuários, a exemplo de programas como o [mIRC](https://pt.wikipedia.org/wiki/MIRC).
 
+Essa versão do programa implementa somente o cliente. Uma outra tentativa de implementação do cliente e do servidor está dentro da pasta `OLD`.
+
 ## Requisitos de Projeto
 Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser implementados tanto o cliente como o servidor, e ambos deverão respeitar um protocolo de comunicação predeterminado.
 
@@ -46,18 +48,13 @@ Nome | Descrição | Formato | Dimensões | Comportamentos esperados | Possívei
 
 Nome | Descrição | Formato | Dimensões | Comportamentos esperados | Possíveis Mensagens de Resposta 
 --- | --- | --- | --- | --- | ---
-`DOWN` | Envio de texto de mensagem do servidor ao cliente. | `DOWN:<nome do usuário> :<texto da mensagem>\0` | `DOWN:`[5 bytes]; `<nome do usuário>`[10 bytes]; `<texto da mensagem>`[1 a 79 bytes] ; `\0`[1 byte] | - | -
+`DOWN` | Envio de texto de mensagem do servidor ao cliente. | `DOWN:<nome do usuário> :<texto da mensagem>\0` | `DOWN:`[5 bytes]; `<nome do usuário>`[10 bytes]; `:<texto da mensagem>`[1 a 79 bytes] ; `\0`[1 byte] | - | -
 `BUSY` | Indicação de excesso de usuários. | `BUSY:\0` | `BUSY:`[5 bytes]; `\0`[1 byte] | - | -
 `BYE` | Confirmação de saida de cliente | `BYE :\0` | `BYE :`[5 bytes]; `\0`[1 byte] | - | -
 `TEST` | Pedido de teste de conexão | `TEST:\0` | `TEST:`[5 bytes]; `\0`[1 byte] | 1) Receptor da mensagem `TEST` deve responder com mensagem `OKOK`; 2) A mensagem deve ser enviada a cada 30s | -
 `OKOK` | Resposta de um teste de conexão. | `OKOK:\0` | `OKOK:`[5 bytes]; `\0`[1 byte] | - | -
 
 ## Estrutura do Projeto
-### cliente.c | cliente.h
-Implementam o programa do cliente
-
-### servidor.c | servidor.h
-Implementam o programa do servidor
 
 ### lista.c | lista.h
 Implementam as estruturas e funções de filas com suporte a concorrência.
@@ -65,14 +62,14 @@ Implementam as estruturas e funções de filas com suporte a concorrência.
 ### fila.c | fila.h
 Implementam as estruturas e funções de filas com suporte a concorrência.
 
+### gui.c | gui.h
+Implementam as estruturas e funções da interface homem-máquina com suporte a concorrência.
+
 ### rede.c | rede.h
 Implementam as estruturas e funções de acesso aos sockets de rede com suporte a concorrência.
 
-### arquivo.c | arquivo.h
-Implementam as estruturas e funções de manipulação de arquivos com suporte a concorrência.
-
-### gui.c | gui.h
-Implementam as estruturas e funções da interface homem-máquina com suporte a concorrência.
+### cliente.c | cliente.h
+Implementam o programa do cliente
 
 ## Utilização
 

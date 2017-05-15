@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 #include "fila.h"
 
 #define TAMMAXINPUT 79	/* Tamanho maximo do texto de 		*

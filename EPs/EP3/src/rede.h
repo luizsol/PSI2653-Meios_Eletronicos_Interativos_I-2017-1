@@ -114,6 +114,9 @@ Fila * inbox;
 Fila * outbox;
 Lista * listaHosts;
 sem_t sem_mutex_listaHosts;
+ChatHost * servidor;
+
+int modoDebug;
 
 volatile int conectadoSRV;
 

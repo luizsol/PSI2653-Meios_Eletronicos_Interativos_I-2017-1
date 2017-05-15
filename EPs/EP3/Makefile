@@ -21,7 +21,7 @@ CFLAGS +=-pedantic
 LIBS=-lpthread -lncurses
 
 
-.DEFAULT_GOAL := main
+.DEFAULT_GOAL := all
 
 ### LISTA
 $(ODIR)/lista.o: $(IDIR)/lista.c $(IDIR)/lista.h
@@ -57,31 +57,17 @@ gui: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/teste_gui.o
 $(ODIR)/rede.o: $(IDIR)/rede.c $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h
 	$(CC) $(CFLAGS) -c $(IDIR)/rede.c -o $(ODIR)/rede.o
 
-#Teste da biblioteca Rede-cliente
-$(ODIR)/teste_rede_cliente.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $(TDIR)/teste_rede_cliente.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede_cliente.c -o $(ODIR)/teste_rede_cliente.o
-rede-cliente: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_cliente.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_cliente.o -o teste_rede-cliente $(LIBS)
-
-#Teste da biblioteca Rede-servidor
-$(ODIR)/teste_rede_servidor.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $(TDIR)/teste_rede_servidor.c
-	$(CC) $(CFLAGS) -c $(TDIR)/teste_rede_servidor.c -o $(ODIR)/teste_rede_servidor.o
-rede-servidor: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_servidor.o
-	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/teste_rede_servidor.o -o teste_rede-servidor $(LIBS)
-
 #Servidor UDP de echo
 $(ODIR)/echo_rede.o: $(TDIR)/echo_rede.c
 	$(CC) $(CFLAGS) -c $(TDIR)/echo_rede.c -o $(ODIR)/echo_rede.o
 echo: $(ODIR)/echo_rede.o
 	$(CC) $(CFLAGS) $(ODIR)/echo_rede.o -o echo_rede $(LIBS)
 
-#main.o: fila.o main.c
-#	gcc -std=gnu11 -Wall -pedantic -c main.c 
-
-#all main: main.o fila.o
-#	gcc -std=gnu11 -Wall -pedantic fila.o main.o -o prod_cons -lpthread
-
-all main: $(ODIR)/lista.o
+#Compilação do cliente
+$(ODIR)/cliente.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $(IDIR)/cliente.c $(IDIR)/cliente.h
+	$(CC) $(CFLAGS) -c $(IDIR)/cliente.c -o $(ODIR)/cliente.o
+all cliente-chat: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/cliente.o
+	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/cliente.o -o cliente-chat $(LIBS)
 
 clean:
-	rm -f $(ODIR)/*.o cliente-chat servidor-chat teste_lista teste_fila teste_gui teste_rede-cliente teste_rede-servidor teste_rede techo_rede
+	rm -f $(ODIR)/*.o cliente-chat teste_lista teste_fila teste_gui techo_rede

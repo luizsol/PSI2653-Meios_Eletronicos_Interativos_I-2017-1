@@ -16,12 +16,18 @@ void RemoveTextoChat();
 void * InputManager(void * arg);
 void InputUpdate();
 void InputErase();
+void signal_callback_handler(int signum);
 
 /** @brief Inicializa as janelas da interface
  *
  *  @param modo MODOCLIENTE OU MODOSERVIDOR
  */
 void InitGUI(int modo){
+	
+	/* Ignorando todos os sinais de sistema 				*/
+	for (int i=1; i<20; i++){
+       signal(i,signal_callback_handler);
+	}
 
     execGUI = 1;	/* Flag de execucao da GUI 				*/
 
@@ -74,10 +80,10 @@ void InitGUI(int modo){
 								inicioYInput, inicioXInput);
 
 		mvwprintw(GUIjanelaTitulo, 1, (COLS-2-27)/2, 
-					"Cliente Chat (F1 para sair)");
+					"Cliente Chat (F2 para sair)");
     } else {
     	mvwprintw(GUIjanelaTitulo, 1 , (COLS-2-27)/2,
-    				"Servidor Chat (F1 para sair)");
+    				"Servidor Chat (F2 para sair)");
     }
 
     wrefresh(GUIjanelaTitulo);
@@ -299,7 +305,7 @@ void * InputManager(void * arg){
 	int ch;
 	int idx = 0;
 	char * conteudo;
-	while((ch = getch()) != KEY_F(1)){
+	while((ch = getch()) != KEY_F(2)){
 		if(inputEnable){
 			switch(ch){
 				case KEY_BACKSPACE:
@@ -329,9 +335,18 @@ void * InputManager(void * arg){
 			}
 		}
 	}
-	endwin();	/* Termina modo curses 						*/
+	//endwin();	/* Termina modo curses 						*/
 	execGUI = 0;
-	exit(0);
+	//exit(0);
 	
 	return NULL;
+}
+
+/** @brief Trata (ignorando) todos os sinais de sistema
+ *
+ *  @param signum número do sinal de sistema
+ */
+void signal_callback_handler(int signum){
+	//Faça nada
+	return;
 }

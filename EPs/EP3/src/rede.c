@@ -21,20 +21,34 @@ char * ParseMensagemUP(RawMsg * mensagem);
 void ParseMensagemDOWN(RawMsg * mensagem);
 void ParseMensagemOKOK(RawMsg * mensagem);
 void ParseMensagemUSER(RawMsg * mensagem);
+int ValidarBUSY(char * conteudo);
+int ValidarBYE(char * conteudo);
+int ValidarOKOK(char * conteudo);
+int ValidarTEST(char * conteudo);
+int ValidarDOWN(char * conteudo);
 void * _threadKeepAlive(void * host);
 void * _ThreadRX(void * arg);
 void * _ThreadTX(void * arg);
 void * _ThreadCliente(void * servidor);
-void * _ThreadCorreios(void * arg);
+void * _ThreadCorreios(void * servidor);
 
 
 void InitCliente(char * srvIP, char * porta, char * nome){
 	InitGUI(MODOCLIENTE);
-	InsereTextoChat("InitCliente");
+	if(modoDebug){
+		InsereTextoChat("[InitCliente]");
+	}
 	//Iniciando Socket
 	InitSocket(htons(atoi(porta)));
 	//Adiciona Servido a lista de hosts
-	AdicionaHost(NOMESRV,inet_addr(srvIP),htons(atoi(porta)));
+	int status = AdicionaHost(NOMESRV,
+					inet_addr(srvIP),
+					htons(atoi(porta)));
+	if(status == L_ERRO){
+		InsereTextoChat("Erro ao adicionar SRV a lista de hosts");
+		endwin();	/* Termina modo curses 						*/
+		exit(1);
+	}
 	//Solicitando entrada na sala
 	conectadoSRV = L_OK;
 	threadCliente = malloc(sizeof(pthread_t));
@@ -48,20 +62,15 @@ void InitCliente(char * srvIP, char * porta, char * nome){
 	BroadcastMsg(pkt);
 }
 
-void InitServidor(char * porta){
-	InitGUI(MODOSERVIDOR);
-	InsereTextoChat("InitServidor");
-	InitSocket(htons(atoi(porta)));
-	conectadoSRV = L_ERRO;
-}
-
 /** @brief Inicializa um socket de comunicacao
  *
  *  @param porta porta de comunicacao
  *  @return status da operação
  */
 int  InitSocket(int porta){
-	InsereTextoChat("InitSocket");
+	if(modoDebug){
+		InsereTextoChat("[InitSocket]");
+	}
 	ChatSocket * chatSocket;
 
 	chatSocket = socketTXRX = malloc(sizeof(ChatSocket));
@@ -69,25 +78,23 @@ int  InitSocket(int porta){
 	inbox = NewFila();
 	listaHosts = NewLista();
 	sem_init(&sem_mutex_listaHosts, 0, 1);
-	//TODO colocar o DestroyFila correspondente
 	
 
-	/* Struct genérico para conexão com todas as interfaces	*
-	 * locais 												*/
+	/* Struct genérico para conexão com todas as interfaces		*
+	 * locais 													*/
 	struct sockaddr_in mylocal_addr;
 	mylocal_addr.sin_family = AF_INET;
 	mylocal_addr.sin_addr.s_addr = INADDR_ANY;
-	mylocal_addr.sin_port = htons(porta); //TODO pode ter erro aqui!
+	mylocal_addr.sin_port = htons(porta);
 	chatSocket->status = -1;
 	
-	/* Criacao do socket 	 								*/
+	/* Criacao do socket 	 									*/
 	chatSocket->sd = socket(AF_INET,SOCK_DGRAM,0);
 	
-	if(chatSocket->sd < 0){	/* Erro na criacao do socket 	*/
+	if(chatSocket->sd < 0){	/* Erro na criacao do socket 		*/
 		free(chatSocket);
 		endwin();	/* Termina modo curses 						*/
 		execGUI = 0;
-		InsereTextoChat("Erro no socket()");
 		return L_ERRO;
 	}
 
@@ -97,8 +104,8 @@ int  InitSocket(int porta){
 						(struct sockaddr *) &mylocal_addr,
 						sizeof(struct sockaddr_in));
 
-	if(chatSocket->status != 0){	/* Erro ao conectar o 	*
-									 * socket 				*/
+	if(chatSocket->status != 0){	/* Erro ao conectar o 		*
+									 * socket 					*/
 		free(chatSocket);
 		endwin();	/* Termina modo curses 						*/
 		execGUI = 0;
@@ -116,7 +123,8 @@ int  InitSocket(int porta){
 	pthread_create(chatSocket->socketThreadTX, NULL,
 			_ThreadTX, NULL);
 	pthread_create(threadCorreios, NULL,
-			_ThreadCorreios, NULL);
+			_ThreadCorreios,
+			(void *) servidor);//erro aqui?
 	return L_OK;
 }
 
@@ -129,8 +137,10 @@ int  InitSocket(int porta){
  */
 int EnviaRawMsg(char * mensagem, unsigned long s_addr,
 	 unsigned short sin_port){
+	if(modoDebug){
+		InsereTextoChat("[EnviaRawMsg]");
+	}
 
-	InsereTextoChat("EnviaRawMsg");
 	RawMsg * nMsg = malloc(sizeof(RawMsg));
 	nMsg->msg[0] = '\0';
 	strcpy(nMsg->msg, mensagem);
@@ -148,39 +158,39 @@ int EnviaRawMsg(char * mensagem, unsigned long s_addr,
  *  @return o tipo da mensagem
  */
 int TipoRawMsg(char * conteudo){
-	InsereTextoChat("TipoRawMsg");
-	if(*(conteudo) == 'B'){ /* BUSY ou BYE 					*/
+	if(modoDebug){
+		InsereTextoChat("[TipoRawMsg]");
+	}
+	if(*(conteudo) == 'B'){ /* BUSY ou BYE 						*/
 		if(*(conteudo + 1) == 'U'){
-			return BUSY;
+			if (ValidarBUSY(conteudo) == L_OK){
+				return BUSY;
+			}
 		} else if(*(conteudo + 1) == 'Y'){
-			return BYE;
+			if(ValidarBYE(conteudo) == L_OK){
+				return BYE;
+			}
 		}
 		return -1;
-	} else if(*(conteudo) == 'U'){ /* USER ou UP			*/
-		if(*(conteudo + 1)  == 'S'){
-			return USER;
-		} else if(conteudo[1] == 'P'){
-			return UP;
-		}
-		return -1;
-	} else if(*(conteudo)  == 'E'){ /* EXIT 					*/
-		if(*(conteudo + 1) == 'X'){
-			return EXIT;
-		}
-		return -1;
-	} else if(*(conteudo) == 'T'){ /* TEST 					*/
+	} else if(*(conteudo) == 'T'){ /* TEST 						*/
 		if(*(conteudo + 1)  == 'E'){
-			return TEST;
+			if(ValidarTEST(conteudo) == L_OK){
+				return TEST;	
+			}
 		}
 		return -1;
-	} else if(*(conteudo) == 'O'){ /* OKOK 					*/
+	} else if(*(conteudo) == 'O'){ /* OKOK 						*/
 		if(*(conteudo + 1) == 'K'){
-			return OKOK;
+			if(ValidarOKOK(conteudo) == L_OK){
+				return OKOK;
+			}
 		}
 		return -1;
-	} else if(*(conteudo) == 'D'){ /* DOWN 					*/
+	} else if(*(conteudo) == 'D'){ /* DOWN 						*/
 		if(*(conteudo + 1) == 'O'){
-			return DOWN;
+			if(ValidarDOWN(conteudo) == L_OK){
+				return DOWN;
+			}
 		}
 		return -1;
 	}
@@ -196,7 +206,9 @@ int TipoRawMsg(char * conteudo){
  */
 int AdicionaHost(char * nome, unsigned long s_addr,
 	 unsigned short sin_port){
-	InsereTextoChat("AdicionaHost");
+	if(modoDebug){
+		InsereTextoChat("[AdicionaHost]");
+	}
 	ChatHost * nHost = malloc(sizeof(ChatHost));
 	nHost->s_addr = s_addr;
 	nHost->sin_port = sin_port;
@@ -204,23 +216,12 @@ int AdicionaHost(char * nome, unsigned long s_addr,
 	strcpy(nHost->nome, nome);
 
 	if(PushFim(listaHosts, nHost) == L_OK){
+		servidor = nHost; /* Gambiarra para o cliente*/
 		nHost->keepAlive = malloc(sizeof(pthread_t));
 		pthread_create(nHost->keepAlive, NULL,
 			_threadKeepAlive, (void * ) nHost);
-		if(strcmp(nHost->nome, NOMESRV) != 0){	/* Não estamos	*
-												 * conectando a *
-												 * um servidor	*/
-			char msg[MAXMSGSIZE];
-			msg[0] = '\0';
-			strcpy(msg, nHost->nome);
-			strcat(msg, " conectado(a).");
-			InsereTextoChat(msg);
-			BroadcastMsg(msg);
-		} else {
-			InsereTextoChat("[Conectado]");
-		}
 		
-		
+		InsereTextoChat("[Conectado]");
 		return L_OK;
 	}
 
@@ -233,7 +234,9 @@ int AdicionaHost(char * nome, unsigned long s_addr,
  *  @return o ponteiro para o host
  */
 ChatHost * BuscaHostPorIP(unsigned long s_addr){
-	InsereTextoChat("BuscaHostPorIP");
+	if(modoDebug){
+		InsereTextoChat("[BuscaHostPorIP]");
+	}
 	ChatHost * host = NULL;
 	sem_wait(&sem_mutex_listaHosts);
 	for(int i = 0; 
@@ -258,7 +261,9 @@ ChatHost * BuscaHostPorIP(unsigned long s_addr){
  *  @return o status da operação
  */
 int RemoveHostPorIP(unsigned long s_addr){
-	InsereTextoChat("RemoveHostPorIP");
+	if(modoDebug){
+		InsereTextoChat("[RemoveHostPorIP]");
+	}
 	sem_wait(&sem_mutex_listaHosts);
 	for(int i = 0; i < TamLista(listaHosts); i++){
 		if(((ChatHost * )
@@ -290,7 +295,9 @@ int RemoveHostPorIP(unsigned long s_addr){
  *  @param msg a mensagem a ser enviada
  */
 void BroadcastMsg(char * msg){
-	InsereTextoChat("BroadcastMsg");
+	if(modoDebug){
+		InsereTextoChat("[BroadcastMsg]");
+	}
 	ChatHost * host;
 	sem_wait(&sem_mutex_listaHosts);
 	for(int i = 0; i < TamLista(listaHosts); i++){
@@ -306,7 +313,9 @@ void BroadcastMsg(char * msg){
  *  @param mensagem a mensagem a ser processada
  */
 char * ParseMensagemUP(RawMsg * mensagem){
-	InsereTextoChat("ParseMensagemUP");
+	if(modoDebug){
+		InsereTextoChat("[ParseMensagemUP]");
+	}
 	ChatHost * host = 
 				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
 	char * texto = malloc(MAXMSGSIZE*sizeof(char));
@@ -326,13 +335,15 @@ char * ParseMensagemUP(RawMsg * mensagem){
  *  @param mensagem a mensagem a ser processada
  */
 void ParseMensagemDOWN(RawMsg * mensagem){
-	InsereTextoChat("ParseMensagemDOWN");
+	if(modoDebug){
+		InsereTextoChat("[ParseMensagemDOWN]");
+	}
 	ChatHost * host = 
 				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
 	if(host != NULL){
 		char * texto = malloc(MAXMSGSIZE*sizeof(char));
 		texto[0] = '\0';
-		strncat (texto, (mensagem->msg + 5), 10);	/* Add nome do 	*
+		strncat (texto, (mensagem->msg + 5), 10);/* Add nome do *
 												 * usuario		*/
 		strcat(texto, ESPACADOR);
 		strcat(texto, (mensagem->msg + 16));
@@ -346,7 +357,9 @@ void ParseMensagemDOWN(RawMsg * mensagem){
  *  @param mensagem a mensagem a ser processada
  */
 void ParseMensagemOKOK(RawMsg * mensagem){
-	InsereTextoChat("ParseMensagemOKOK");
+	if(modoDebug){
+		InsereTextoChat("[ParseMensagemOKOK]");
+	}
 	ChatHost * host = 
 				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
 	if(host != NULL){
@@ -359,7 +372,9 @@ void ParseMensagemOKOK(RawMsg * mensagem){
  *  @param mensagem a mensagem a ser processada
  */
 void ParseMensagemUSER(RawMsg * mensagem){
-	InsereTextoChat("ParseMensagemUSER");
+	if(modoDebug){
+		InsereTextoChat("[ParseMensagemUSER]");
+	}
 	if(conectadoSRV == L_OK){	/* Rodando no modo cliente.		*/
 		return;
 	}
@@ -379,17 +394,325 @@ void ParseMensagemUSER(RawMsg * mensagem){
 	}
 }
 
+
+/** @brief Verifica a integridade do pacote BUSY
+ *
+ *  @param conteudo a mensagem recebida
+ *  @return L_OK se for um pacote BUSY válido, L_ERRO c.c.
+ */
+int ValidarBUSY(char * conteudo){
+	if(modoDebug){
+		InsereTextoChat("[ValidarBUSY]");
+	}
+	if(strlen(conteudo) == 5){
+		if(*(conteudo) == 'B'){
+			if(*(conteudo + 1) == 'U'){
+				if(*(conteudo + 2) == 'S'){
+					if(*(conteudo + 3) == 'Y'){
+						if(*(conteudo + 4) == ':'){
+							if(*(conteudo + 5) == '\0'){
+								return L_OK;
+							} else {
+								if(modoDebug){
+									InsereTextoChat(
+										"[ValidarBUSY]: Quinta letra errada (\\0).");
+								}
+							}
+						} else {
+							if(modoDebug){
+								InsereTextoChat(
+									"[ValidarBUSY]: Quinta letra errada (:).");
+							}
+						}
+					} else {
+						if(modoDebug){
+							InsereTextoChat(
+								"[ValidarBUSY]: Quarta letra errada (Y).");
+						}
+					}
+				} else {
+					if(modoDebug){
+						InsereTextoChat(
+							"[ValidarBUSY]: Terceira letra errada (S).");
+					}
+				}
+			} else {
+				if(modoDebug){
+					InsereTextoChat("[ValidarBUSY]: Segunda letra errada (U).");
+				}
+			}
+		} else {
+			if(modoDebug){
+				InsereTextoChat("[ValidarBUSY]: Primeira letra errada (B).");
+			}
+		}
+	} else {
+		if(modoDebug){
+			InsereTextoChat("[ValidarBUSY]: Tamanho do pacote errado.");
+		}
+	}
+	return L_ERRO;
+}
+
+/** @brief Verifica a integridade do pacote BYE
+ *
+ *  @param conteudo a mensagem recebida
+ *  @return L_OK se for um pacote BYE válido, L_ERRO c.c.
+ */
+int ValidarBYE(char * conteudo){
+	if(modoDebug){
+		InsereTextoChat("[ValidarBYE]");
+	}
+	if(strlen(conteudo) == 5){
+		if(*(conteudo) == 'B'){
+			if(*(conteudo + 1) == 'Y'){
+				if(*(conteudo + 2) == 'E'){
+					if(*(conteudo + 3) == ' '){
+						if(*(conteudo + 4) == ':'){
+							if(*(conteudo + 5) == '\0'){
+								return L_OK;
+							} else {
+								if(modoDebug){
+									InsereTextoChat(
+										"[ValidarBYE]: Quinta letra errada (\\0).");
+								}
+							}
+						} else {
+							if(modoDebug){
+								InsereTextoChat(
+									"[ValidarBYE]: Quinta letra errada (:).");
+							}
+						}
+					} else {
+						if(modoDebug){
+							InsereTextoChat(
+								"[ValidarBYE]: Quarta letra errada ( ).");
+						}
+					}
+				} else {
+					if(modoDebug){
+						InsereTextoChat(
+							"[ValidarBYE]: Terceira letra errada (E).");
+					}
+				}
+			} else {
+				if(modoDebug){
+					InsereTextoChat("[ValidarBYE]: Segunda letra errada (Y).");
+				}
+			}
+		} else {
+			if(modoDebug){
+				InsereTextoChat("[ValidarBYE]: Primeira letra errada (B).");
+			}
+		}
+	} else {
+		if(modoDebug){
+			InsereTextoChat("[ValidarBYE]: Tamanho do pacote errado.");
+		}
+	}
+	return L_ERRO;
+}
+
+/** @brief Verifica a integridade do pacote OKOK
+ *
+ *  @param conteudo a mensagem recebida
+ *  @return L_OK se for um pacote OKOK válido, L_ERRO c.c.
+ */
+int ValidarOKOK(char * conteudo){
+	if(modoDebug){
+		InsereTextoChat("[ValidarOKOK]");
+	}
+	if(strlen(conteudo) == 5){
+		if(*(conteudo) == 'O'){
+			if(*(conteudo + 1) == 'K'){
+				if(*(conteudo + 2) == 'O'){
+					if(*(conteudo + 3) == 'K'){
+						if(*(conteudo + 4) == ':'){
+							if(*(conteudo + 5) == '\0'){
+								return L_OK;
+							} else {
+								if(modoDebug){
+									InsereTextoChat(
+										"[ValidarOKOK]: Quinta letra errada (\\0).");
+								}
+							}
+						} else {
+							if(modoDebug){
+								InsereTextoChat(
+									"[ValidarOKOK]: Quinta letra errada (:).");
+							}
+						}
+					} else {
+						if(modoDebug){
+							InsereTextoChat(
+								"[ValidarOKOK]: Quarta letra errada ( ).");
+						}
+					}
+				} else {
+					if(modoDebug){
+						InsereTextoChat(
+							"[ValidarOKOK]: Terceira letra errada (E).");
+					}
+				}
+			} else {
+				if(modoDebug){
+					InsereTextoChat("[ValidarOKOK]: Segunda letra errada (Y).");
+				}
+			}
+		} else {
+			if(modoDebug){
+				InsereTextoChat("[ValidarOKOK]: Primeira letra errada (B).");
+			}
+		}
+	} else {
+		if(modoDebug){
+			InsereTextoChat("[ValidarOKOK]: Tamanho do pacote errado.");
+		}
+	}
+	return L_ERRO;
+}
+
+/** @brief Verifica a integridade do pacote TEST
+ *
+ *  @param conteudo a mensagem recebida
+ *  @return L_OK se for um pacote TEST válido, L_ERRO c.c.
+ */
+int ValidarTEST(char * conteudo){
+	if(modoDebug){
+		InsereTextoChat("[ValidarTEST]");
+	}
+	if(strlen(conteudo) == 5){
+		if(*(conteudo) == 'T'){
+			if(*(conteudo + 1) == 'E'){
+				if(*(conteudo + 2) == 'S'){
+					if(*(conteudo + 3) == 'T'){
+						if(*(conteudo + 4) == ':'){
+							if(*(conteudo + 5) == '\0'){
+								return L_OK;
+							} else {
+								if(modoDebug){
+									InsereTextoChat(
+										"[ValidarTEST]: Quinta letra errada (\\0).");
+								}
+							}
+						} else {
+							if(modoDebug){
+								InsereTextoChat(
+									"[ValidarTEST]: Quinta letra errada (:).");
+							}
+						}
+					} else {
+						if(modoDebug){
+							InsereTextoChat(
+								"[ValidarTEST]: Quarta letra errada (T).");
+						}
+					}
+				} else {
+					if(modoDebug){
+						InsereTextoChat(
+							"[ValidarTEST]: Terceira letra errada (S).");
+					}
+				}
+			} else {
+				if(modoDebug){
+					InsereTextoChat("[ValidarTEST]: Segunda letra errada (E).");
+				}
+			}
+		} else {
+			if(modoDebug){
+				InsereTextoChat("[ValidarTEST]: Primeira letra errada (T).");
+			}
+		}
+	} else {
+		if(modoDebug){
+			InsereTextoChat("[ValidarTEST]: Tamanho do pacote errado.");
+		}
+	}
+	return L_ERRO;
+}
+
+/** @brief Verifica a integridade do pacote DOWN
+ *
+ *  @param conteudo a mensagem recebida
+ *  @return L_OK se for um pacote DOWN válido, L_ERRO c.c.
+ */
+int ValidarDOWN(char * conteudo){
+	/*"DOWN:" = 5,"<nome do usuário>" = 10, ":" = 1, '\0'=1		*/
+	if(modoDebug){
+		InsereTextoChat("[ValidarDOWN]");
+	}
+	if(strlen(conteudo) >= 17){
+		if(*(conteudo) == 'D'){
+			if(*(conteudo + 1) == 'O'){
+				if(*(conteudo + 2) == 'W'){
+					if(*(conteudo + 3) == 'N'){
+						if(*(conteudo + 4) == ':'){
+							if(*(conteudo + 15) == ':'){
+								if(*(
+									conteudo + strlen(conteudo))
+									 == '\0'){
+									return L_OK;
+								} else {
+									if(modoDebug){
+									InsereTextoChat(
+										"[ValidarDOWN]: Ultimo caracter errado (\\0).");
+								}
+								}
+							} else {
+								if(modoDebug){
+									InsereTextoChat(
+										"[ValidarDOWN]: Decima sexta letra errada (:).");
+								}
+							}
+						} else {
+							if(modoDebug){
+								InsereTextoChat(
+									"[ValidarDOWN]: Quinta letra errada (:).");
+							}
+						}
+					} else {
+						if(modoDebug){
+							InsereTextoChat(
+								"[ValidarDOWN]: Quarta letra errada (N).");
+						}
+					}
+				} else {
+					if(modoDebug){
+						InsereTextoChat(
+							"[ValidarDOWN]: Terceira letra errada (W).");
+					}
+				}
+			} else {
+				if(modoDebug){
+					InsereTextoChat("[ValidarDOWN]: Segunda letra errada (O).");
+				}
+			}
+		} else {
+			if(modoDebug){
+				InsereTextoChat("[ValidarDOWN]: Primeira letra errada (D).");
+			}
+		}
+	} else {
+		if(modoDebug){
+			InsereTextoChat("[ValidarDOWN]: Tamanho do pacote errado.");
+		}
+	}
+	return L_ERRO;
+}
+
 /** @brief Continuamente verifica se o host está online
  *
  *  @param host ponteiro para o host a ser monitorado
  *  @return NULL
  */
 void * _threadKeepAlive(void * host){
-	InsereTextoChat("_threadKeepAlive");
+	if(modoDebug){
+		InsereTextoChat("[_threadKeepAlive]");
+	}
+	sleep(2);
 	ChatHost * myHost = (ChatHost *) host;
 	unsigned long myHostIP = myHost->s_addr;
-	while(BuscaHostPorIP(myHostIP) != NULL &&
-		myHost->alive > 0){
+	while(myHost->alive > 0){
 		EnviaRawMsg("TEST:", myHost->s_addr, myHost->sin_port);
 		myHost->alive--;
 		sleep(PERIODOTEST);
@@ -404,7 +727,9 @@ void * _threadKeepAlive(void * host){
 
 		}
 	}
-	InsereTextoChat("FIM _threadKeepAlive");
+	if(modoDebug){
+		InsereTextoChat("[_threadKeepAlive]: FIM");
+	}
 	return NULL;
 }
 
@@ -414,10 +739,12 @@ void * _threadKeepAlive(void * host){
  *  @return NULL
  */
 void * _ThreadRX(void * arg){
-	InsereTextoChat("_ThreadRX");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadRX]");
+	}
 	unsigned int sizeSock = sizeof(struct sockaddr_in);
 	int sizeMsg = MAXMSGSIZE * sizeof(char);
-	int status = -1;
+	int status = 0;
 	RawMsg * nMsg;
 
 	while (socketTXRX->status == 0){
@@ -432,12 +759,19 @@ void * _ThreadRX(void * arg){
 					&sizeSock);
 
 		if(status > 0){
-			InsereTextoChat("Mensagem recebida:");
-			InsereTextoChat(nMsg->msg);
+			if(modoDebug){
+				char strRecebido[200];
+				sprintf(strRecebido,
+					"[_ThreadRX] Mensagem recebida:\"%s\"",
+				 	nMsg->msg);
+				InsereTextoChat(strRecebido);
+			}
 			PushFila(inbox, (void *) nMsg);
 		}
 	}
-	InsereTextoChat("FIM _ThreadRX");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadRX]: FIM");
+	}
 	return NULL;
 }
 
@@ -447,14 +781,16 @@ void * _ThreadRX(void * arg){
  *  @return NULL
  */
 void * _ThreadTX(void * arg){
-	InsereTextoChat("_ThreadTX");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadTX]");
+	}
 	int status = -1;
 	RawMsg * nMsg;
 	int sizeSock = sizeof(struct sockaddr);
 	int tentativas;
 
 	while(socketTXRX->status == 0){
-		
+		//InsereTextoChat("Comeca LoopTX");
 		nMsg = (RawMsg *) PopFila(outbox);
 		if(nMsg != NULL){
 			tentativas = MAXTENTATIVAS;
@@ -468,23 +804,33 @@ void * _ThreadTX(void * arg){
 							0,
 							(struct sockaddr *) &(nMsg->fromTo),
 							sizeSock);
-				InsereTextoChat("Mensagem enviada:");
-				InsereTextoChat(nMsg->msg);
+				if(modoDebug){
+					char strEnviado[200];
+					sprintf(strEnviado,
+						"[_ThreadTX] Mensagem enviada:\"%s\"",
+					 	nMsg->msg);
+					InsereTextoChat(strEnviado);
+				}
 			}
 			free(nMsg);
 		}
 	}
-	InsereTextoChat("FIM _ThreadRX");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadTX]: FIM");
+	}
 	return NULL;
 }
 
-/** @brief Continuamente transfere msgs da filaInput para o outbox
+/** @brief Continuamente transfere msgs da filaInput para o 
+ *         outbox
  *
  *  @param arg NULL
  *  @return NULL
  */
 void * _ThreadCliente(void * servidor){
-	InsereTextoChat("_ThreadCliente");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadCliente]");
+	}
 	char msg[MAXMSGSIZE];
 	ChatHost * srv = (ChatHost *) servidor;
 	while(conectadoSRV == L_OK){
@@ -496,7 +842,9 @@ void * _ThreadCliente(void * servidor){
 			EnviaRawMsg(msg, srv->s_addr, srv->sin_port);
 		}
 	}
-	InsereTextoChat("FIM _ThreadCliente");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadCliente]: FIM");
+	}
 	return NULL;
 }
 
@@ -505,29 +853,16 @@ void * _ThreadCliente(void * servidor){
  *  @param arg NULL
  *  @return NULL
  */
-void * _ThreadCorreios(void * arg){
-	InsereTextoChat("_ThreadCorreios");
+void * _ThreadCorreios(void * servidor){
+	if(modoDebug){
+		InsereTextoChat("[_ThreadCorreios]");
+	}
 	RawMsg * nMsg;
-	ChatHost * host;
-	while(socketTXRX->status == 0){
+	ChatHost * host = servidor;
+	while(socketTXRX->status == 0 && execGUI == 1){
 		nMsg = (RawMsg *) PopFila(inbox);
 		if (nMsg != NULL){
-			InsereTextoChat("Mensagem Recebida");
 			switch(TipoRawMsg(nMsg->msg)){
-			case USER:
-				ParseMensagemUSER(nMsg);
-				break;
-			case UP:
-				host = BuscaHostPorIP(nMsg->fromTo.sin_addr.s_addr);
-				if(host	!= NULL){ /* Host está de fato registrado		*/
-					char * text = ParseMensagemUP(nMsg);
-					BroadcastMsg(text);
-					free(text);
-				}
-				break;
-			case EXIT:
-				RemoveHostPorIP(nMsg->fromTo.sin_addr.s_addr);
-				break;
 			case TEST:
 				EnviaRawMsg("OKOK:", nMsg->fromTo.sin_addr.s_addr,
 						 nMsg->fromTo.sin_port);
@@ -538,21 +873,28 @@ void * _ThreadCorreios(void * arg){
 			case BUSY:
 				printf("Servidor cheio. Tente mais tarde.\n");
 			case BYE:
-				endwin();	/* Termina modo curses 						*/
-				execGUI = 0;
-				exit(0);
+				execGUI = 0;				
 				break;
 			case OKOK:
 				ParseMensagemOKOK(nMsg);
 				conectadoSRV = 1;
 				break;
 			default:
-				InsereTextoChat("Mensagem Invalida.");
+				if(modoDebug){
+					InsereTextoChat(
+						"[Mensagem Invalida recebida do servidor]");
+				}
 				break;
 			}
 			free(nMsg);
 		}
 	}
-	InsereTextoChat("FIM _ThreadCorreios");
+	if(modoDebug){
+		InsereTextoChat("[_ThreadCorreios]: FIM");
+	}
+	EnviaRawMsg("BYE :", host->s_addr, host->sin_port);
+	sleep(1);
+	endwin();	/* Termina modo curses 									*/
+	exit(0);
 	return NULL;
 }
