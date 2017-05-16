@@ -86,30 +86,61 @@ O arquivo `Makefile` automatiza o processo de compilação do projeto bem como d
 
 O diretório `obj` é o destino dos arquivos `.o` gerados durante o processo de compilação, já o diretório `test` contém o código-fonte dos programas que testam as bibliotecas utilizadas pelo cliente de chat.
 
-Por último, o diretório `src` contém os códigos-fonte utilizados na compilação do cliente de chat. Abaixo seguem uma descrição mais detalhada de cada um deles.
+Por último, o diretório `src` contém os códigos-fonte utilizados na compilação do cliente de chat. Abaixo seguem uma breve descrição de cada um deles.
 
 ### lista.c | lista.h
 Implementam as estruturas e funções de listas ligadas com suporte a concorrência utilizando mutex e semáforos.
 
 A alocação dos elementos na lista se dá dinamicamente (através de `malloc()` e `free()`), portanto é recomendado que o usuário da biblioteca evite alterar as estruturas `Item` e `Lista` diretamente, devendo preferencialmente utilizar as seguintes funções:
 
-* `Lista * NewLista();`: cria e inicializa uma nova fila
-* `int InsereNovoItemIndice(Lista *L, void * conteudo, int indice);`: insere um novo conteudo na lista em um determinado índice
-* `int PushInicio(Lista *L, void * conteudo);`: insere um conteúdo no início da lista
-* `int PushFim(Lista *L, void * conteudo);`: insere um conteúdo no fim da lista
-
+* `Lista * NewLista();`: cria e inicializa uma nova fila.
+* `int InsereNovoItemIndice(Lista *L, void * conteudo, int indice);`: insere um novo conteudo na lista em um determinado índice. Função bloqueante.
+* `int PushInicio(Lista *L, void * conteudo);`: insere um conteúdo no início da lista.
+* `int PushFim(Lista *L, void * conteudo);`: insere um conteúdo no fim da lista.
+* `void * RemoveItemIndice(Lista *L, int indice);`: remove um conteúdo da lista na posição de um dado índice. Retorna `NULL` caso o índice esteja fora do range de índices. Função bloqueante.
+* `void * PopInicio(Lista *L)`: remove o primeiro conteúdo da lista. retorna `NULL`caso a lista esteja vazia. Função bloqueante.
+* `void * PopFim(Lista *L)`: remove o último conteúdo da lista. Função bloqueante.
+* `void * GetConteudoIndice(Lista *L, int indice)`: retorna um ponteiro para o conteúdo de um item na posição de um determinado índice. Função bloqueante.
+* `void PrintLista(Lista *L);`: imprime o conteúdo da lista via `printf()`.
+* `int TamLista(Lista *L)`: determina o tamanho da lista.
 
 ### fila.c | fila.h
-Implementam as estruturas e funções de filas com suporte a concorrência.
+Implementam as estruturas e funções de filas com suporte a concorrência. Ela utiliza a biblioteca de Listas na sua implementação. Suas principais funções são:
+
+* `Fila * NewFila();`: cria e inicializa uma nova fila.
+* `int PushFila(Fila *F, void * conteudo);`: insere um conteúdo no fim da fila.
+* `void * PopFila(Fila *F);`: remove um conteúdo do início da fila. Função bloqueante.
+* `void PrintFila(Fila *F);`: imprime o conteúdo da fila via `printf()`.
+* `int TamFila(Fila *F);`: determina o tamanho da fila.
 
 ### gui.c | gui.h
-Implementam as estruturas e funções da interface homem-máquina com suporte a concorrência.
+Implementam as estruturas e funções da interface gráfica com suporte a concorrência. Ela utiliza a biblioteca [ncurses](https://en.wikipedia.org/wiki/Ncurses) na sua implementação.
+
+A primeira função a ser executada nessa biblioteca deve ser a `void InitGUI(int modo);`, que tem como parâmetro o modo de execução, que pode assumir os valores `MODOCLIENTE` e `MODOSERVIDOR`. Caso essa função seja executada no `MODOSERVIDOR` serão criadas 2 janelas, a primeira contendo o título do programa (`GUIjanelaTitulo`) e a segunda responsável por conter o texto do chat (`GUIjanelaChat`). Já no `MODOCLIENTE` será criada também outra janela que conterá o texto a ser digitado pelo usuário.
+
+Assim que é executada, a função `InitGUI()` irá inicializar as variáveis de controle da interface gráfica bem como configurar o ncurses. A seguir ela irá calcular as dimensões e posicionamento das janelas a serem criadas, apresentará as telas e iniciará uma thread responsável por processar os inputs do usuário (`void * _InputManager(void * arg)`).
+
+A thread de processamento de input do usuário armazena os caracteres válidos inserido pelo usuário e assim que detecta os caractere `\n` adiciona o conteúdo desse buffer na `filaInput`, fila essa que posteriormente será processada por outra thread da biblioteca `rede.c|rede.h`. Outra atribuição dessa thread é detectar o pressionamento da tecla `F2` e sinalizar o encerramento do programa alterando o valor da flag `execGUI`.
+
+Outras funções podem adicionar textos à janela do chat por meio da função `void InsereTextoChat(char * texto)`, que adiciona o texto à lista `textosChat`, lista essa que será apresentada na janela de chat. Caso a quantidade de linhas a serem apresentadas na janela exceda o espaço disponível, os textos mais antigos serão removidos da lista até que haja espaço para o novo texto.
+
+Todas as outros funções servem propósitos operacionais internos e não devem ser utilizadas externamente.
 
 ### rede.c | rede.h
-Implementam as estruturas e funções de acesso aos sockets de rede com suporte a concorrência.
+Implementam as estruturas e funções de acesso e uso de sockets UDP bem como o protocolo de comunicação utilizado pelo chat.
+
+A função que dá início ao processo de inicialização das estruturas, variáveis e threads de comunicação do cliente é a `void InitCliente(char * srvIP, char * porta, char * nome);`. Para ela devem ser passados o IP do servidor, a porta de comunicação e o nome de usuário a ser utilizado. Essa função irá inicializar a interface gráfica, converter e armazenar os parâmetros de comunicação com o servidor (`int AdicionaHost(char * nome, unsigned long s_addr, unsigned short sin_port);`), incializar os sockets de comunicação com o servidor (`int InitSocket(int porta);`) e inicializar a thread responsável por constantemente enviar as mensavens digitadas pelo usuário (`_ThreadCliente`);
+
+Dentor da função `InitCliente()`, além de se configurar e inicializar o socket de comunicação com o servidor, também são inicializadas outras 3 threads, sendo elas a `void * _ThreadTX(void * arg)`, a `void * _ThreadRX(void * arg)` e a `void * _ThreadCorreios(void * arg)`. As duas primeiras, como os nomes indicam, são responsáveis por continuamente enviar e receber mensagens de texto do chat (`RawMsg`). Já a `_ThreadCorreios()` processa as mensagens recebidas e toma decisões do que fazer a partir dos seus conteúdos e do protocolo de comunicação.
+
+Outra thread de grande importância para o chat é a `void * _threadKeepAlive(void * host)`, que de tempos em tempos verifica se o servidor ainda está on-line por meio da mensagem `TEST` e caso seja detectada a desconeção ela inicia o procedimento de fechamento do chat.
+
+Todas as outros funções servem propósitos operacionais internos e não devem ser utilizadas externamente.
 
 ### cliente.c | cliente.h
-Implementam o programa do cliente
+Implementam o programa do cliente.
+
+Além da função `main()` a única outra função aqui implementada é a `void processa_parametros(int argc, char* argv[])`, que processa os parâmetros da chamada do programa. Uma vez processados esses parâmetros, a função `InitCliente()` é executada, dando início à execução do cliente do chat.
 
 ## Utilização
 

@@ -75,7 +75,7 @@ void InitCliente(char * srvIP, char * porta, char * nome){
  *  @param porta porta de comunicacao
  *  @return status da operação
  */
-int  InitSocket(int porta){
+int InitSocket(int porta){
 	if(modoDebug){
 		InsereTextoChat("[InitSocket]");
 	}
@@ -677,6 +677,8 @@ void * _threadKeepAlive(void * host){
 			if(conectadoSRV == L_OK){
 				conectadoSRV = L_ERRO;
 			}
+			InsereTextoChat("[Servidor desconectado]");
+			execGUI = 0;
 			RemoveHostPorIP(myHostIP);
 			return NULL;
 
