@@ -2,10 +2,8 @@
 
 Este programa tem por objetivo implementar uma sala de chat para múltiplos usuários, a exemplo de programas como o [mIRC](https://pt.wikipedia.org/wiki/MIRC).
 
-Essa versão do programa implementa somente o cliente. Uma outra tentativa de implementação do cliente e do servidor está dentro da pasta `OLD`.
-
 ## Requisitos de Projeto
-Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício deverão ser implementados tanto o cliente como o servidor, e ambos deverão respeitar um protocolo de comunicação predeterminado.
+Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício os grupos deverão implementar o cliente ou o servidor, e ambos deverão respeitar um protocolo de comunicação predeterminado.
 
 ### Servidor
 * **Porta de comunicação**: Deve aguardar requisições na porta 10.000/UDP
@@ -56,8 +54,50 @@ Nome | Descrição | Formato | Dimensões | Comportamentos esperados | Possívei
 
 ## Estrutura do Projeto
 
+Nosso grupo ficou responsável por implementar o cliente do chat. A princípio tentamos implementar também o servidor (e por isso algumas partes do nosso código parecem ser inúteis mas isso se deve ao fato de que foram implementadas para serem genéricas) mas por falta de tempo nos restringimos a implementar somente o necessário.
+
+O projeto tem a seguinte estrutura de arquivos:
+```
+.
+├── 82-Trabalho-UDP-chat-v6.pdf
+├── Makefile
+├── obj
+├── README.md
+├── src
+│   ├── cliente.c
+│   ├── cliente.h
+│   ├── fila.c
+│   ├── fila.h
+│   ├── gui.c
+│   ├── gui.h
+│   ├── lista.c
+│   ├── lista.h
+│   ├── rede.c
+│   └── rede.h
+└── test
+    ├── echo_rede.c
+    ├── teste_fila.c
+    ├── teste_gui.c
+    └── teste_lista.c
+```
+O arquivo `82-Trabalho-UDP-chat-v6.pdf` contém o enunciado do projeto e o arquivo `README.md` contém o texto que você está lendo.
+
+O arquivo `Makefile` automatiza o processo de compilação do projeto bem como dos programas de teste das bibliotecas.
+
+O diretório `obj` é o destino dos arquivos `.o` gerados durante o processo de compilação, já o diretório `test` contém o código-fonte dos programas que testam as bibliotecas utilizadas pelo cliente de chat.
+
+Por último, o diretório `src` contém os códigos-fonte utilizados na compilação do cliente de chat. Abaixo seguem uma descrição mais detalhada de cada um deles.
+
 ### lista.c | lista.h
-Implementam as estruturas e funções de filas com suporte a concorrência.
+Implementam as estruturas e funções de listas ligadas com suporte a concorrência utilizando mutex e semáforos.
+
+A alocação dos elementos na lista se dá dinamicamente (através de `malloc()` e `free()`), portanto é recomendado que o usuário da biblioteca evite alterar as estruturas `Item` e `Lista` diretamente, devendo preferencialmente utilizar as seguintes funções:
+
+* `Lista * NewLista();`: cria e inicializa uma nova fila
+* `int InsereNovoItemIndice(Lista *L, void * conteudo, int indice);`: insere um novo conteudo na lista em um determinado índice
+* `int PushInicio(Lista *L, void * conteudo);`: insere um conteúdo no início da lista
+* `int PushFim(Lista *L, void * conteudo);`: insere um conteúdo no fim da lista
+
 
 ### fila.c | fila.h
 Implementam as estruturas e funções de filas com suporte a concorrência.
@@ -79,23 +119,14 @@ Implementam o programa do cliente
 * Bibliotecas: Pthreads e Ncurses
 
 ### Compilação
-* Compilação de cliente e servidor: `make`
-* Compilação do cliente: `make cliente`
-* Compilação do servidor: `make servidor`
+* Compilação de cliente `make`
 * Apagar todos os arquivos gerados pela compilação: `make clean`
-
-### Execução do servidor
-* Nome do binário: `servidor-chat`
-* Sinopse: `servidor-chat [-p |-P <porta>] [-c | -C <max_cl>] [-v | -V <verbose>] [-o | -O <arquivo>]`
-* Opções
-  * `-p <porta>` Porta a ser utilizada pelo servidor (padrão: 10000)
-  * `-c <max_cl>` Número máximo de clientes simultâneos (padrão: 3)
-  * `-v <verbose>` Opção para mostrar o log de conversa durante a execução do programa (padrão: 1 (sim))
-  * `-o <arquivo>` Arquivo para armazenamento do log de conversa (padrão: nenhum)
 
 ### Execução do cliente
 * Nome do binário: `cliente-chat`
-* Sinopse: `cliente-chat [-p |-P <porta>] [-o | -O <arquivo>]`
-* Opções
-  * `-p <porta>` Porta a ser utilizada pelo cliente (padrão: 10000)
-  * `-o <arquivo>` Arquivo para armazenamento do log de conversa (padrão: nenhum)
+* Sinopse: `cliente-chat -i <IPSrv> [-p <porta>] [-u <Usuário>] [-d (0|1)]`
+* Opções:
+  * `-i <IPSrv>` IP do servidor de chat (Obrigatório)
+  * `-p <porta>` Porta a ser utilizada pelo cliente (padrão: `10000`) (Opcional)
+  * `-u <Usuário>` Nome de usuário que deseja utilizar (padrão: `Anonimo`) (Opcional)
+  * `-d (0|1)` Ativar modo debug (padrão: `0` = desativado) (Opcional)

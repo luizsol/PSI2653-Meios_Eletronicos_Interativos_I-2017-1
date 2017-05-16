@@ -11,6 +11,7 @@
 #ifndef __GUI__H
 #define __GUI__H
 
+/* Includes 												*/
 #include <ncurses.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,12 +21,15 @@
 #include <signal.h>
 #include "fila.h"
 
+/* Constantes da biblioteca 								*/
 #define TAMMAXINPUT 79	/* Tamanho maximo do texto de 		*
 						 * usuario							*/
 #define TAMNOME 10	/* Tamanho maximo do nome de usuario 	*/
 #define MODOCLIENTE 0
 #define MODOSERVIDOR 1
 
+
+/* Variáveis globais da biblioteca 							*/
 WINDOW * GUIjanelaTitulo;	/* Janela para descricao e 		*
 							 * instrucoes do programa		*/
 
@@ -63,9 +67,11 @@ char * inputBuffer;	/* Variavel de armazenamento do input 	*/
 
 pthread_t * inputThread; /* Thread de processamento de input*/
 
-volatile int execGUI;
+volatile int execGUI; 	/* Flag que determina se a interface*
+						 * gráfica está em execução 		*/
 
-int inputEnable;
+int inputEnable; 	/* Determina se o programa deve 		*
+					 * processar inputs gerados pelo usuário*/
 
 /** @brief Inicializa as janelas da interface
  *
@@ -73,8 +79,10 @@ int inputEnable;
  */
 void InitGUI(int modo);
 
-/** @brief Inicializa as janelas da interface
+/** @brief Calcula as dimensões e posições dos elementos da
+ *         interface gráfica
  *
+ *  @param modo MODOCLIENTE OU MODOSERVIDOR
  */
 void AtualizaDimPos(int modo);
 

@@ -1,4 +1,15 @@
-#Makefile
+#  @file       Makefile
+#  @brief      Automatiza a compilação do EP3 de MEI
+#              
+#              Utilização: execute o comando `make`
+#                      
+#              Repository: 
+#				https://github.com/luizsol/MEI
+#  @author     Luiz Sol (luizedusol@gmail.com)
+#  @date       2017/05/16
+#
+
+#Compilador a ser utilizado
 CC=gcc
 
 #Local dos arquivos fonte
@@ -20,11 +31,12 @@ CFLAGS +=-pedantic
 #Biblioteca a ser utilizada (Pthread)
 LIBS=-lpthread -lncurses
 
-
+#Target padrão de compilação (make sem parâmetros)
 .DEFAULT_GOAL := all
 
 ### LISTA
 $(ODIR)/lista.o: $(IDIR)/lista.c $(IDIR)/lista.h
+	mkdir -p $(ODIR)
 	$(CC) $(CFLAGS) -c $(IDIR)/lista.c -o $(ODIR)/lista.o
 
 #Teste da biblioteca de listas
@@ -69,5 +81,6 @@ $(ODIR)/cliente.o: $(IDIR)/rede.h $(IDIR)/fila.h $(IDIR)/lista.h $(IDIR)/gui.h $
 all cliente-chat: $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/cliente.o
 	$(CC) $(CFLAGS) $(ODIR)/lista.o $(ODIR)/fila.o $(ODIR)/gui.o $(ODIR)/rede.o $(ODIR)/cliente.o -o cliente-chat $(LIBS)
 
+##Remoção de todos os arquivos gerados por compilação
 clean:
 	rm -f $(ODIR)/*.o cliente-chat teste_lista teste_fila teste_gui techo_rede

@@ -10,13 +10,13 @@
 
 #include "gui.h"
 
-/* Cabecalhos de funcoes nao declaradas no .h 				*/
+/*	Assinaturas de funcoes de uso exclusivamente interno 	*/
 void AtualizaChat();
 void RemoveTextoChat();
-void * InputManager(void * arg);
+void * _InputManager(void * arg);
 void InputUpdate();
 void InputErase();
-void signal_callback_handler(int signum);
+void Signal_callback_handler(int signum);
 
 /** @brief Inicializa as janelas da interface
  *
@@ -26,7 +26,7 @@ void InitGUI(int modo){
 	
 	/* Ignorando todos os sinais de sistema 				*/
 	for (int i=1; i<20; i++){
-       signal(i,signal_callback_handler);
+       signal(i,Signal_callback_handler);
 	}
 
     execGUI = 1;	/* Flag de execucao da GUI 				*/
@@ -90,11 +90,13 @@ void InitGUI(int modo){
 
     /* Inicializando a thread de manipulacao de input 		*/
     inputThread = malloc(sizeof(pthread_t));
-    pthread_create(inputThread, NULL, InputManager, NULL);
+    pthread_create(inputThread, NULL, _InputManager, NULL);
 }
 
-/** @brief Inicializa as janelas da interface
+/** @brief Calcula as dimensões e posições dos elementos da
+ *         interface gráfica
  *
+ *  @param modo MODOCLIENTE OU MODOSERVIDOR
  */
 void AtualizaDimPos(int modo){
 	alturaTitulo = 3;
@@ -301,7 +303,7 @@ void InputUpdate(){
 /** @brief Funcao responsavel por tratar inputs do usuario
  *
  */
-void * InputManager(void * arg){
+void * _InputManager(void * arg){
 	int ch;
 	int idx = 0;
 	char * conteudo;
@@ -325,7 +327,8 @@ void * InputManager(void * arg){
 					InputUpdate();
 					break;
 				default:
-					if(ch > 31 && ch < 127	/* Caracteres ASCII */
+					if(ch > 31 && ch < 127	/* Caracteres 	* 
+											 * ASCII 		*/
 						&& idx < TAMMAXINPUT-1){
 						*(inputBuffer + idx) = ch;
 						idx++;
@@ -346,7 +349,7 @@ void * InputManager(void * arg){
  *
  *  @param signum número do sinal de sistema
  */
-void signal_callback_handler(int signum){
-	//Faça nada
+void Signal_callback_handler(int signum){
+	InsereTextoChat("[Pressione <F2> para sair]");
 	return;
 }

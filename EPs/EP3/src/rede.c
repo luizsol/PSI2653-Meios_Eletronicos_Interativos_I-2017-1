@@ -1,5 +1,5 @@
 /** @file 	rede.h
- *  @brief 	Implementa uma interface para utilizacao de
+ *  @brief 	Implementa uma interface para utilização de
  * 			sockets UDP
  *         	
  *         	Repository: 
@@ -10,6 +10,7 @@
 
 #include "rede.h"
 
+/*	Assinaturas de funcoes de uso exclusivamente interno 	*/
 int InitSocket(int porta);
 int TipoRawMsg(char * conteudo);
 int AdicionaHost(char * nome, unsigned long s_addr,
@@ -17,10 +18,8 @@ int AdicionaHost(char * nome, unsigned long s_addr,
 ChatHost * BuscaHostPorIP(unsigned long s_addr);
 int RemoveHostPorIP(unsigned long s_addr);
 void BroadcastMsg(char * msg);
-char * ParseMensagemUP(RawMsg * mensagem);
 void ParseMensagemDOWN(RawMsg * mensagem);
 void ParseMensagemOKOK(RawMsg * mensagem);
-void ParseMensagemUSER(RawMsg * mensagem);
 int ValidarBUSY(char * conteudo);
 int ValidarBYE(char * conteudo);
 int ValidarOKOK(char * conteudo);
@@ -30,26 +29,35 @@ void * _threadKeepAlive(void * host);
 void * _ThreadRX(void * arg);
 void * _ThreadTX(void * arg);
 void * _ThreadCliente(void * servidor);
-void * _ThreadCorreios(void * servidor);
+void * _ThreadCorreios(void * arg);
 
-
+/** @brief Inicializa o socket e as variáveis de controle de
+ *         um cliente de chat
+ *
+ *  @param srvIP endereço IPV4 do servidor
+ *  @param porta porta a ser utilizada na comunicação
+ *  @param nome nome que o cliente deseja utilizar no chat
+ */
 void InitCliente(char * srvIP, char * porta, char * nome){
 	InitGUI(MODOCLIENTE);
 	if(modoDebug){
 		InsereTextoChat("[InitCliente]");
 	}
-	//Iniciando Socket
+	ipServidor = inet_addr(srvIP);
+	portaServidor = htons(atoi(porta));
+	/* Iniciando Socket 									*/
 	InitSocket(htons(atoi(porta)));
-	//Adiciona Servido a lista de hosts
+	/* Adiciona Servido a lista de hosts 					*/
 	int status = AdicionaHost(NOMESRV,
 					inet_addr(srvIP),
 					htons(atoi(porta)));
 	if(status == L_ERRO){
-		InsereTextoChat("Erro ao adicionar SRV a lista de hosts");
-		endwin();	/* Termina modo curses 						*/
+		InsereTextoChat(
+			"Erro ao adicionar SRV a lista de hosts");
+		endwin();	/* Termina modo curses 					*/
 		exit(1);
 	}
-	//Solicitando entrada na sala
+	/* Solicitando entrada na sala 							*/
 	conectadoSRV = L_OK;
 	threadCliente = malloc(sizeof(pthread_t));
 	pthread_create(threadCliente, NULL,
@@ -80,8 +88,8 @@ int  InitSocket(int porta){
 	sem_init(&sem_mutex_listaHosts, 0, 1);
 	
 
-	/* Struct genérico para conexão com todas as interfaces		*
-	 * locais 													*/
+	/* Struct genérico para conexão com todas as interfaces	*
+	 * locais 												*/
 	struct sockaddr_in mylocal_addr;
 	mylocal_addr.sin_family = AF_INET;
 	mylocal_addr.sin_addr.s_addr = INADDR_ANY;
@@ -91,25 +99,23 @@ int  InitSocket(int porta){
 	/* Criacao do socket 	 									*/
 	chatSocket->sd = socket(AF_INET,SOCK_DGRAM,0);
 	
-	if(chatSocket->sd < 0){	/* Erro na criacao do socket 		*/
+	if(chatSocket->sd < 0){	/* Erro na criacao do socket 	*/
 		free(chatSocket);
-		endwin();	/* Termina modo curses 						*/
+		endwin();	/* Termina modo curses 					*/
 		execGUI = 0;
 		return L_ERRO;
 	}
-
-	//fcntl(chatSocket->sd, F_SETFL, O_ASYNC);
 
 	chatSocket->status = bind(chatSocket->sd,
 						(struct sockaddr *) &mylocal_addr,
 						sizeof(struct sockaddr_in));
 
-	if(chatSocket->status != 0){	/* Erro ao conectar o 		*
-									 * socket 					*/
+	if(chatSocket->status != 0){	/* Erro ao conectar o 	*
+									 * socket 				*/
 		free(chatSocket);
-		endwin();	/* Termina modo curses 						*/
+		endwin();	/* Termina modo curses 					*/
 		execGUI = 0;
-		InsereTextoChat("Erro no bind()");
+		puts("Erro no bind()");
 		return L_ERRO;
 	}
 
@@ -123,8 +129,7 @@ int  InitSocket(int porta){
 	pthread_create(chatSocket->socketThreadTX, NULL,
 			_ThreadTX, NULL);
 	pthread_create(threadCorreios, NULL,
-			_ThreadCorreios,
-			(void *) servidor);//erro aqui?
+			_ThreadCorreios, NULL);
 	return L_OK;
 }
 
@@ -161,7 +166,7 @@ int TipoRawMsg(char * conteudo){
 	if(modoDebug){
 		InsereTextoChat("[TipoRawMsg]");
 	}
-	if(*(conteudo) == 'B'){ /* BUSY ou BYE 						*/
+	if(*(conteudo) == 'B'){ /* BUSY ou BYE 					*/
 		if(*(conteudo + 1) == 'U'){
 			if (ValidarBUSY(conteudo) == L_OK){
 				return BUSY;
@@ -172,21 +177,21 @@ int TipoRawMsg(char * conteudo){
 			}
 		}
 		return -1;
-	} else if(*(conteudo) == 'T'){ /* TEST 						*/
+	} else if(*(conteudo) == 'T'){ /* TEST 					*/
 		if(*(conteudo + 1)  == 'E'){
 			if(ValidarTEST(conteudo) == L_OK){
 				return TEST;	
 			}
 		}
 		return -1;
-	} else if(*(conteudo) == 'O'){ /* OKOK 						*/
+	} else if(*(conteudo) == 'O'){ /* OKOK 					*/
 		if(*(conteudo + 1) == 'K'){
 			if(ValidarOKOK(conteudo) == L_OK){
 				return OKOK;
 			}
 		}
 		return -1;
-	} else if(*(conteudo) == 'D'){ /* DOWN 						*/
+	} else if(*(conteudo) == 'D'){ /* DOWN 					*/
 		if(*(conteudo + 1) == 'O'){
 			if(ValidarDOWN(conteudo) == L_OK){
 				return DOWN;
@@ -216,7 +221,6 @@ int AdicionaHost(char * nome, unsigned long s_addr,
 	strcpy(nHost->nome, nome);
 
 	if(PushFim(listaHosts, nHost) == L_OK){
-		servidor = nHost; /* Gambiarra para o cliente*/
 		nHost->keepAlive = malloc(sizeof(pthread_t));
 		pthread_create(nHost->keepAlive, NULL,
 			_threadKeepAlive, (void * ) nHost);
@@ -281,7 +285,6 @@ int RemoveHostPorIP(unsigned long s_addr){
 					BroadcastMsg(msg);
 					EnviaRawMsg("BYE :", item->s_addr,
 						item->sin_port);
-					//Pode dar problema aqui...
 					free(item);
 					return L_OK;
 			}
@@ -290,7 +293,8 @@ int RemoveHostPorIP(unsigned long s_addr){
 	return L_ERRO;
 }
 
-/** @brief Envia uma mensagem para todos os hosts da listaHosts
+/** @brief Envia uma mensagem para todos os hosts da 
+           listaHosts
  *
  *  @param msg a mensagem a ser enviada
  */
@@ -305,29 +309,6 @@ void BroadcastMsg(char * msg){
 		EnviaRawMsg(msg, host->s_addr, host->sin_port);
 	}
 	sem_post(&sem_mutex_listaHosts);
-	InsereTextoChat(msg);
-}
-
-/** @brief Processa as mensagens UP
- *
- *  @param mensagem a mensagem a ser processada
- */
-char * ParseMensagemUP(RawMsg * mensagem){
-	if(modoDebug){
-		InsereTextoChat("[ParseMensagemUP]");
-	}
-	ChatHost * host = 
-				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
-	char * texto = malloc(MAXMSGSIZE*sizeof(char));
-	texto[0] = '\0';
-	strcat(texto, "DOWN:");
-	strcat(texto, host->nome);
-	while(strlen(texto) < 15){
-		strcat(texto, " ");
-	}
-	strcat(texto, ":");
-	strcat(texto, (mensagem->msg + 5));
-	return texto;
 }
 
 /** @brief Processa as mensagens DOWN
@@ -339,12 +320,12 @@ void ParseMensagemDOWN(RawMsg * mensagem){
 		InsereTextoChat("[ParseMensagemDOWN]");
 	}
 	ChatHost * host = 
-				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
+				BuscaHostPorIP(
+					mensagem->fromTo.sin_addr.s_addr);
 	if(host != NULL){
 		char * texto = malloc(MAXMSGSIZE*sizeof(char));
 		texto[0] = '\0';
-		strncat (texto, (mensagem->msg + 5), 10);/* Add nome do *
-												 * usuario		*/
+		strncat (texto, (mensagem->msg + 5), 10);
 		strcat(texto, ESPACADOR);
 		strcat(texto, (mensagem->msg + 16));
 		InsereTextoChat(texto);
@@ -361,36 +342,10 @@ void ParseMensagemOKOK(RawMsg * mensagem){
 		InsereTextoChat("[ParseMensagemOKOK]");
 	}
 	ChatHost * host = 
-				BuscaHostPorIP(mensagem->fromTo.sin_addr.s_addr);
+				BuscaHostPorIP(
+					mensagem->fromTo.sin_addr.s_addr);
 	if(host != NULL){
 		host->alive = MAXTENTATIVAS;
-	}
-}
-
-/** @brief Processa as mensagens USER
- *
- *  @param mensagem a mensagem a ser processada
- */
-void ParseMensagemUSER(RawMsg * mensagem){
-	if(modoDebug){
-		InsereTextoChat("[ParseMensagemUSER]");
-	}
-	if(conectadoSRV == L_OK){	/* Rodando no modo cliente.		*/
-		return;
-	}
-
-	if(TamLista(listaHosts) >= MAXHOSTS){
-		InsereTextoChat("Novo usuario recusado");
-		EnviaRawMsg("BUSY:", mensagem->fromTo.sin_addr.s_addr,
-			mensagem->fromTo.sin_port);
-	} else {
-		InsereTextoChat("Novo usuario adicionado");
-		AdicionaHost(mensagem->msg + 5,	/* O nome começa no i=5	*/
-			mensagem->fromTo.sin_addr.s_addr,
-			mensagem->fromTo.sin_port);
-		EnviaRawMsg("OKOK:",
-			mensagem->fromTo.sin_addr.s_addr, 
-			mensagem->fromTo.sin_port);
 	}
 }
 
@@ -717,8 +672,8 @@ void * _threadKeepAlive(void * host){
 		myHost->alive--;
 		sleep(PERIODOTEST);
 		if(BuscaHostPorIP(myHostIP) != NULL &&
-			myHost->alive < 1){ /* O host não respondeu			*
-								 * depois de MAXTENTATIVAS 		*/
+			myHost->alive < 1){ /* O host não respondeu		*
+								 * depois de MAXTENTATIVAS 	*/
 			if(conectadoSRV == L_OK){
 				conectadoSRV = L_ERRO;
 			}
@@ -790,7 +745,6 @@ void * _ThreadTX(void * arg){
 	int tentativas;
 
 	while(socketTXRX->status == 0){
-		//InsereTextoChat("Comeca LoopTX");
 		nMsg = (RawMsg *) PopFila(outbox);
 		if(nMsg != NULL){
 			tentativas = MAXTENTATIVAS;
@@ -848,30 +802,32 @@ void * _ThreadCliente(void * servidor){
 	return NULL;
 }
 
-/** @brief Continuamente decide o que fazer com as msgs recebidas
+/** @brief Continuamente decide o que fazer com as msgs 
+ *         recebidas
  *
  *  @param arg NULL
  *  @return NULL
  */
-void * _ThreadCorreios(void * servidor){
+void * _ThreadCorreios(void * arg){
 	if(modoDebug){
 		InsereTextoChat("[_ThreadCorreios]");
 	}
 	RawMsg * nMsg;
-	ChatHost * host = servidor;
 	while(socketTXRX->status == 0 && execGUI == 1){
 		nMsg = (RawMsg *) PopFila(inbox);
 		if (nMsg != NULL){
 			switch(TipoRawMsg(nMsg->msg)){
 			case TEST:
-				EnviaRawMsg("OKOK:", nMsg->fromTo.sin_addr.s_addr,
-						 nMsg->fromTo.sin_port);
+				EnviaRawMsg("OKOK:", 
+					nMsg->fromTo.sin_addr.s_addr,
+					nMsg->fromTo.sin_port);
 				break;
 			case DOWN:
 				ParseMensagemDOWN(nMsg);
 				break;
 			case BUSY:
-				printf("Servidor cheio. Tente mais tarde.\n");
+				InsereTextoChat(
+					"[Servidor cheio. Tente mais tarde.]");
 			case BYE:
 				execGUI = 0;				
 				break;
@@ -892,8 +848,13 @@ void * _ThreadCorreios(void * servidor){
 	if(modoDebug){
 		InsereTextoChat("[_ThreadCorreios]: FIM");
 	}
-	EnviaRawMsg("BYE :", host->s_addr, host->sin_port);
-	sleep(1);
+	/* Garantindo que o programa irá terminar mesmo que 	*
+	 * haja erro no envio do pacote de BYE ao tornar o 		*
+	 * socket assíncrono 									*/
+	fcntl(socketTXRX->sd, F_SETFL, O_ASYNC);
+	InsereTextoChat("[Saindo]");
+	EnviaRawMsg("EXIT:", ipServidor, portaServidor);
+	sleep(2);
 	endwin();	/* Termina modo curses 									*/
 	exit(0);
 	return NULL;

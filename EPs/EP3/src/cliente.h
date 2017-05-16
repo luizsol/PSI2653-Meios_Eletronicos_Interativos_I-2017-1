@@ -1,12 +1,13 @@
-/** @file       cliente.h
- *  @brief      Implementa o cliente do chat
+/** @file   cliente.h
+ *  @brief  Implementa o cliente do chat
  *                      
- *              Repository: 
- *				https://github.com/luizsol/MEI
- *  @author     Luiz Sol (luizedusol@gmail.com)
- *  @date       2017/05/15
+ *         	Repository: 
+ *			https://github.com/luizsol/MEI/tree/master/EPs/EP3
+ *  @author Luiz Sol (luizedusol@gmail.com)
+ *  @date   2017/05/15
  */
 
+/* Includes 												*/
 #include <unistd.h>
 #include "rede.h"
 

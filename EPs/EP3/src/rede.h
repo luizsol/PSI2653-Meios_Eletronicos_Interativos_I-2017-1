@@ -1,30 +1,6 @@
 /** @file 	rede.h
- *  @brief 	Implementa uma interface para utilizacao de
+ *  @brief 	Implementa uma interface para utilização de
  * 			sockets UDP
- *         	
- *			Principio de funcionamento: no início são instanci-
- *			adas dois sockets, um TX e outro RX, e juntamente a
- *			eles são criadas duas threads (threadTX e threadRX).
- *			A threadRX lê as mensagens da fila inbox e envia aos
- *			seus devidos destinatários, já a threadTX lê as men-
- *			sagens da fila outbox e as envia aos seus respecti-
- *			vos destinatários.
- *			
- *			Além dessas duas threads no início do programa é 
- *			criada outra chamada threadCorreios que é responsá-
- *			vel por centralizar a tomada de decisão em relação
- *			às mensagens recebidas. Ele também é responsável
- *			por manter o registro de todos os endereços e nomes
- *			dos correspondentes na lista listaHosts.
- *
- *			Sempre que for iniciada a comunicação com um novo
- *			host será iniciada uma nova thread responsável por
- *			implementar uma máquina de estados referente ao 
- *			estado atual da comunicação com seu respectivo
- *			host. Dentre as tarefas dessa thread, encontra-se
- *			a de periodicamente checar o status da conexão
- *			(TEST). 
- *
  *
  *         	Repository: 
  *			https://github.com/luizsol/MEI/tree/master/EPs/EP3
@@ -35,6 +11,7 @@
 #ifndef __REDE__H
 #define __REDE__H
 
+/* Includes 												*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -48,6 +25,7 @@
 #include "fila.h"
 #include "gui.h"
 
+/* Constantes da biblioteca 								*/
 
 /* Definição de parâmetros de rede 							*/
 #define STDPORTA 		10000	/* Porta padrao 			*/
@@ -105,27 +83,36 @@ typedef struct chatHost{
 	unsigned short sin_port;	/**< porta de comunicação	*/
 	char nome[MAXNAMESIZE];	/**< Nome do Host				*/
 	volatile int alive;	/**< Status da conexão com o host	*/
-	pthread_t * keepAlive;
+	pthread_t * keepAlive;	/**< Watchdog associado ao host */
 	/*@}*/
 } ChatHost;
 
-ChatSocket * socketTXRX;
-Fila * inbox;
-Fila * outbox;
-Lista * listaHosts;
-sem_t sem_mutex_listaHosts;
-ChatHost * servidor;
+/* Variáveis globais da biblioteca 							*/
+ChatSocket * socketTXRX; /* Socket utilizado pelo software	*/
+Fila * inbox; /* Fila de mensagens recebidas 				*/
+Fila * outbox; /* Fila de mensagens a serem enviadas 		*/
+Lista * listaHosts; /* Lista de hosts conectados 			*/
+sem_t sem_mutex_listaHosts; /* Mutex da listaHost 			*/
+unsigned long ipServidor; /* IP do servidor 				*/
+unsigned short portaServidor; /* Porta de comunicacao do srv*/
 
-int modoDebug;
+int modoDebug; /* Flag para geração de mensagens de debug 	*/
 
-volatile int conectadoSRV;
+volatile int conectadoSRV; /* Status da comunicacao com srv */
 
-pthread_t * threadCorreios;
-pthread_t * threadCliente;
+pthread_t * threadCorreios; /* Thread que processa os 		*
+							 * pacotes recebidos 			*/
+pthread_t * threadCliente;	/* Thread que gera pacotes a 	*
+							 * serem enviados ao servidor 	*/
 
+/** @brief Inicializa o socket e as variáveis de controle de
+ *         um cliente de chat
+ *
+ *  @param srvIP endereço IPV4 do servidor
+ *  @param porta porta a ser utilizada na comunicação
+ *  @param nome nome que o cliente deseja utilizar no chat
+ */
 void InitCliente(char * srvIP, char * porta, char * nome);
-
-void InitServidor(char * porta);
 
 /** @brief Cria e adiciona uma RawMsg à fila de envios
  *
