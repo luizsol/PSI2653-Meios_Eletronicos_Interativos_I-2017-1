@@ -1,6 +1,26 @@
 # Exercício Programa 3: Chat UDP
 
-Este programa tem por objetivo implementar uma sala de chat para múltiplos usuários, a exemplo de programas como o [mIRC](https://pt.wikipedia.org/wiki/MIRC).
+Este programa tem por objetivo implementar o cliente de uma sala de chat para múltiplos usuários, a exemplo de programas como o [mIRC](https://pt.wikipedia.org/wiki/MIRC).
+
+## Utilização
+
+### Pre-requisitos
+* Sistema Operacional: Linux 
+* Compilador: GCC 6.2 ou maior
+* Bibliotecas: Pthreads e Ncurses
+
+### Compilação
+* Compilação de cliente `make`
+* Apagar todos os arquivos gerados pela compilação: `make clean`
+
+### Execução do cliente
+* Nome do binário: `cliente-chat`
+* Sinopse: `cliente-chat -i <IPSrv> [-p <porta>] [-u <Usuário>] [-d (0|1)]`
+* Opções:
+  * `-i <IPSrv>` IP do servidor de chat (Obrigatório)
+  * `-p <porta>` Porta a ser utilizada pelo cliente (padrão: `10000`) (Opcional)
+  * `-u <Usuário>` Nome de usuário que deseja utilizar (padrão: `Anonimo`) (Opcional)
+  * `-d (0|1)` Ativar modo debug (padrão: `0` = desativado) (Opcional)
 
 ## Requisitos de Projeto
 Segundo o [enunciado](82-Trabalho-UDP-chat-v6.pdf) do exercício os grupos deverão implementar o cliente ou o servidor, e ambos deverão respeitar um protocolo de comunicação predeterminado.
@@ -141,23 +161,3 @@ Todas as outros funções servem propósitos operacionais internos e não devem 
 Implementam o programa do cliente.
 
 Além da função `main()` a única outra função aqui implementada é a `void processa_parametros(int argc, char* argv[])`, que processa os parâmetros da chamada do programa. Uma vez processados esses parâmetros, a função `InitCliente()` é executada, dando início à execução do cliente do chat.
-
-## Utilização
-
-### Pre-requisitos
-* Sistema Operacional: Linux 
-* Compilador: GCC 6.2 ou maior
-* Bibliotecas: Pthreads e Ncurses
-
-### Compilação
-* Compilação de cliente `make`
-* Apagar todos os arquivos gerados pela compilação: `make clean`
-
-### Execução do cliente
-* Nome do binário: `cliente-chat`
-* Sinopse: `cliente-chat -i <IPSrv> [-p <porta>] [-u <Usuário>] [-d (0|1)]`
-* Opções:
-  * `-i <IPSrv>` IP do servidor de chat (Obrigatório)
-  * `-p <porta>` Porta a ser utilizada pelo cliente (padrão: `10000`) (Opcional)
-  * `-u <Usuário>` Nome de usuário que deseja utilizar (padrão: `Anonimo`) (Opcional)
-  * `-d (0|1)` Ativar modo debug (padrão: `0` = desativado) (Opcional)
