@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title> Exemplo hiperlinks </title>
+</head>
+
+<body>
+
+<h2> Notícias </h2> 
+<ul> 
+<li> 
+   <a href="http://www.uol.com.br/"> UOL </a> 
+</li> 
+<li> 
+   <a href="http://www.folha.com.br/"> Folha </a> 
+</li> 
+<li> 
+   <a href="http://www.estadao.com.br/"> Estadao </a> 
+</li> 
+</ul> 
+
+</body>
+</html>

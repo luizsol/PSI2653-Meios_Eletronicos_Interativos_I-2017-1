@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title> Exemplo de imagem </title>
+</head>
+
+
+<body>
+  <img src="http://www5.usp.br/wp-content/themes/usp2015/images/usp-logo.png" 
+  alt="Logotipo USP"
+  title="USP" >
+</body>
+
+</html>

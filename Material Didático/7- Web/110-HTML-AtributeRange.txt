@@ -1,0 +1,22 @@
+<!DOCTYPE html> 
+
+<html> 
+
+<head> 
+     <title> Exemplo de formulários </title> 
+</head> 
+
+<body> 
+
+<h2> CONFIGURAÇÃO:</h2>
+
+<form action="action_page.php" method="GET">
+Limiar:
+<input type="range" name="limiar" min="0" max="100" value="50" >
+<input type="submit" value="Submit">
+
+</form>
+     
+</body> 
+</html>
+
