@@ -1,6 +1,6 @@
 # Exercício Programa 4: Servidor Web
 
-## Serverlib
+## serverlib
 
 No momento, a biblioteca serverlib é uma reformatação do código fornecido.
 
@@ -10,3 +10,13 @@ No momento, a biblioteca serverlib é uma reformatação do código fornecido.
 ## server.ini
 
 Arquivo de configuração.
+
+
+## synchronized_queue
+
+Biblioteca de filas sincronizadas para distribuição de threads.
+
+
+## main
+
+Copiado do servidor TCP multithreaded desenvolvido em sala.
