@@ -8,6 +8,9 @@
  * -----------------------------------------------------------------------------
  */
 
+#ifndef SYNCHRONIZED_QUEUE_H
+#define SYNCHRONIZED_QUEUE_H
+
 #include <semaphore.h>
 
 
@@ -28,3 +31,5 @@ int emptyQueue(struct queue *Q);
 int fullQueue(struct queue *Q);
 void insertQueue(struct queue *Q, int item);
 int removeQueue(struct queue *Q);
+
+#endif
