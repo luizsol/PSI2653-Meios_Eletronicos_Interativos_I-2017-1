@@ -1,11 +1,12 @@
-/* --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
  * Title:       synchronized_queue
  * File:        synchronized_queue.c
  * Author:      Gabriel Crabbé, Tiago Azevedo
  * Version:     1.0 (2017-05-02)
  * Date:        2017-05-23
  * Description: EP 2 de PSI2653.
- * -------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 #include "synchronized_queue.h"
 
@@ -16,10 +17,10 @@ void initQueue(struct queue *Q)
 	Q->first   = 0;
 	Q->last    = 0;
 	Q->nItems  = 0;
-	Q->maxsize = SIZE_QUEUE;
+	Q->maxsize = QUEUE_LENGTH;
 
 	// Semaphore init
-	sem_init(&Q->freeItems, 0, SIZE_QUEUE);
+	sem_init(&Q->freeItems, 0, QUEUE_LENGTH);
 	sem_init(&Q->fullItems, 0, 0);
 	sem_init(&Q->mutex, 0, 1);
 }
