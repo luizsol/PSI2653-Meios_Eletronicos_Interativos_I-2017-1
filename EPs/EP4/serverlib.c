@@ -102,7 +102,7 @@ int composepath(char *oldpath, char *path, char *newpath)
  *      Entrada: buffer para string e tamanho deste buffer
  *      Saida: ponteiro para string
  */
-char * getcurrentdir(char *path, int pathsize)
+char *getcurrentdir(char *path, int pathsize)
 {
 	char *p;
 
