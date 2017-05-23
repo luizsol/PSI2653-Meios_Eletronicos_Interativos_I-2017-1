@@ -36,21 +36,32 @@ void worker(int id)
 	{
 		int status;
 		int E = removeQueue(&requestQueue);
-		// Receive
 		char rxbuffer[80];
-	
-		status = read(E, rxbuffer, sizeof(rxbuffer));
-		if(status < 0)
-			perror("Error reading from TCP stream");
-		else if(status > 0)
-			printf("%s\n", rxbuffer);
-		else
-			printf("Connection closed\n");
+		
+		for(;;)
+		{
+			// Receive
+			status = read(E, rxbuffer, sizeof(rxbuffer));
+			if(status < 0)
+				perror("Error reading from TCP stream");
+			else if(status > 0)
+				printf("%s\n", rxbuffer);
+			else
+			{
+				printf("Connection closed\n");
+				break;
+			}
 
-		// Echo
-		status = write(E, rxbuffer, strlen(rxbuffer) + 1);
-		if(status <= 0)
+			// Echo
+			status = write(E, rxbuffer, strlen(rxbuffer) + 1);
+			if(status <= 0)
 			perror("Error writing to TCP stream");
+		}
+
+		// Close
+		status = close(E);
+		if(status)
+			perror("Error closing socket");
 	}	
 }
 
