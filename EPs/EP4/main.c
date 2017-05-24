@@ -2,8 +2,8 @@
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-05-23)
- * Date:        2017-05-23
+ * Version:     0.0 (2017-05-24)
+ * Date:        2017-05-24
  * Description: Exercício 4 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -37,32 +37,31 @@ void worker(int id)
 		int status;
 		int E = removeQueue(&requestQueue);
 		char rxbuffer[80];
-		
-		for(;;)
-		{
-			// Receive
-			status = read(E, rxbuffer, sizeof(rxbuffer));
-			if(status < 0)
-				perror("Error reading from TCP stream");
-			else if(status > 0)
-				printf("%s\n", rxbuffer);
-			else
-			{
-				printf("Connection closed\n");
-				break;
-			}
 
-			// Echo
-			status = write(E, rxbuffer, strlen(rxbuffer) + 1);
-			if(status <= 0)
-			perror("Error writing to TCP stream");
+		// Receive
+		status = read(E, rxbuffer, sizeof(rxbuffer));
+		if(status < 0)
+			perror("Error reading from TCP stream");
+		else if(status > 0)
+			printf("%s\n", rxbuffer);
+		else
+		{
+			printf("Connection closed\n");
+			break;
 		}
+
+		// HTTP 1.0 response
+		// status = write(E, rxbuffer, strlen(rxbuffer) + 1);
+
+		status = transferfile("index.html", E);
+		if(status <= 0)
+			perror("Error writing to TCP stream");
 
 		// Close
 		status = close(E);
 		if(status)
 			perror("Error closing socket");
-	}	
+	}
 }
 
 
@@ -123,7 +122,7 @@ int main()
 
 	// Queue
 	initQueue(&requestQueue);
-	
+
 	// Create threads
 	pthread_t myworkers[NUM_WORKERS];
 	printf("Launching worker threads\n");
