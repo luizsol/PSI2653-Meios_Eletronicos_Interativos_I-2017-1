@@ -17,7 +17,7 @@
 struct config
 {
 	char base[PATH_MAX];
-	unsigned short port;
+	uint16_t port;
 };
 
 

@@ -45,14 +45,9 @@ void worker(int id)
 		else if(status > 0)
 			printf("%s\n", rxbuffer);
 		else
-		{
 			printf("Connection closed\n");
-			break;
-		}
 
 		// HTTP 1.0 response
-		// status = write(E, rxbuffer, strlen(rxbuffer) + 1);
-
 		status = transferfile("index.html", E);
 		if(status <= 0)
 			perror("Error writing to TCP stream");
@@ -78,27 +73,30 @@ int main()
 	}
 
 	// Parse .ini
-	struct config serverconf;
-	if(parseini(&serverconf) < 0)
+	int status;
+	struct config sconf;
+	struct sockaddr_in saddr;
+
+	if(parseini(&sconf) < 0)
 	{
-		serverconf.port = DEFAULT_PORT;
-		serverconf.base = DEFAULT_BASE;
+		sconf.port = DEFAULT_PORT;
+		sconf.base = DEFAULT_BASE;
 	}
 
 	// Bind
-	int status;
-	struct sockaddr_in serveraddr;
+	saddr.sin_family      = AF_INET;
+	saddr.sin_addr.s_addr = INADDR_ANY;
+	saddr.sin_port        = htons(sconf.port);
 
-	serveraddr.sin_family      = AF_INET;
-	serveraddr.sin_addr.s_addr = INADDR_ANY;
-	serveraddr.sin_port        = htons(s_port);
-
-	status = bind(sd, (struct sockaddr *) &serveraddr, sizeof(serveraddr));
+	status = bind(sd, (struct sockaddr *) &saddr, sizeof(saddr));
 	if(status < 0)
+	{
 		perror("Error binding socket");
+		exit(1);
+	}
 
 	// Listen
-	status = listen(sd, QLEN);
+	status = listen(sd, QUEUE_LENGTH);
 	if(status)
 	{
 		perror("Error listening to socket");
@@ -109,22 +107,20 @@ int main()
 	initQueue(&requestQueue);
 
 	// Create threads
-	pthread_t myworkers[NUM_WORKERS];
+	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
-	for(int i = 0; i < NUM_WORKERS; i++)
+	for(int i = 0; i < WORKER_THREADS; i++)
 		pthread_create(&myworkers[i], NULL, (void *) worker, i + 1);
 
 	// Accept
 	for(;;)
 	{
-		struct sockaddr_in clientaddr;
-		int size;
-		int newsd = accept(sd, (struct sockaddr *) &clientaddr,
-			(socklen_t *) &size);
+		int size, newsd;
+		struct sockaddr_in caddr;
+
+		newsd = accept(sd, (struct sockaddr *) &caddr, (socklen_t *) &size);
 		if(newsd < 0)
-		{
 			perror("Error accepting connection");
-		}
 
 		insertQueue(&requestQueue, newsd);
 	}
