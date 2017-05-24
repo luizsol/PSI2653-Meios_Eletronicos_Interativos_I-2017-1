@@ -27,8 +27,9 @@ struct request
 {
 	char msg[BUFFERSIZE]; //msg recebida
 	unsigned short port;
-	char *CAMINHO=NULL; //armazena url (CAMINHO)
-	char *http=NULL; // 
+	char CAMINHO[BUFFERSIZE]; //armazena url (CAMINHO)
+	char http[10]; //
+	char get[5];
 };
 
 struct response

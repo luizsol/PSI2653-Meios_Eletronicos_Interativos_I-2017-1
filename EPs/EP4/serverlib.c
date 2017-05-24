@@ -261,12 +261,19 @@ int parseRequest(struct request *req)
 {
 	// decodificação Get -http - url (CAMINHO)
 	// separa o texto
-		
-	req->get=strtok(req->msg,"\n"); //GET 
-	req->http=strtok(req->get," "); 
-	req->CAMINHO=strtok(NULL," "); //URL
-	req->http=strtok(NULL,"\n"); //HTTP
-		
+	
+	char* get=NULL;
+	char* http=NULL;
+	char* CAMINHO=NULL;
+
+	get=strtok(req->msg,"\n"); //GET 
+	http=strtok(get," "); 
+	CAMINHO=strtok(NULL," "); //URL
+	http=strtok(NULL,"\n"); //HTTP
+	
+	strcpy(req->get,get); //passa para a struct	
+	strcpy(req->CAMINHO,CAMINHO);
+	strcpy(req->http,http);
 	return 0;
 }
 
@@ -282,9 +289,9 @@ int buildResponse(struct request *req, struct response *res)
 		Content-Length: 6821
 		Content-Type: text/html */
 	if(strcmp(req->http,"HTTP/1.0\n")!=0) //observa se é a versão http suportada
-		res->http("HTTP/1.0 505 HTTP Version Not Supported\n");
+		res->http="HTTP/1.0 505 HTTP Version Not Supported\n";
 	else if (strcmp(req->get,"GET \n")!=0) //busca estrutura get no começo da msg recebida, retorna erro caso não seja
-		res->http("HTTP/1.0 400 Bad Request\n");
+		res->http="HTTP/1.0 400 Bad Request\n";
 
 
 
