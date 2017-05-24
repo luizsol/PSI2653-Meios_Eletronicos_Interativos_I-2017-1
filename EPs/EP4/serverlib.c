@@ -261,38 +261,38 @@ int parseRequest(struct request *req)
 {
 	// decodificação Get - host - user - acce - http
 	// separa o texto
-	char *get=NULL;
-	char *host=NULL;
-	char *user=NULL;
-	char *acce=NULL;
-	char *http=NULL;
+	char *get  = NULL;
+	char *host = NULL;
+	char *user = NULL;
+	char *acce = NULL;
+	char *http = NULL;
 	// char *token=NULL;
 
-	get=strtok(rxbuffer,"\n");
-	printf("%s\n",get);
-	host=strtok(NULL,"\n");
-	printf("%s\n",host);
-	user=strtok(NULL,"\n");
-	printf("%s\n",user);
-	acce=strtok(NULL,"\n");
-	printf("%s\n",acce);
+	get  = strtok(req->msg, "\n");
+	printf("%s\n", get);
+	host = strtok(NULL, "\n");
+	printf("%s\n", host);
+	user = strtok(NULL, "\n");
+	printf("%s\n", user);
+	acce = strtok(NULL, "\n");
+	printf("%s\n", acce);
 
-	http=strtok(get," ");
-	http=strtok(NULL," ");
-	http=strtok(NULL,"\n");
-	printf("%s\n",http);
+	http = strtok(get, " ");
+	http = strtok(NULL, " ");
+	http = strtok(NULL, "\n");
+	printf("%s\n", http);
 
-	host=strtok(host," ");
-	host=strtok(NULL,"\n");
-	printf("%s\n",host);
+	host = strtok(host, " ");
+	host = strtok(NULL, "\n");
+	printf("%s\n", host);
 
-	user=strtok(user," ");
-	user=strtok(NULL,"\n");
-	printf("%s\n",user);
+	user = strtok(user, " ");
+	user = strtok(NULL, "\n");
+	printf("%s\n", user);
 
-	acce=strtok(acce," ");
-	acce=strtok(NULL,"\n");
-	printf("%s\n",acce);
+	acce = strtok(acce, " ");
+	acce = strtok(NULL, "\n");
+	printf("%s\n", acce);
 
 	return 0;
 }
