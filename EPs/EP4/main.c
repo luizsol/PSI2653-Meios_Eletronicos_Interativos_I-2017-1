@@ -36,7 +36,7 @@ void worker(int id)
 	{
 		int status;
 		int E = removeQueue(&requestQueue);
-		char rxbuffer[80];
+		char rxbuffer[4096];
 
 		// Receive
 		status = read(E, rxbuffer, sizeof(rxbuffer));

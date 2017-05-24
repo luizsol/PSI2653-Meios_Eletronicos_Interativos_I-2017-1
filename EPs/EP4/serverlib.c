@@ -247,4 +247,6 @@ int parseini(struct config *c)
 		else if(!strcmp(line, "base"))
 			strcpy(strtok(NULL, "\n"), c->base);
 	}
+
+	return 0;
 }
