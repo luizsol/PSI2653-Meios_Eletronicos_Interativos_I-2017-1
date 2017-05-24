@@ -233,7 +233,6 @@ int parseini(struct config *c)
 		return(-1);
 
 	char line[82];
-	char temp[82];
 	char *strp;
 
 	for(;;)
@@ -251,6 +250,5 @@ int parseini(struct config *c)
 			strcpy(c->base, strtok(NULL, " "));
 	}
 
-	printf("%hu %s\n", c->port, c->base);
 	return(0);
 }

@@ -145,8 +145,8 @@ int main()
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
-	for(int i = 0; i < WORKER_THREADS; i++)
-		pthread_create(&myworkers[i], NULL, (void *) worker, i + 1);
+	for(int i = 1; i <= WORKER_THREADS; i++)
+		pthread_create(&myworkers[i], NULL, (void *) worker, &i);
 
 	// Accept
 	for(;;)
