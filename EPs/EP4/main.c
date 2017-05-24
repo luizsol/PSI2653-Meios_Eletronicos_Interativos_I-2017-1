@@ -32,60 +32,36 @@ struct queue requestQueue;
 */
 void worker(int id)
 {
+	int E, status;
+	struct request  req;
+	struct response res;
+
 	for(;;)
 	{
-		int status;
-		int E = removeQueue(&requestQueue);
-		char rxbuffer[4096];
-
 		// Receive
-		status = read(E, rxbuffer, sizeof(rxbuffer));
+		E = removeQueue(&requestQueue);
+		status = read(E, req.msg, sizeof(req.msg));
 		if(status < 0)
 			perror("Error reading from TCP stream");
 		else if(status > 0)
-			printf("%s\n", rxbuffer);
+			printf("%s\n", req.msg);
 		else
 			printf("Connection closed\n");
 
-		// decodificação Get - host - user - acce - http
-		// separa o texto
-		char *get=NULL;
-		char *host=NULL;
-		char *user=NULL;
-		char *acce=NULL;
-		char *http=NULL;
-		// char *token=NULL;
+		// Parse request
+		parseRequest(&req);
 
-		get=strtok(rxbuffer,"\n");
-		printf("%s\n",get);
-		host=strtok(NULL,"\n");
-		printf("%s\n",host);
-		user=strtok(NULL,"\n");
-		printf("%s\n",user);
-		acce=strtok(NULL,"\n");
-		printf("%s\n",acce);
-
-		http=strtok(get," ");
-		http=strtok(NULL," ");
-		http=strtok(NULL,"\n");
-		printf("%s\n",http);
-
-		host=strtok(host," ");
-		host=strtok(NULL,"\n");
-		printf("%s\n",host);
-
-		user=strtok(user," ");
-		user=strtok(NULL,"\n");
-		printf("%s\n",user);
-
-		acce=strtok(acce," ");
-		acce=strtok(NULL,"\n");
-		printf("%s\n",acce);
+		// Build response
+		buildResponse(&req, &res);
 
 		// HTTP 1.0 response
 		status = transferfile("index.html", E);
-		if(status)
+		if(status < 0)
 			perror("Error writing to TCP stream");
+
+		// status = write(E, res.msg, strlen(res.msg) + 1);
+		// if(status <= 0)
+		// 	perror("Error writing to TCP stream");
 
 		// Close
 		status = close(E);

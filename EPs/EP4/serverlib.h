@@ -11,13 +11,27 @@
 #ifndef SERVERLIB_H
 #define SERVERLIB_H
 
+
 #include <linux/limits.h>
 
 #define BUFFERSIZE 4096
 
+
 struct config
 {
 	char base[PATH_MAX];
+	unsigned short port;
+};
+
+struct request
+{
+	char msg[BUFFERSIZE];
+	unsigned short port;
+};
+
+struct response
+{
+	char msg[BUFFERSIZE];
 	unsigned short port;
 };
 
@@ -28,5 +42,7 @@ void append(char *dest, int buffersize, char *src);
 void lista_diretorio(char *path, char *buffer, int buffersize);
 int transferfile(char *path, int output_fd);
 int parseini(struct config *c);
+int parseRequest(struct request *req);
+int buildResponse(struct request *req, struct response *res);
 
 #endif

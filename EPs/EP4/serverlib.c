@@ -21,6 +21,7 @@
 
 #include <dirent.h>
 #include <fcntl.h>
+#include <time.h>
 
 
 #define min(x,y) (((x)<(y))?(x):(y))
@@ -230,7 +231,7 @@ int parseini(struct config *c)
 	FILE *f;
 	f = fopen("server.ini", "r");
 	if(f == NULL)
-		return(-1);
+		return -1;
 
 	char line[82];
 	char *strp;
@@ -250,5 +251,61 @@ int parseini(struct config *c)
 			strcpy(c->base, strtok(NULL, " "));
 	}
 
-	return(0);
+	return 0;
+}
+
+
+/* parseRequest()
+*/
+int parseRequest(struct request *req)
+{
+	// decodificação Get - host - user - acce - http
+	// separa o texto
+	char *get=NULL;
+	char *host=NULL;
+	char *user=NULL;
+	char *acce=NULL;
+	char *http=NULL;
+	// char *token=NULL;
+
+	get=strtok(rxbuffer,"\n");
+	printf("%s\n",get);
+	host=strtok(NULL,"\n");
+	printf("%s\n",host);
+	user=strtok(NULL,"\n");
+	printf("%s\n",user);
+	acce=strtok(NULL,"\n");
+	printf("%s\n",acce);
+
+	http=strtok(get," ");
+	http=strtok(NULL," ");
+	http=strtok(NULL,"\n");
+	printf("%s\n",http);
+
+	host=strtok(host," ");
+	host=strtok(NULL,"\n");
+	printf("%s\n",host);
+
+	user=strtok(user," ");
+	user=strtok(NULL,"\n");
+	printf("%s\n",user);
+
+	acce=strtok(acce," ");
+	acce=strtok(NULL,"\n");
+	printf("%s\n",acce);
+
+	return 0;
+}
+
+/* buildResponse()
+*/
+int buildResponse(struct request *req, struct response *res)
+{
+	/* HTTP/1.0 200 OK
+		Date: Thu, 06 Aug 1998 12:00:15 GMT
+		Server: Apache/1.3.0 (Unix)
+		Last-Modified: Mon, 22 Jun 1998
+		Content-Length: 6821
+		Content-Type: text/html */
+	return 0;
 }
