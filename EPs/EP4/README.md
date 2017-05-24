@@ -12,7 +12,7 @@ No momento, a biblioteca serverlib é uma reformatação do código fornecido.
 Arquivo de configuração.
 
 
-## synchronized_queue
+## queue
 
 Biblioteca de filas sincronizadas para distribuição de threads.
 
