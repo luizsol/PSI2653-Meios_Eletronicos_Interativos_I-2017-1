@@ -84,7 +84,7 @@ void worker(int id)
 
 		// HTTP 1.0 response
 		status = transferfile("index.html", E);
-		if(status <= 0)
+		if(status)
 			perror("Error writing to TCP stream");
 
 		// Close
@@ -114,7 +114,6 @@ int main()
 
 	if(parseini(&sconf) < 0)
 	{
-		printf("0\n");
 		sconf.port = DEFAULT_PORT;
 		strcpy(sconf.base, DEFAULT_BASE);
 	}
