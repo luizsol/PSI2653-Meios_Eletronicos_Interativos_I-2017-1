@@ -259,16 +259,13 @@ int parseini(struct config *c)
 */
 int parseRequest(struct request *req)
 {
-	// decodificação Get - host - user - acce - http
+	// decodificação Get -http - url (CAMINHO)
 	// separa o texto
-	char *get=NULL;
-	char *http=NULL;
-	char *CAMINHO=NULL; //caminho = url
-
-	get=strtok(rxbuffer,"\n");
-	http=strtok(get," ");
-	CAMINHO=strtok(NULL," ");
-	http=strtok(NULL,"\n");
+		
+	req->get=strtok(req->msg,"\n"); //GET 
+	req->http=strtok(req->get," "); 
+	req->CAMINHO=strtok(NULL," "); //URL
+	req->http=strtok(NULL,"\n"); //HTTP
 		
 	return 0;
 }
@@ -277,11 +274,19 @@ int parseRequest(struct request *req)
 */
 int buildResponse(struct request *req, struct response *res)
 {
+	
 	/* HTTP/1.0 200 OK
 		Date: Thu, 06 Aug 1998 12:00:15 GMT
 		Server: Apache/1.3.0 (Unix)
 		Last-Modified: Mon, 22 Jun 1998
 		Content-Length: 6821
 		Content-Type: text/html */
+	if(strcmp(req->http,"HTTP/1.0\n")!=0) //observa se é a versão http suportada
+		res->http("HTTP/1.0 505 HTTP Version Not Supported\n");
+	else if (strcmp(req->get,"GET \n")!=0) //busca estrutura get no começo da msg recebida, retorna erro caso não seja
+		res->http("HTTP/1.0 400 Bad Request\n");
+
+
+
 	return 0;
 }

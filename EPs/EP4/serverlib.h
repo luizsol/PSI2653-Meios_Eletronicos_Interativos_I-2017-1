@@ -25,14 +25,17 @@ struct config
 
 struct request
 {
-	char msg[BUFFERSIZE];
+	char msg[BUFFERSIZE]; //msg recebida
 	unsigned short port;
+	char *CAMINHO=NULL; //armazena url (CAMINHO)
+	char *http=NULL; // 
 };
 
 struct response
 {
-	char msg[BUFFERSIZE];
-	unsigned short port;
+	char msg[BUFFERSIZE]; //msg a ser enviada
+	unsigned short port; 
+	char *http; //parte da http da resposta
 };
 
 
