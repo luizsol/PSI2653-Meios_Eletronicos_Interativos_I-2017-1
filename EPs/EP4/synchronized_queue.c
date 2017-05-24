@@ -2,8 +2,8 @@
  * Title:       synchronized_queue
  * File:        synchronized_queue.c
  * Author:      Gabriel Crabbé, Tiago Azevedo
- * Version:     1.0 (2017-05-02)
- * Date:        2017-05-23
+ * Version:     1.0 (2017-05-24)
+ * Date:        2017-05-24
  * Description: EP 2 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -26,7 +26,7 @@ void initQueue(struct queue *Q)
 }
 
 
-int emptyQueue(struct queue *Q)
+int isQueueEmpty(struct queue *Q)
 {
 	int res = 0;
 	sem_wait(&Q->mutex);
@@ -36,7 +36,7 @@ int emptyQueue(struct queue *Q)
 }
 
 
-int fullQueue(struct queue *Q)
+int isQueueFull(struct queue *Q)
 {
 	int res = 0;
 	sem_wait(&Q->mutex);

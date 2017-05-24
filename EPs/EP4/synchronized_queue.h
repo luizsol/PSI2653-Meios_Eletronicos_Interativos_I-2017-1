@@ -2,8 +2,8 @@
  * Title:       synchronized_queue
  * File:        synchronized_queue.h
  * Author:      Gabriel Crabbé, Tiago Azevedo
- * Version:     1.0 (2017-05-02)
- * Date:        2017-05-23
+ * Version:     1.0 (2017-05-24)
+ * Date:        2017-05-24
  * Description: EP 2 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -27,8 +27,8 @@ struct queue
 
 
 void initQueue(struct queue *Q);
-int emptyQueue(struct queue *Q);
-int fullQueue(struct queue *Q);
+int isQueueEmpty(struct queue *Q);
+int isQueueFull(struct queue *Q);
 void insertQueue(struct queue *Q, int item);
 int removeQueue(struct queue *Q);
 
