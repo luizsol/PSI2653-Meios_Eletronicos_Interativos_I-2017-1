@@ -21,7 +21,7 @@
 
 
 #define DEFAULT_PORT 8080
-#define DEFAULT_PATH "./"
+#define DEFAULT_BASE "./"
 #define WORKER_THREADS 3
 
 
@@ -78,8 +78,12 @@ int main()
 	}
 
 	// Parse .ini
-	struct config c;
-	parseini(&c);
+	struct config serverconf;
+	if(parseini(&serverconf) < 0)
+	{
+		serverconf.port = DEFAULT_PORT;
+		serverconf.base = DEFAULT_BASE;
+	}
 
 	// Bind
 	int status;

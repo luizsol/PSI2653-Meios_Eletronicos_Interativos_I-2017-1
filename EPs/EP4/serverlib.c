@@ -2,8 +2,8 @@
  * Title:       serverlib
  * File:        serverlib.c
  * Author:      Gabriel Crabbé
- * Version:     0.0
- * Date:        2017-05-23
+ * Version:     0.0 (2017-05-24)
+ * Date:        2017-05-24
  * Description: EP 4 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -25,7 +25,7 @@
 #define min(x,y) (((x)<(y))?(x):(y))
 
 
-/* Compose Path: altera PATH 
+/* Compose Path: altera PATH
  *    oldpath: path original (ex: /home/jose/test
  *    path   : path para ser alterado (ex: "..", "/tmp", "prog1" )
  *             (imagine na forma: "cd ..", "cd /tmp", "cd prog1")
@@ -148,7 +148,7 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 		return;
 	}
 	buffer[0]='\0';
-	while(dirp) 
+	while(dirp)
 	{
 		// Enquanto nao chegar ao fim do diretorio, leia cada entrada
 		direntry = readdir(dirp);
@@ -168,7 +168,7 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 
 /* transferfile()
  *    Realiza a leitura do conteudo de um arquivo, identificado
- *    por seu caminho (path), transferindo seu conteudo para 
+ *    por seu caminho (path), transferindo seu conteudo para
  *    outro arquivo ou socket identificado pelo descritor "outfd"
  */
 int transferfile(char *path, int output_fd)
@@ -198,7 +198,7 @@ int transferfile(char *path, int output_fd)
 	sprintf(str,"SIZE=%d\n",statp.st_size);
 	write(output_fd,str,strlen(str));
 
-	// le arquivo , por partes 
+	// le arquivo , por partes
 	do
 	{
 		n = read(input_fd,buffer,BUFFERSIZE);
@@ -213,10 +213,38 @@ int transferfile(char *path, int output_fd)
 	while(n>0);
 
 	status = close(input_fd);
-	if (status == -1) 
+	if (status == -1)
 	{
 		perror("ERRO: chamada close(): Erro no fechamento do arquivo: " );
 		return(-1);
 	}
 	return(0);
+}
+
+
+/* parseini()
+*/
+int parseini(struct config *c)
+{
+	FILE *f;
+	f = fopen("server.ini", "r");
+	if(f == NULL)
+		return -1;
+
+	char line[82];
+	char *strp;
+
+	for(;;)
+	{
+		strp = fgets(line, sizeof(line), f);
+		if(strp == NULL)
+			break;
+
+		line[strcspn(line, "\n")] = '\0';
+		strp = strtok(line, "=");
+		if(!strcmp(line, "port"))
+			sscanf(strtok(NULL, "\n"), "%hu", c->port);
+		else if(!strcmp(line, "base"))
+			strcpy(strtok(NULL, "\n"), c->base);
+	}
 }
