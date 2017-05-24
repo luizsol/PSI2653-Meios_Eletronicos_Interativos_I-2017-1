@@ -11,6 +11,7 @@
 #include "serverlib.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
 
@@ -232,6 +233,7 @@ int parseini(struct config *c)
 		return(-1);
 
 	char line[82];
+	char temp[82];
 	char *strp;
 
 	for(;;)
@@ -242,11 +244,13 @@ int parseini(struct config *c)
 
 		line[strcspn(line, "\n")] = '\0';
 		strp = strtok(line, "=");
+
 		if(!strcmp(line, "port"))
-			sscanf(strtok(NULL, "\n"), "%hu", c->port);
+			sscanf(strtok(NULL, " "), "%hu", &c->port);
 		else if(!strcmp(line, "base"))
-			strcpy(strtok(NULL, "\n"), c->base);
+			strcpy(c->base, strtok(NULL, " "));
 	}
 
+	printf("%hu %s\n", c->port, c->base);
 	return(0);
 }

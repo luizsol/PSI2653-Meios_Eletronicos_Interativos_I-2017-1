@@ -114,8 +114,9 @@ int main()
 
 	if(parseini(&sconf) < 0)
 	{
+		printf("0\n");
 		sconf.port = DEFAULT_PORT;
-		sconf.base = DEFAULT_BASE;
+		strcpy(sconf.base, DEFAULT_BASE);
 	}
 
 	// Bind

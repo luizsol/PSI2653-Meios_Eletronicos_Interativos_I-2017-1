@@ -13,11 +13,12 @@
 
 #include <linux/limits.h>
 
+#define BUFFERSIZE 4096
 
 struct config
 {
 	char base[PATH_MAX];
-	uint16_t port;
+	unsigned short port;
 };
 
 
