@@ -229,7 +229,7 @@ int parseini(struct config *c)
 	FILE *f;
 	f = fopen("server.ini", "r");
 	if(f == NULL)
-		return -1;
+		return(-1);
 
 	char line[82];
 	char *strp;
@@ -248,5 +248,5 @@ int parseini(struct config *c)
 			strcpy(strtok(NULL, "\n"), c->base);
 	}
 
-	return 0;
+	return(0);
 }
