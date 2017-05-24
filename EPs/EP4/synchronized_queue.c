@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
- * Title:       synchronized_queue
- * File:        synchronized_queue.c
+ * Title:       queue
+ * File:        queue.c
  * Author:      Gabriel Crabbé, Tiago Azevedo
  * Version:     1.0 (2017-05-24)
  * Date:        2017-05-24
@@ -8,7 +8,7 @@
  * -----------------------------------------------------------------------------
  */
 
-#include "synchronized_queue.h"
+#include "queue.h"
 
 
 void initQueue(struct queue *Q)

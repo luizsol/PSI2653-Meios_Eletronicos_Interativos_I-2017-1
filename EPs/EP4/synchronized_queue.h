@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
- * Title:       synchronized_queue
- * File:        synchronized_queue.h
+ * Title:       queue
+ * File:        queue.h
  * Author:      Gabriel Crabbé, Tiago Azevedo
  * Version:     1.0 (2017-05-24)
  * Date:        2017-05-24
@@ -8,8 +8,8 @@
  * -----------------------------------------------------------------------------
  */
 
-#ifndef SYNCHRONIZED_QUEUE_H
-#define SYNCHRONIZED_QUEUE_H
+#ifndef QUEUE_H
+#define QUEUE_H
 
 #include <semaphore.h>
 

@@ -17,7 +17,7 @@
 #include <pthread.h>
 
 #include "serverlib.h"
-#include "synchronized_queue.h"
+#include "queue.h"
 
 
 #define DEFAULT_PORT 8080
@@ -78,27 +78,8 @@ int main()
 	}
 
 	// Parse .ini
-	FILE *ini;
-	ini = fopen("server.ini", "a+");
-	if(ini == NULL)
-	{
-		perror("Error opening server.ini");
-		exit(1);
-	}
-
-	int s_port = getPort(ini);
-	if(s_port < 0)
-	{
-		s_port = DEFAULT_PORT;
-		fprintf(ini, "port=%d\n", s_port);
-	}
-
-	char path[256];
-	if(getPath(ini, path) < 0)
-	{
-		path = "./";
-		fprintf(ini, "path=%s\n", path);
-	}
+	struct config c;
+	parseini(&c);
 
 	// Bind
 	int status;
