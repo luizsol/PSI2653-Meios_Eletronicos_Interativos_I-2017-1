@@ -296,7 +296,6 @@ int buildResponse(struct request *req, struct response *res)
 		perror("Error opening file");
 
 	stat(res->path, &statf);
-	printf("%s\n", statf.st_dev);
 
 	printf("S2\n");
 
@@ -333,8 +332,9 @@ int buildResponse(struct request *req, struct response *res)
 
 	res->lastmod = res->server + strlen(res->server);
 
+	servertime = localtime(statf.st_mtime);
 	strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\n",
-		statf.st_mtime);
+		servertime);
 
 	printf("S6\n");
 
