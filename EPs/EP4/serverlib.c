@@ -280,44 +280,27 @@ int buildResponse(struct request *req, struct response *res)
 	/* 400 Bad Request
 	404 Not Found */
 
-	if(composepath(req->base,req->path,req->path)<0)
-			perror("Error creating object path");
-
-	int fd; // file descriptor 
-	char rdbuffer[BUFFERSIZE];
-	int count;	
-
-	fd=open(req->path,O_RDONLY);
-
-		
-	if(strcmp(req->http,"HTTP/1.0\n")!=0) {//observa se é a versão http suportada
-		res->http="HTTP/1.0 505 HTTP Version Not Supported\n";
-		res->c_length=" 0\n";
-		res->c_type=" \n";	
-	}
-
-	else if (strcmp(req->cmd,"GET \n")!=0){ //busca estrutura get no começo da msg recebida, retorna erro caso não seja
-		res->http="HTTP/1.0 400 Bad Request\n";
-		res->c_length=" 0\n";
-		res->c_type=" \n";	
-	}
-	else if(fd==NULL){	
-		res->http="HTTP/1.0 404 Not Found\n";
-		res->c_length="0\n";
-		res->c_type=" \n";	
-	}
-	else if(fd!=NULL){
-		res->http="HTTP/1.0 200 OK\n";
-		int aux=read(fd,rdbuffer,count); //read devolve tamanho do arquivo em bytes
-		sprintf(res->c_length,"%d",aux);  //converte
-	}
-
+	if(composepath(res->base, req->path, res->path) < 0)
+		perror("Error creating object path");
 
 	FILE *f;
 	struct stat statf;
 
-	f = fopen("DA PATH HERE", "r"); 
+	f = fopen(res->path, "r");
 	stat(f, &statf);
+
+	res->http = res->msg;
+
+	if(strcmp(req->http, "HTTP/1.0") != 0)
+		res->http = "HTTP/1.0 505 HTTP Version Not Supported\n";
+	else if (strcmp(req->cmd, "GET") != 0)
+		res->http = "HTTP/1.0 400 Bad Request\n";
+	else if(f == NULL)
+		res->http = "HTTP/1.0 404 Not Found\n";
+	else if(f != NULL)
+		res->http = "HTTP/1.0 200 OK\n";
+
+	res->date = res->msg + strlen(res->msg);
 
 	strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\n",
 		statf.st_mtime);

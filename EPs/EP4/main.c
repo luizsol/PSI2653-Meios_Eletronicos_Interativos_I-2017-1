@@ -36,7 +36,7 @@ void worker(struct config *sconf)
 	struct request  req;
 	struct response res;
 
-	strcpy(req.base, sconf->base);
+	strcpy(res.base, sconf->base);
 
 	for(;;)
 	{

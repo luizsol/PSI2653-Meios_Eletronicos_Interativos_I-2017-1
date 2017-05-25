@@ -26,21 +26,20 @@ struct config
 struct request
 {
 	char msg[BUFFERSIZE];
-	unsigned short port;
 	char *cmd;
 	char *path;
 	char *http;
-	char *base;
 };
 
 struct response
 {
-	char msg[BUFFERSIZE]; //msg a ser enviada
-	unsigned short port;
-	char *http; //parte da http da resposta
-	char *c_length; //
-	char *c_type;
-	
+	char msg[BUFFERSIZE];
+	char *http;
+	char *date;
+	char *server;
+	char *lastmod;
+	char *length;
+	char *type;
 };
 
 
