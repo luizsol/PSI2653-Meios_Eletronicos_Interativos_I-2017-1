@@ -34,6 +34,8 @@ struct request
 struct response
 {
 	char msg[BUFFERSIZE];
+	char *base;
+	char *path;
 	char *http;
 	char *date;
 	char *server;
