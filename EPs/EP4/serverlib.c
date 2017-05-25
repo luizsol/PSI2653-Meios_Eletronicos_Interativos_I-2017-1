@@ -319,7 +319,8 @@ int buildResponse(struct request *req, struct response *res)
 	res->date = res->http + strlen(res->http);
 	printf("%s\n", res->date);
 
-	strftime(res->date, 90, "Last-Modified: %a, %d %b %Y %T %g\n", time(NULL));
+	time_t mytime = time(NULL);
+	strftime(res->date, 90, "Last-Modified: %a, %d %b %Y %T %g\n", &mytime);
 
 	printf("S4\n");
 
