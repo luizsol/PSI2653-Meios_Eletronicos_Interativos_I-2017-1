@@ -64,6 +64,7 @@ void worker(struct config *sconf)
 		// if(status < 0)
 		//	perror("Error writing to TCP stream");
 
+		printf("%s\n", res.msg);
 		status = write(E, res.msg, strlen(res.msg) + 1);
 		if(status <= 0)
 			perror("Error writing to TCP stream");
