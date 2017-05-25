@@ -283,11 +283,20 @@ int buildResponse(struct request *req, struct response *res)
 	if(composepath(req->base,req->path,req->path)<0)
 			perror("Error creating object path");
 
+		int fd; // file descriptor 
+
+	fd=open(req->path,O_RDONLY);
+
+		
 	if(strcmp(req->http,"HTTP/1.0\n")!=0) //observa se é a versão http suportada
 		res->http="HTTP/1.0 505 HTTP Version Not Supported\n";
 	else if (strcmp(req->cmd,"GET \n")!=0) //busca estrutura get no começo da msg recebida, retorna erro caso não seja
 		res->http="HTTP/1.0 400 Bad Request\n";
+	else if(fd==NULL)	
+		res->http="HTTP/1.0 404 Not Found\n";
 
+	else if(fd!=NULL)
+		res->http="HTTP/1.0 200 OK\n";
 
 
 	return 0;
