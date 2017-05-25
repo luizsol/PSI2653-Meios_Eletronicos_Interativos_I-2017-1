@@ -284,8 +284,10 @@ int buildResponse(struct request *req, struct response *res)
 	printf("%s\n", res->base);
 	printf("%s\n", req->path);
 	printf("%s\n", res->path);
-	if(composepath(res->base, req->path, res->path) < 0)
-		perror("Error creating object path");
+	//if(composepath(res->base, req->path, res->path) < 0)
+	//	perror("Error creating object path");
+	strcpy(res->path, res->base);
+	strcat(res->path, req->path);
 	printf("S1\n");
 
 	FILE *f;
