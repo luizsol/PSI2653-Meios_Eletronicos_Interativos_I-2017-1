@@ -38,6 +38,9 @@ struct response
 	char msg[BUFFERSIZE]; //msg a ser enviada
 	unsigned short port;
 	char *http; //parte da http da resposta
+	char *c_length; //
+	char *c_type;
+	
 };
 
 
