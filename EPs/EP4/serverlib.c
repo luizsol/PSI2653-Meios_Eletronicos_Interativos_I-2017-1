@@ -295,6 +295,9 @@ int buildResponse(struct request *req, struct response *res)
 	struct stat statf;
 
 	f = fopen(res->path, "r");
+	if(f == NULL)
+		perror("Error opening file");
+
 	stat(f, &statf);
 
 	printf("S2\n");
@@ -320,7 +323,7 @@ int buildResponse(struct request *req, struct response *res)
 	printf("%s\n", res->date);
 
 	time_t mytime = time(NULL);
-	strftime(res->date, 90, "Last-Modified: %a, %d %b %Y %T %g\n", &mytime);
+	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\n", &mytime);
 
 	printf("S4\n");
 
