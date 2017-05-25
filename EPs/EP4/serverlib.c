@@ -197,8 +197,8 @@ int transferfile(char *path, int output_fd)
 		status = close(input_fd);
 		return(-1);
 	}
-	sprintf(str,"SIZE=%d\n",statp.st_size);
-	write(output_fd,str,strlen(str));
+	// sprintf(str,"SIZE=%d\n",statp.st_size);
+	// write(output_fd,str,strlen(str));
 
 	// le arquivo , por partes
 	do
@@ -220,7 +220,7 @@ int transferfile(char *path, int output_fd)
 		perror("ERRO: chamada close(): Erro no fechamento do arquivo: " );
 		return(-1);
 	}
-	return(0);
+	return statp.st_size;
 }
 
 
