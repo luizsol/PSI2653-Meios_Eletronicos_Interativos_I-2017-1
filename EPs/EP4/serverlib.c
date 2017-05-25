@@ -298,9 +298,11 @@ int buildResponse(struct request *req, struct response *res)
 
 	res->date = res->http + strlen(res->http);
 
+	time_t rawtime;
 	struct tm *servertime;
 
-	servertime = localtime(time(NULL));
+	time(&rawtime);
+	servertime = localtime(&rawtime);
 
 	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\n", servertime);
 

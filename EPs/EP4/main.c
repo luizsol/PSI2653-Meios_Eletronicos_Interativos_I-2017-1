@@ -21,7 +21,7 @@
 
 
 #define DEFAULT_PORT 8080
-#define DEFAULT_BASE "./"
+#define DEFAULT_BASE "."
 #define WORKER_THREADS 1
 
 
@@ -51,13 +51,10 @@ void worker(struct config *sconf)
 			printf("Connection closed\n");
 
 		// Parse request
-		printf("W1\n");
 		parseRequest(&req);
-		printf("W2\n");
 
 		// Build response
 		buildResponse(&req, &res);
-		printf("W3\n");
 
 		// HTTP 1.0 response
 		// status = transferfile("index.html", E);
