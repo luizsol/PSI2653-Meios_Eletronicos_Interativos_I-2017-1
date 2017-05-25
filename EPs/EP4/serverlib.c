@@ -300,17 +300,17 @@ int buildResponse(struct request *req, struct response *res)
 	printf("S2\n");
 
 	res->http = res->msg;
-	print("%d\n", res->msg);
-	print("%d\n", res->http);
+	printf("%d\n", res->msg);
+	printf("%d\n", res->http);
 
 	if(strncmp(req->http, "HTTP/1.0", 8) != 0)
-		res->http = "HTTP/1.0 505 HTTP Version Not Supported\n";
+		strcpy(res->http, "HTTP/1.0 505 HTTP Version Not Supported\n");
 	else if (strncmp(req->cmd, "GET", 3) != 0)
-		res->http = "HTTP/1.0 400 Bad Request\n";
+		strcpy(res->http, "HTTP/1.0 400 Bad Request\n");
 	else if(f == NULL)
-		res->http = "HTTP/1.0 404 Not Found\n";
+		strcpy(res->http, "HTTP/1.0 404 Not Found\n");
 	else if(f != NULL)
-		res->http = "HTTP/1.0 200 OK\n";
+		strcpy(res->http, "HTTP/1.0 200 OK\n");
 
 	printf("S3\n");
 	printf("%s\n", res->msg);
