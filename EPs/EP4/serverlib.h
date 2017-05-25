@@ -2,8 +2,8 @@
  * Title:       serverlib
  * File:        serverlib.h
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-05-24)
- * Date:        2017-05-24
+ * Version:     0.0 (2017-05-25)
+ * Date:        2017-05-25
  * Description: EP 4 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -25,17 +25,17 @@ struct config
 
 struct request
 {
-	char msg[BUFFERSIZE]; //msg recebida
+	char msg[BUFFERSIZE];
 	unsigned short port;
-	char CAMINHO[BUFFERSIZE]; //armazena url (CAMINHO)
-	char http[10]; //
-	char get[5];
+	char *cmd;
+	char *path;
+	char *http;
 };
 
 struct response
 {
 	char msg[BUFFERSIZE]; //msg a ser enviada
-	unsigned short port; 
+	unsigned short port;
 	char *http; //parte da http da resposta
 };
 

@@ -2,8 +2,8 @@
  * Title:       serverlib
  * File:        serverlib.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-05-24)
- * Date:        2017-05-24
+ * Version:     0.0 (2017-05-25)
+ * Date:        2017-05-25
  * Description: EP 4 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -259,21 +259,10 @@ int parseini(struct config *c)
 */
 int parseRequest(struct request *req)
 {
-	// decodificação Get -http - url (CAMINHO)
-	// separa o texto
-	
-	char* get=NULL;
-	char* http=NULL;
-	char* CAMINHO=NULL;
+	req->cmd  = strtok(req->msg, " "); // Command
+	req->path = strtok(NULL, " "); // Path
+	req->http = strtok(NULL, " "); // HTTP
 
-	get=strtok(req->msg,"\n"); //GET 
-	http=strtok(get," "); 
-	CAMINHO=strtok(NULL," "); //URL
-	http=strtok(NULL,"\n"); //HTTP
-	
-	strcpy(req->get,get); //passa para a struct	
-	strcpy(req->CAMINHO,CAMINHO);
-	strcpy(req->http,http);
 	return 0;
 }
 
@@ -281,13 +270,15 @@ int parseRequest(struct request *req)
 */
 int buildResponse(struct request *req, struct response *res)
 {
-	
+
 	/* HTTP/1.0 200 OK
 		Date: Thu, 06 Aug 1998 12:00:15 GMT
 		Server: Apache/1.3.0 (Unix)
 		Last-Modified: Mon, 22 Jun 1998
 		Content-Length: 6821
 		Content-Type: text/html */
+	/* 400 Bad Request
+	404 Not Found */
 	if(strcmp(req->http,"HTTP/1.0\n")!=0) //observa se é a versão http suportada
 		res->http="HTTP/1.0 505 HTTP Version Not Supported\n";
 	else if (strcmp(req->get,"GET \n")!=0) //busca estrutura get no começo da msg recebida, retorna erro caso não seja
