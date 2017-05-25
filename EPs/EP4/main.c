@@ -36,11 +36,7 @@ void worker(struct config *sconf)
 	struct request  req;
 	struct response res;
 
-	printf("W0\n");
-	printf("%s", sconf->base);
-	printf("W0a\n");
 	strcpy(res.base, sconf->base);
-	printf("W0b\n");
 
 	for(;;)
 	{

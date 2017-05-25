@@ -34,8 +34,8 @@ struct request
 struct response
 {
 	char msg[BUFFERSIZE];
-	char *base;
-	char *path;
+	char base[PATH_MAX];
+	char path[PATH_MAX];
 	char *http;
 	char *date;
 	char *server;
