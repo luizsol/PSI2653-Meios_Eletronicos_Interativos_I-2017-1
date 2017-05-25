@@ -280,14 +280,18 @@ int buildResponse(struct request *req, struct response *res)
 	/* 400 Bad Request
 	404 Not Found */
 
+	printf("S0\n");
 	if(composepath(res->base, req->path, res->path) < 0)
 		perror("Error creating object path");
+	printf("S1\n");
 
 	FILE *f;
 	struct stat statf;
 
 	f = fopen(res->path, "r");
 	stat(f, &statf);
+
+	printf("S2\n");
 
 	res->http = res->msg;
 
@@ -300,26 +304,38 @@ int buildResponse(struct request *req, struct response *res)
 	else if(f != NULL)
 		res->http = "HTTP/1.0 200 OK\n";
 
+	printf("S3\n");
+
 	res->date = res->http + strlen(res->http);
 
 	strftime(res->date, 90, "Last-Modified: %a, %d %b %Y %T %g\n", time(NULL));
 
+	printf("S4\n");
+
 	res->server = res->date + strlen(res->date);
 
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\n");
+
+	printf("S5\n");
 
 	res->lastmod = res->server + strlen(res->server);
 
 	strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\n",
 		statf.st_mtime);
 
+	printf("S6\n");
+
 	res->length = res->lastmod + strlen(res->lastmod);
 
 	sprintf(res->length, "Content-Length: %d\n", statf.st_size);
 
+	printf("S7\n");
+
 	res->type = res->length + strlen(res->length);
 
 	sprintf(res->type, "Content-Type: html\n");
+
+	printf("S8\n");
 
 	return 0;
 }
