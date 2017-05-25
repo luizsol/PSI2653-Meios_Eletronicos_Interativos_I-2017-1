@@ -88,7 +88,6 @@ int main()
 	// Parse .ini
 	int status;
 	struct config sconf;
-	struct config *pconf = &sconf;
 	struct sockaddr_in saddr;
 
 	if(parseini(&sconf) < 0)
@@ -124,7 +123,7 @@ int main()
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
 	for(int i = 1; i <= WORKER_THREADS; i++)
-		pthread_create(&myworkers[i], NULL, (void *) worker, &pconf);
+		pthread_create(&myworkers[i], NULL, (void *) worker, &sconf);
 
 	// Accept
 	for(;;)
