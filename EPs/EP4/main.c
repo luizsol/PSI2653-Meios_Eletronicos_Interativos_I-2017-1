@@ -88,7 +88,7 @@ int main()
 	// Parse .ini
 	int status;
 	struct config sconf;
-	struct config *pconf;
+	struct config *pconf = &sconf;
 	struct sockaddr_in saddr;
 
 	if(parseini(&sconf) < 0)
