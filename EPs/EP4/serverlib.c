@@ -288,6 +288,7 @@ int buildResponse(struct request *req, struct response *res)
 	//	perror("Error creating object path");
 	strcpy(res->path, res->base);
 	strcat(res->path, req->path);
+	printf("%s\n", res->path);
 	printf("S1\n");
 
 	FILE *f;
@@ -310,8 +311,11 @@ int buildResponse(struct request *req, struct response *res)
 		res->http = "HTTP/1.0 200 OK\n";
 
 	printf("S3\n");
+	printf("%s\n", res->msg);
+	printf("%s\n", res->http);
 
 	res->date = res->http + strlen(res->http);
+	printf("%s\n", res->date);
 
 	strftime(res->date, 90, "Last-Modified: %a, %d %b %Y %T %g\n", time(NULL));
 
