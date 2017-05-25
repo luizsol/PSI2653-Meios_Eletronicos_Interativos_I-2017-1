@@ -300,10 +300,26 @@ int buildResponse(struct request *req, struct response *res)
 	else if(f != NULL)
 		res->http = "HTTP/1.0 200 OK\n";
 
-	res->date = res->msg + strlen(res->msg);
+	res->date = res->http + strlen(res->http);
+
+	strftime(res->date, 90, "Last-Modified: %a, %d %b %Y %T %g\n", time());
+
+	res->server = res->date + strlen(res->date);
+
+	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\n");
+
+	res->lastmod = res->server + strlen(res->server);
 
 	strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\n",
 		statf.st_mtime);
+
+	res->length = res->lastmod + strlen(res->lastmod);
+
+	sprintf(res->length, "Content-Length: %d\n", statf.st_size);
+
+	res->type = res->length + strlen(res->length);
+
+	sprintf(res->type, "Content-Type: html\n");
 
 	return 0;
 }
