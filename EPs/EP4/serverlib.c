@@ -281,9 +281,6 @@ int buildResponse(struct request *req, struct response *res)
 	404 Not Found */
 
 	printf("S0\n");
-	printf("%s\n", res->base);
-	printf("%s\n", req->path);
-	printf("%s\n", res->path);
 	//if(composepath(res->base, req->path, res->path) < 0)
 	//	perror("Error creating object path");
 	strcpy(res->path, res->base);
@@ -299,12 +296,11 @@ int buildResponse(struct request *req, struct response *res)
 		perror("Error opening file");
 
 	stat(f, &statf);
+	printf("%s\n", statf.dev_t);
 
 	printf("S2\n");
 
 	res->http = res->msg;
-	printf("%d\n", res->msg);
-	printf("%d\n", res->http);
 
 	if(strncmp(req->http, "HTTP/1.0", 8) != 0)
 		strcpy(res->http, "HTTP/1.0 505 HTTP Version Not Supported\n");
@@ -316,14 +312,16 @@ int buildResponse(struct request *req, struct response *res)
 		strcpy(res->http, "HTTP/1.0 200 OK\n");
 
 	printf("S3\n");
-	printf("%s\n", res->msg);
-	printf("%s\n", res->http);
 
 	res->date = res->http + strlen(res->http);
-	printf("%s\n", res->date);
 
-	time_t mytime = time(NULL);
-	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\n", &mytime);
+	time_t rawtime;
+	struct tm *servertime;
+
+	time(&rawtime);
+	servertime = localtime(&rawtime);
+
+	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\n", servertime);
 
 	printf("S4\n");
 
