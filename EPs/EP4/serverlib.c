@@ -270,23 +270,11 @@ int parseRequest(struct request *req)
 */
 int buildResponse(struct request *req, struct response *res)
 {
-
-	/* HTTP/1.0 200 OK
-		Date: Thu, 06 Aug 1998 12:00:15 GMT
-		Server: Apache/1.3.0 (Unix)
-		Last-Modified: Mon, 22 Jun 1998
-		Content-Length: 6821
-		Content-Type: text/html */
-	/* 400 Bad Request
-	404 Not Found */
-
-	printf("S0\n");
 	//if(composepath(res->base, req->path, res->path) < 0)
 	//	perror("Error creating object path");
 	strcpy(res->path, res->base);
 	strcat(res->path, req->path);
 	printf("%s\n", res->path);
-	printf("S1\n");
 
 	FILE *f;
 	struct stat statf;
@@ -296,8 +284,6 @@ int buildResponse(struct request *req, struct response *res)
 		perror("Error opening file");
 
 	stat(res->path, &statf);
-
-	printf("S2\n");
 
 	res->http = res->msg;
 
@@ -310,49 +296,36 @@ int buildResponse(struct request *req, struct response *res)
 	else if(f != NULL)
 		strcpy(res->http, "HTTP/1.0 200 OK\n");
 
-	printf("S3\n");
-
 	res->date = res->http + strlen(res->http);
 
-	time_t rawtime;
 	struct tm *servertime;
 
-	time(&rawtime);
-	servertime = localtime(&rawtime);
+	servertime = localtime(time(NULL));
 
 	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\n", servertime);
-
-	printf("S4\n");
 
 	res->server = res->date + strlen(res->date);
 
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\n");
 
-	printf("S5\n");
-
 	res->lastmod = res->server + strlen(res->server);
 
-	servertime = localtime(statf.st_mtime);
+	servertime = gmtime(&statf.st_mtime);
 	strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\n",
 		servertime);
-
-	printf("S6\n");
 
 	res->length = res->lastmod + strlen(res->lastmod);
 
 	sprintf(res->length, "Content-Length: %d\n", statf.st_size);
 
-	printf("S7\n");
-
 	res->type = res->length + strlen(res->length);
 
 	sprintf(res->type, "Content-Type: html\n\n");
 
-	printf("S8\n");
-
 	res->object = res->type + strlen(res->type);
 
-	fread(res->object, 1, BUFFERSIZE, f);
+	if(f != NULL)
+		fread(res->object, 1, BUFFERSIZE, f); // FIXME
 
 	return 0;
 }
