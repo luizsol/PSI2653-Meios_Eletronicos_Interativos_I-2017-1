@@ -37,7 +37,7 @@ void worker(struct config *sconf)
 	struct response res;
 
 	strcpy(req.base, sconf->base);
-	req.base="/Web/";
+
 	for(;;)
 	{
 		// Receive
