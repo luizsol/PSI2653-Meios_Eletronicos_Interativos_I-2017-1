@@ -261,7 +261,7 @@ int parseRequest(struct request *req)
 {
 	req->cmd  = strtok(req->msg, " "); // Command
 	req->path = strtok(NULL, " "); // Path
-	req->http = strtok(NULL, " "); // HTTP
+	req->http = strtok(NULL, "\n"); // HTTP
 
 	return 0;
 }
