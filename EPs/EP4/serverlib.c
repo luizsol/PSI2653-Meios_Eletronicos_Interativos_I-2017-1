@@ -281,6 +281,9 @@ int buildResponse(struct request *req, struct response *res)
 	404 Not Found */
 
 	printf("S0\n");
+	printf("%s\n", res->base);
+	printf("%s\n", req->path);
+	printf("%s\n", res->path);
 	if(composepath(res->base, req->path, res->path) < 0)
 		perror("Error creating object path");
 	printf("S1\n");
