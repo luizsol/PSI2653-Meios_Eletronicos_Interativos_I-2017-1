@@ -42,6 +42,7 @@ struct response
 	char *lastmod;
 	char *length;
 	char *type;
+	char *object;
 };
 
 

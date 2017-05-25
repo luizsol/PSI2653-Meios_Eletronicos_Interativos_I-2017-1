@@ -295,8 +295,8 @@ int buildResponse(struct request *req, struct response *res)
 	if(f == NULL)
 		perror("Error opening file");
 
-	stat(f, &statf);
-	printf("%s\n", statf.dev_t);
+	stat(res->path, &statf);
+	printf("%s\n", statf.st_dev);
 
 	printf("S2\n");
 
@@ -346,9 +346,13 @@ int buildResponse(struct request *req, struct response *res)
 
 	res->type = res->length + strlen(res->length);
 
-	sprintf(res->type, "Content-Type: html\n");
+	sprintf(res->type, "Content-Type: html\n\n");
 
 	printf("S8\n");
+
+	res->object = res->type + strlen(res->type);
+
+	fread(res->object, 1, BUFFERSIZE, f);
 
 	return 0;
 }
