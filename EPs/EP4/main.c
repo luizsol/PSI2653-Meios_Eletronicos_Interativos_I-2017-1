@@ -22,7 +22,7 @@
 
 #define DEFAULT_PORT 8080
 #define DEFAULT_BASE "./"
-#define WORKER_THREADS 3
+#define WORKER_THREADS 1
 
 
 struct queue requestQueue;
@@ -36,9 +36,11 @@ void worker(struct config *sconf)
 	struct request  req;
 	struct response res;
 
-	printf("W0");
+	printf("W0\n");
+	printf("%s", sconf->base);
+	printf("W0a\n");
 	strcpy(res.base, sconf->base);
-	printf("W0b");
+	printf("W0b\n");
 
 	for(;;)
 	{
@@ -127,10 +129,8 @@ int main()
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
-	printf("M0");
 	for(int i = 1; i <= WORKER_THREADS; i++)
 		pthread_create(&myworkers[i], NULL, (void *) worker, &sconf);
-	printf("M1");
 
 	// Accept
 	for(;;)
