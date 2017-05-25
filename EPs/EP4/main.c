@@ -30,11 +30,13 @@ struct queue requestQueue;
 
 /* worker thread
 */
-void worker(int id)
+void worker(struct config *sconf)
 {
 	int E, status;
 	struct request  req;
 	struct response res;
+
+	strcpy(req.base, sconf->base);
 	req.base="/Web/";
 	for(;;)
 	{
@@ -86,6 +88,7 @@ int main()
 	// Parse .ini
 	int status;
 	struct config sconf;
+	struct config *pconf;
 	struct sockaddr_in saddr;
 
 	if(parseini(&sconf) < 0)
@@ -121,7 +124,7 @@ int main()
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
 	for(int i = 1; i <= WORKER_THREADS; i++)
-		pthread_create(&myworkers[i], NULL, (void *) worker, &i);
+		pthread_create(&myworkers[i], NULL, (void *) worker, &pconf);
 
 	// Accept
 	for(;;)
