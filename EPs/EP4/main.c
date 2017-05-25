@@ -55,13 +55,13 @@ void worker(int id)
 		buildResponse(&req, &res);
 
 		// HTTP 1.0 response
-		status = transferfile("index.html", E);
-		if(status < 0)
-			perror("Error writing to TCP stream");
+		// status = transferfile("index.html", E);
+		// if(status < 0)
+		//	perror("Error writing to TCP stream");
 
-		// status = write(E, res.msg, strlen(res.msg) + 1);
-		// if(status <= 0)
-		// 	perror("Error writing to TCP stream");
+		status = write(E, res.msg, strlen(res.msg) + 1);
+		if(status <= 0)
+			perror("Error writing to TCP stream");
 
 		// Close
 		status = close(E);
