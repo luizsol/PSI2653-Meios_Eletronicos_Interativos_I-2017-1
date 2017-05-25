@@ -36,7 +36,9 @@ void worker(struct config *sconf)
 	struct request  req;
 	struct response res;
 
+	printf("W0");
 	strcpy(res.base, sconf->base);
+	printf("W0b");
 
 	for(;;)
 	{
@@ -51,10 +53,13 @@ void worker(struct config *sconf)
 			printf("Connection closed\n");
 
 		// Parse request
+		printf("W1");
 		parseRequest(&req);
+		printf("W2");
 
 		// Build response
 		buildResponse(&req, &res);
+		printf("W3");
 
 		// HTTP 1.0 response
 		// status = transferfile("index.html", E);
@@ -122,8 +127,10 @@ int main()
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
+	printf("M0");
 	for(int i = 1; i <= WORKER_THREADS; i++)
 		pthread_create(&myworkers[i], NULL, (void *) worker, &sconf);
+	printf("M1");
 
 	// Accept
 	for(;;)
