@@ -35,7 +35,7 @@ void worker(int id)
 	int E, status;
 	struct request  req;
 	struct response res;
-
+	req.base="/Web/";
 	for(;;)
 	{
 		// Receive

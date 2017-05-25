@@ -279,9 +279,13 @@ int buildResponse(struct request *req, struct response *res)
 		Content-Type: text/html */
 	/* 400 Bad Request
 	404 Not Found */
+
+	if(composepath(req->base,req->path,req->path)<0)
+			perror("Error creating object path");
+
 	if(strcmp(req->http,"HTTP/1.0\n")!=0) //observa se é a versão http suportada
 		res->http="HTTP/1.0 505 HTTP Version Not Supported\n";
-	else if (strcmp(req->get,"GET \n")!=0) //busca estrutura get no começo da msg recebida, retorna erro caso não seja
+	else if (strcmp(req->cmd,"GET \n")!=0) //busca estrutura get no começo da msg recebida, retorna erro caso não seja
 		res->http="HTTP/1.0 400 Bad Request\n";
 
 

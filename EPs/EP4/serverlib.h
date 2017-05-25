@@ -30,6 +30,7 @@ struct request
 	char *cmd;
 	char *path;
 	char *http;
+	char *base;
 };
 
 struct response
