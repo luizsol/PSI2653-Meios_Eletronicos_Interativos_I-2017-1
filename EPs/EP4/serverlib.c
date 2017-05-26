@@ -226,7 +226,7 @@ int transferfile(char *path, int output_fd)
 
 /* parseini()
 */
-int parseini(struct config *c)
+int parseini(struct config *c) // lê as configurações relacionadas a porta e endereço base do servidor salvas no arquivo server.ini
 {
 	FILE *f;
 	f = fopen("server.ini", "r");
@@ -257,9 +257,9 @@ int parseini(struct config *c)
 
 /* parseRequest()
 */
-int parseRequest(struct request *req)
+int parseRequest(struct request *req) //decodifica a mensagem HTTP recebida e salva nos parâmetros respectivo do request
 {
-	req->cmd  = strtok(req->msg, " "); // Command
+	req->cmd  = strtok(req->msg, " "); // Command (GET)
 	req->path = strtok(NULL, " "); // Path
 	req->http = strtok(NULL, "\n"); // HTTP
 
@@ -275,11 +275,15 @@ int buildResponse(struct request *req, struct response *res)
 	FILE *f;
 	//if(composepath(res->base, req->path, res->path) < 0)
 	//	perror("Error creating object path");
-	strcpy(res->path, res->base);
-	strcat(res->path, req->path); //FIXME
-	printf("%s\n", res->path);
-
+	strcpy(res->path, res->base); 
+	strcat(res->path, req->path); //cria o endereço do arquivo
+//FIXME
+	printf("%s\n", res->path); 
 	res->http = res->msg;
+
+	//análise de msgs de erro
+
+	//HTTP Header:
 	if (strncmp(req->cmd, "GET", 3) != 0)
 	{
 		rescode = 400;
@@ -339,6 +343,8 @@ int buildResponse(struct request *req, struct response *res)
 			strcpy(res->http, "HTTP/1.0 200 OK\r\n");
 		}
 	}
+	
+	//Date:
 	res->date = res->http + strlen(res->http);
 
 	time_t rawtime;
@@ -347,7 +353,7 @@ int buildResponse(struct request *req, struct response *res)
 	servertime = localtime(&rawtime);
 	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\r\n", servertime);
 
-
+	//Server:
 	res->server = res->date + strlen(res->date);
 
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
@@ -355,7 +361,7 @@ int buildResponse(struct request *req, struct response *res)
 	if(rescode == 400 || rescode == 505 || rescode == 404)
 		return 0;
 	else
-	{
+	{		//Last Modified:	
 		res->lastmod = res->server + strlen(res->server);
 		if(rescode == 201)
 			{
@@ -370,7 +376,7 @@ int buildResponse(struct request *req, struct response *res)
 			strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\r\n",
 				servertime);
 
-
+				//Content Length:
 			res->length = res->lastmod + strlen(res->lastmod);
 
 			sprintf(res->length, "Content-Length: %d\n", statf.st_size);
@@ -379,6 +385,7 @@ int buildResponse(struct request *req, struct response *res)
 			res->type = res->length + strlen(res->length);
 
 			fclose(f);
+				//Content Type:
 			if(rescode == 200)
 			{
 				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
@@ -396,7 +403,7 @@ int buildResponse(struct request *req, struct response *res)
 			}
 
 			res->object = res->type + strlen(res->type);
-
+				//Lê arquivo a ser enviado
 			if(f != NULL)
 				fread(res->object, 1, BUFFERSIZE, f); // FIXME
 		}

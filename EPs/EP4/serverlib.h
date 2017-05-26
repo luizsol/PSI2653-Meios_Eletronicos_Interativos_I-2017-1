@@ -19,33 +19,33 @@
 
 struct config
 {
-	char base[PATH_MAX];
-	unsigned short port;
+	char base[PATH_MAX]; // diretório base do servidor complementado pelo path fornecido pela url
+	unsigned short port; // porta de conexão do servidor
 };
 
 struct request
 {
-	char msg[BUFFERSIZE];
-	char *cmd;
-	char *path;
-	char *http;
+	char msg[BUFFERSIZE];// msg recebida do client web
+	char *cmd; // command enviado
+	char *path; // url recebido
+	char *http; // versão do HTTP
 };
 
 struct response
 {
-	char msg[BUFFERSIZE];
-	char base[PATH_MAX];
-	char path[PATH_MAX];
+	char msg[BUFFERSIZE]; // msg a ser enviada
+	char base[PATH_MAX]; // diretório base do servidor complementado pelo path fornecido pela url
+	char path[PATH_MAX]; // path completo
 	char pathindex[PATH_MAX];
 	char ext[5];
 	char *endext;
-	char *http;
-	char *date;
-	char *server;
-	char *lastmod;
-	char *length;
-	char *type;
-	char *object;
+	char *http; // versão do HTTP
+	char *date; // Date 
+	char *server; // Server name
+	char *lastmod; // Last Modified
+	char *length; // Content Length
+	char *type; // Content Type
+	char *object; //arquivo a ser enviado
 };
 
 
