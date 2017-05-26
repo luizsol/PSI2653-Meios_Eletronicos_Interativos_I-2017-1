@@ -270,64 +270,137 @@ int parseRequest(struct request *req)
 */
 int buildResponse(struct request *req, struct response *res)
 {
+	int rescode;
+	struct stat statf;
+	FILE *f;
 	//if(composepath(res->base, req->path, res->path) < 0)
 	//	perror("Error creating object path");
 	strcpy(res->path, res->base);
-	strcat(res->path, req->path);
+	strcat(res->path, req->path); //FIXME
 	printf("%s\n", res->path);
 
-	FILE *f;
-	struct stat statf;
-
-	f = fopen(res->path, "r");
-	if(f == NULL)
-		perror("Error opening file");
-
-	stat(res->path, &statf);
-
 	res->http = res->msg;
+	if (strncmp(req->cmd, "GET", 3) != 0)
+	{
+		rescode = 400;
+		strcpy(res->http, "HTTP/1.0 400 Bad Request\r\n");
+	}
+	else 	if(strncmp(req->http, "HTTP/1.0", 8) != 0)
+	{
+		rescode = 505;
+		strcpy(res->http, "HTTP/1.0 505 HTTP Version Not Supported\r\n");
+	}
+	else
+	{
+		f = fopen(res->path, "r");
+		if(f == NULL)
+		{
+			rescode = 404;
+			strcpy(res->http, "HTTP/1.0 404 Not Found\r\n");
+		}
+		else	if(f != NULL)
+		{
+			stat(res->path, &statf);
 
-	if(strncmp(req->http, "HTTP/1.0", 8) != 0)
-		strcpy(res->http, "HTTP/1.0 505 HTTP Version Not Supported\n");
-	else if (strncmp(req->cmd, "GET", 3) != 0)
-		strcpy(res->http, "HTTP/1.0 400 Bad Request\n");
-	else if(f == NULL)
-		strcpy(res->http, "HTTP/1.0 404 Not Found\n");
-	else if(f != NULL)
-		strcpy(res->http, "HTTP/1.0 200 OK\n");
+			// Verifica se o arquivo em res->path é diretorio (1) ou não (0)
+			if(S_ISDIR(statf.st_mode))
+			{
+				// se sim, verifica se há um arquivo index.html no diretorio
+				fclose(f);
+				strcpy(res->pathindex, res->path);
+				strcat(res->pathindex, "/index.html"); //FIXME
 
+				f = fopen(res->pathindex, "r");
+				if(f == NULL)
+				{
+					// se não houver, manda a listagem dos diretorios
+					rescode = 201;
+					perror("Error opening file");
+				}
+				else if (f != NULL)
+				{
+					rescode = 200;
+					strcpy(res->path, res->pathindex);
+				}
+			}
+			else if(S_ISREG(statf.st_mode))
+			{
+				strncpy(res->ext, &res->path[strlen(res->path) - 6], 6);
+				res->endext = strtok(res->ext,".");
+				res->endext = strtok(NULL,"");
+				if(strncmp(res->endext, "html", 4) == 0)
+					rescode = 200;
+				else if(strncmp(res->endext, "txt", 3) == 0)
+					rescode = 202;
+				else if(strncmp(res->endext, "png", 3) == 0 || strncmp(res->endext,
+					"jpg", 3) == 0)
+					rescode = 203;
+			}
+			strcpy(res->http, "HTTP/1.0 200 OK\r\n");
+		}
+	}
 	res->date = res->http + strlen(res->http);
 
 	time_t rawtime;
 	struct tm *servertime;
-
 	time(&rawtime);
 	servertime = localtime(&rawtime);
+	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\r\n", servertime);
 
-	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\n", servertime);
 
 	res->server = res->date + strlen(res->date);
 
-	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\n");
+	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
 
-	res->lastmod = res->server + strlen(res->server);
+	if(rescode == 400 || rescode == 505 || rescode == 404)
+		return 0;
+	else
+	{
+		res->lastmod = res->server + strlen(res->server);
+		if(rescode == 201)
+			{
+				strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
+				// gerar 	aqui a listagem dos diretorios
+				return 0;
+			}
+		else
+		{
+			stat(res->path, &statf);
+			servertime = gmtime(&statf.st_mtime);
+			strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\r\n",
+				servertime);
 
-	servertime = gmtime(&statf.st_mtime);
-	strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\n",
-		servertime);
 
-	res->length = res->lastmod + strlen(res->lastmod);
+			res->length = res->lastmod + strlen(res->lastmod);
 
-	sprintf(res->length, "Content-Length: %d\n", statf.st_size);
+			sprintf(res->length, "Content-Length: %d\n", statf.st_size);
 
-	res->type = res->length + strlen(res->length);
 
-	sprintf(res->type, "Content-Type: html\n\n");
+			res->type = res->length + strlen(res->length);
 
-	res->object = res->type + strlen(res->type);
+			fclose(f);
+			if(rescode == 200)
+			{
+				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
+				f = fopen(res->path, "r");
+			}
+			else if(rescode == 202)
+			{
+				sprintf(res->type, "Content-Type: text\r\n\r\n");
+				f = fopen(res->path, "r");
+			}
+			else if(rescode == 203)
+			{
+				sprintf(res->type, "Content-Type: image\r\n\r\n");
+				f = fopen(res->path, "rb");
+			}
 
-	if(f != NULL)
-		fread(res->object, 1, BUFFERSIZE, f); // FIXME
+			res->object = res->type + strlen(res->type);
+
+			if(f != NULL)
+				fread(res->object, 1, BUFFERSIZE, f); // FIXME
+		}
+	}
 
 	return 0;
 }

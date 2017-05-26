@@ -36,6 +36,9 @@ struct response
 	char msg[BUFFERSIZE];
 	char base[PATH_MAX];
 	char path[PATH_MAX];
+	char pathindex[PATH_MAX];
+	char ext[5];
+	char *endext;
 	char *http;
 	char *date;
 	char *server;
