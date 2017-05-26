@@ -275,10 +275,10 @@ int buildResponse(struct request *req, struct response *res)
 	FILE *f;
 	//if(composepath(res->base, req->path, res->path) < 0)
 	//	perror("Error creating object path");
-	strcpy(res->path, res->base); 
+	strcpy(res->path, res->base);
 	strcat(res->path, req->path); //cria o endereço do arquivo
 //FIXME
-	printf("%s\n", res->path); 
+	printf("%s\n", res->path);
 	res->http = res->msg;
 
 	//análise de msgs de erro
@@ -343,7 +343,7 @@ int buildResponse(struct request *req, struct response *res)
 			strcpy(res->http, "HTTP/1.0 200 OK\r\n");
 		}
 	}
-	
+
 	//Date:
 	res->date = res->http + strlen(res->http);
 
@@ -361,7 +361,7 @@ int buildResponse(struct request *req, struct response *res)
 	if(rescode == 400 || rescode == 505 || rescode == 404)
 		return 0;
 	else
-	{		//Last Modified:	
+	{		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
 		if(rescode == 201)
 			{
@@ -404,8 +404,10 @@ int buildResponse(struct request *req, struct response *res)
 
 			res->object = res->type + strlen(res->type);
 				//Lê arquivo a ser enviado
-			if(f != NULL)
-				fread(res->object, 1, BUFFERSIZE, f); // FIXME
+			if(f != NULL){
+				int i = fread(res->object, 1, BUFFERSIZE, f); // FIXME
+				res->object[--i] = '\0'; // Retirar o -- se estiver comendo o ultimo caractere.
+			}
 		}
 	}
 
