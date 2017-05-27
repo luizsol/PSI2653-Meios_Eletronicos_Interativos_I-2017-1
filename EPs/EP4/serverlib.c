@@ -422,7 +422,7 @@ int buildResponse(struct request *req, struct response *res)
 					i += j;
 			}
 		}
-	fclose(f);
+		fclose(f);
 	}
 	return i;
 }
