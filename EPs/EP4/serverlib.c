@@ -363,6 +363,7 @@ int buildResponse(struct request *req, struct response *res)
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
 
 	if(rescode == 400 || rescode == 505 || rescode == 404)
+		fclose(f);
 		return strlen(res->msg);
 	else
 	{		//Last Modified:
@@ -373,6 +374,7 @@ int buildResponse(struct request *req, struct response *res)
 				res->type = res->lastmod + strlen(res->lastmod);
 				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
 				// gerar 	aqui a listagem dos diretorios //FIXME
+				fclose(f);
 				return strlen(res->msg);
 			}
 		else
