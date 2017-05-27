@@ -14,7 +14,7 @@
 
 #include <linux/limits.h>
 
-#define BUFFERSIZE 4096
+#define BUFFERSIZE 4194304
 
 
 struct config

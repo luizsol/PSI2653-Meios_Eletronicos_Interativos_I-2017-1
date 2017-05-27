@@ -270,6 +270,7 @@ int parseRequest(struct request *req) //decodifica a mensagem HTTP recebida e sa
 */
 int buildResponse(struct request *req, struct response *res)
 {
+	int i;
 	int rescode;
 	struct stat statf;
 	FILE *f;
@@ -277,7 +278,7 @@ int buildResponse(struct request *req, struct response *res)
 	//	perror("Error creating object path");
 	strcpy(res->path, res->base);
 	strcat(res->path, req->path); //cria o endereço do arquivo
-//FIXME
+  //FIXME
 	printf("%s\n", res->path);
 	res->http = res->msg;
 
@@ -369,6 +370,8 @@ int buildResponse(struct request *req, struct response *res)
 		if(rescode == 201)
 			{		// Se precisar mandar a listagem dos diretorios, lastmod = localtime
 				strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
+				res->type = res->lastmod + strlen(res->lastmod);
+				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
 				// gerar 	aqui a listagem dos diretorios //FIXME
 				return strlen(res->msg);
 			}
@@ -389,13 +392,9 @@ int buildResponse(struct request *req, struct response *res)
 
 			//Content Type:
 			if(rescode == 200)
-			{
 				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
-			}
 			else if(rescode == 202)
-			{
 				sprintf(res->type, "Content-Type: text\r\n\r\n");
-			}
 			else if(rescode == 203)
 			{
 				sprintf(res->type, "Content-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\n\r\n");
@@ -411,7 +410,7 @@ int buildResponse(struct request *req, struct response *res)
 
 			res->object = res->type + strlen(res->type);
 				//Lê arquivo a ser enviado
-			int i = strlen(res->msg);
+			i = strlen(res->msg);
 			if(f != NULL){
 				int j = fread(res->object, 1, statf.st_size, f);
 				if(rescode == 200 || rescode == 202)
@@ -423,6 +422,7 @@ int buildResponse(struct request *req, struct response *res)
 					i += j;
 			}
 		}
+	fclose(f);
 	}
 	return i;
 }
