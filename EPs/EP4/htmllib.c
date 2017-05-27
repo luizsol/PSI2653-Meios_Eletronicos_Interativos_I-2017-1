@@ -157,18 +157,7 @@ int generatepart4(char *path, char *output){
 	return 0;
 }
 
-/* Gera a resposta HTML que lista o diretório
- *	  Gera a quarta parte do HTML a ser entregue ao
- *    usuário, contendo os conteúdos do diretório 
- *    apontado por path e seus respectivos links
- *    Exemplos:
- *    path = "/home/user/arquivos/" =>
- *    output = 
- *    "<li><a href="http://localhost:8080/home/user/arquivos/foto1.jpg">foto1.jpg</a></li>
- *     <li><a href="http://localhost:8080/home/user/arquivos/texto.txt">texto.txt</a></li>
- *     <li><a href="http://localhost:8080/home/user/arquivos/subdiretorio/">subdiretorio/</a></li>  
- *    "
- *
+/* Gera a resposta HTML que lista o diretório apontado por path
  *    path: diretorio a ser avaliado
  *    output: string na qual sera apensado o resultado
  *    retorno: o resultado da operação
