@@ -9,6 +9,7 @@
  */
 
 #include "serverlib.h"
+#include "htmllib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,7 +127,7 @@ void append(char *dest, int buffersize, char *src)
 	int i;
 
 	d = strlen(dest);
-	for(i=0; i<min(strlen(src),buffersize-1-d); i++)
+	for(i=0; i<min((int) strlen(src),buffersize-1-d); i++)
 		dest[d+i] = src[i];
 	dest[d+i] = '\0';
 }
@@ -142,8 +143,6 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 {
 	DIR           * dirp;
 	struct dirent * direntry;
-	char            linha[80];
-	int             i = 0;
 
 	dirp = opendir(path);
 	if(dirp ==NULL)
@@ -182,7 +181,6 @@ int transferfile(char *path, int output_fd)
 	int          status;
 	int          n;
 	char         buffer[BUFFERSIZE];
-	char         str[10];
 	struct stat  statp;
 
 	input_fd = open(path,O_RDONLY);
@@ -391,7 +389,7 @@ int buildResponse(struct request *req, struct response *res)
 				//Content Length:
 			res->length = res->lastmod + strlen(res->lastmod);
 
-			sprintf(res->length, "Content-Length: %d\r\n", statf.st_size);
+			sprintf(res->length, "Content-Length: %d\r\n", (int) statf.st_size);
 
 
 			res->type = res->length + strlen(res->length);
