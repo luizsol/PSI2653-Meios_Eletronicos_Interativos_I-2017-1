@@ -32,7 +32,7 @@ struct queue requestQueue;
 */
 void worker(struct config *sconf)
 {
-	int E, status;
+	int E, len, status;
 	struct request  req;
 	struct response res;
 
@@ -54,7 +54,7 @@ void worker(struct config *sconf)
 		parseRequest(&req);
 
 		// Build response
-		buildResponse(&req, &res);
+		len = buildResponse(&req, &res);
 
 		// HTTP 1.0 response
 		// status = transferfile("index.html", E);
@@ -62,7 +62,7 @@ void worker(struct config *sconf)
 		//	perror("Error writing to TCP stream");
 
 		printf("%s\n", res.msg);
-		status = write(E, res.msg, strlen(res.msg) + 1);
+		status = write(E, res.msg, len);
 		if(status <= 0)
 			perror("Error writing to TCP stream");
 

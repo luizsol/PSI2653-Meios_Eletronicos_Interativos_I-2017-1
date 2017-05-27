@@ -362,7 +362,7 @@ int buildResponse(struct request *req, struct response *res)
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
 
 	if(rescode == 400 || rescode == 505 || rescode == 404)
-		return 0;
+		return strlen(res->msg) + 1;
 	else
 	{		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
@@ -370,7 +370,7 @@ int buildResponse(struct request *req, struct response *res)
 			{		// Se precisar mandar a listagem dos diretorios, lastmod = localtime
 				strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
 				// gerar 	aqui a listagem dos diretorios //FIXME
-				return 0;
+				return strlen(res->msg) + 1;
 			}
 		else
 		{		// Se não, normal:
@@ -411,12 +411,18 @@ int buildResponse(struct request *req, struct response *res)
 
 			res->object = res->type + strlen(res->type);
 				//Lê arquivo a ser enviado
+			int i = strlen(res->msg) + 1;
 			if(f != NULL){
-				int i = fread(res->object, 1, statf.st_size, f); // FIXME
-				res->object[i] = '\0';
+				i = fread(res->object, 1, statf.st_size, f);
+				if(rescode == 200 || rescode == 202)
+				{
+					res->object[i] = '\0';
+					i = strlen(res->msg) + 1;
+				}
+				else
+					i += strlen(res->msg);
 			}
 		}
 	}
-
-	return 0;
+	return i;
 }
