@@ -30,8 +30,8 @@ struct queue requestQueue;
 
 /* worker thread
 */
-void worker(struct config *sconf)
-{
+void * worker(void * arg){
+	struct config *sconf = (struct config *) arg;
 	int E, len, status;
 	struct request  req;
 	struct response res;
@@ -71,6 +71,7 @@ void worker(struct config *sconf)
 		if(status)
 			perror("Error closing socket");
 	}
+	return NULL;
 }
 
 
@@ -124,7 +125,7 @@ int main()
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
 	for(int i = 1; i <= WORKER_THREADS; i++)
-		pthread_create(&myworkers[i], NULL, (void *) worker, &sconf);
+		pthread_create(&myworkers[i], NULL, worker,(void *) &sconf);
 
 	// Accept
 	for(;;)

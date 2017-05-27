@@ -9,6 +9,8 @@
  */
 
 #include "../serverlib.h"
+#include "../htmllib.h"
+#include <stdio.h>
 
 int main(int argc, char const *argv[])
 {
@@ -17,7 +19,11 @@ int main(int argc, char const *argv[])
 	}
 	char newpath[400];
 	newpath[0] = '\0';
-	composepath(argv[1], argv[2], newpath);
-	printf("%s\n", newpath);
+	composepath((char *) argv[1],(char *) argv[2], newpath);
+	//printf("%s\n", newpath);
+	char output[4000];
+	output[0] = '\0';
+	generatedirhtml(newpath, output);
+	printf("%s\n", output);
 	return 0;
 }
