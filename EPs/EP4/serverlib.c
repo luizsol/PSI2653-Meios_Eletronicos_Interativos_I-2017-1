@@ -306,39 +306,42 @@ int buildResponse(struct request *req, struct response *res)
 		{
 			stat(res->path, &statf);
 
-			// Verifica se o arquivo em res->path é diretorio (1) ou não (0)
+			// Verificação se o arquivo em res->path é diretorio:
 			if(S_ISDIR(statf.st_mode))
 			{
-				// se sim, verifica se há um arquivo index.html no diretorio
 				fclose(f);
 				strcpy(res->pathindex, res->path);
 				strcat(res->pathindex, "/index.html"); //FIXME
 
 				f = fopen(res->pathindex, "r");
+				// Se sim, verificação se há um arquivo index.html no diretorio
 				if(f == NULL)
 				{
-					// se não houver, manda a listagem dos diretorios
+					// Se não houver, manda a listagem dos diretorios
 					rescode = 201;
 					perror("Error opening file");
 				}
 				else if (f != NULL)
 				{
+					// Se houver, manda o index.html
 					rescode = 200;
 					strcpy(res->path, res->pathindex);
 				}
 			}
 			else if(S_ISREG(statf.st_mode))
-			{
+			{		// Verificação do tipo (extensão) do arquivo:
 				strncpy(res->ext, &res->path[strlen(res->path) - 6], 6);
 				res->endext = strtok(res->ext,".");
 				res->endext = strtok(NULL,"");
+
 				if(strncmp(res->endext, "html", 4) == 0)
 					rescode = 200;
 				else if(strncmp(res->endext, "txt", 3) == 0)
 					rescode = 202;
-				else if(strncmp(res->endext, "png", 3) == 0 || strncmp(res->endext,
-					"jpg", 3) == 0)
+				else if(strncmp(res->endext, "jpg", 3) == 0)
 					rescode = 203;
+				else if(strncmp(res->endext, "png", 3) == 0)
+					rescode = 204;
 			}
 			strcpy(res->http, "HTTP/1.0 200 OK\r\n");
 		}
@@ -364,13 +367,13 @@ int buildResponse(struct request *req, struct response *res)
 	{		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
 		if(rescode == 201)
-			{
+			{		// Se precisar mandar a listagem dos diretorios, lastmod = localtime
 				strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
-				// gerar 	aqui a listagem dos diretorios
+				// gerar 	aqui a listagem dos diretorios //FIXME
 				return 0;
 			}
 		else
-		{
+		{		// Se não, normal:
 			stat(res->path, &statf);
 			servertime = gmtime(&statf.st_mtime);
 			strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\r\n",
@@ -379,34 +382,38 @@ int buildResponse(struct request *req, struct response *res)
 				//Content Length:
 			res->length = res->lastmod + strlen(res->lastmod);
 
-			sprintf(res->length, "Content-Length: %d\n", statf.st_size);
+			sprintf(res->length, "Content-Length: %d\r\n", statf.st_size);
 
 
 			res->type = res->length + strlen(res->length);
 
-			fclose(f);
-				//Content Type:
+			//Content Type:
 			if(rescode == 200)
 			{
 				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
-				f = fopen(res->path, "r");
 			}
 			else if(rescode == 202)
 			{
 				sprintf(res->type, "Content-Type: text\r\n\r\n");
-				f = fopen(res->path, "r");
 			}
 			else if(rescode == 203)
 			{
-				sprintf(res->type, "Content-Type: image\r\n\r\n");
+				sprintf(res->type, "Content-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\n\r\n");
+				fclose(f);
+				f = fopen(res->path, "rb");
+			}
+			else if(rescode == 204)
+			{
+				sprintf(res->type, "Content-Type: image/png\r\nContent-Transfer-Encoding: binary\r\n\r\n");
+				fclose(f);
 				f = fopen(res->path, "rb");
 			}
 
 			res->object = res->type + strlen(res->type);
 				//Lê arquivo a ser enviado
 			if(f != NULL){
-				int i = fread(res->object, 1, BUFFERSIZE, f); // FIXME
-				res->object[--i] = '\0'; // Retirar o -- se estiver comendo o ultimo caractere.
+				int i = fread(res->object, 1, statf.st_size, f); // FIXME
+				res->object[i] = '\0';
 			}
 		}
 	}

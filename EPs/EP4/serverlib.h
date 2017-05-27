@@ -37,10 +37,10 @@ struct response
 	char base[PATH_MAX]; // diretório base do servidor complementado pelo path fornecido pela url
 	char path[PATH_MAX]; // path completo
 	char pathindex[PATH_MAX];
-	char ext[5];
+	char ext[6];
 	char *endext;
 	char *http; // versão do HTTP
-	char *date; // Date 
+	char *date; // Date
 	char *server; // Server name
 	char *lastmod; // Last Modified
 	char *length; // Content Length
