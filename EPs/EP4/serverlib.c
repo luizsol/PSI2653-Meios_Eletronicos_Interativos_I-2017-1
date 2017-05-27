@@ -82,7 +82,10 @@ int composepath(char *oldpath, char *path, char *newpath)
 	else if(strcmp(dir,".")==0)
 	{
 		strcpy(newpath,oldpath);
-		strcat(newpath,"/");
+		//Evitando a geração de path com duas / consecutivas
+		if(oldpath[strlen(oldpath)-1]!='/'){
+			strcat(newpath,"/");
+		}
 		strcat(newpath,path);
 		status=0;
 	}
@@ -362,9 +365,10 @@ int buildResponse(struct request *req, struct response *res)
 
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
 
-	if(rescode == 400 || rescode == 505 || rescode == 404)
+	if(rescode == 400 || rescode == 505 || rescode == 404){
 		fclose(f);
 		return strlen(res->msg);
+	}
 	else
 	{		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
