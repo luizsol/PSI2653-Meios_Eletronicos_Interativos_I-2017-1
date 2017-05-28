@@ -27,6 +27,8 @@
 
 #define min(x,y) (((x)<(y))?(x):(y))
 
+#define DEBUG 1
+
 
 /* Compose Path: altera PATH
  *    oldpath: path original (ex: /home/jose/test
@@ -37,6 +39,9 @@
  */
 int composepath(char *oldpath, char *path, char *newpath)
 {
+	if(DEBUG){
+		puts("composepath():start");
+	}
 	char * olddir;
 	char * oldbase;
 	char * oldpath1;
@@ -99,6 +104,9 @@ int composepath(char *oldpath, char *path, char *newpath)
 	free(oldpath2);
 	free(path1);
 	free(path2);
+	if(DEBUG){
+		puts("composepath():return");
+	}
 	return(status);
 }
 
@@ -110,11 +118,17 @@ int composepath(char *oldpath, char *path, char *newpath)
  */
 char *getcurrentdir(char *path, int pathsize)
 {
+	if(DEBUG){
+		puts("getcurrentdir():start");
+	}
 	char *p;
 
 	p = getcwd(path,pathsize);
 	if(p==NULL)
 		perror("Erro na chamada getcwd");
+	if(DEBUG){
+		puts("getcurrentdir():return");
+	}
 	return(p);
 }
 
@@ -123,6 +137,9 @@ char *getcurrentdir(char *path, int pathsize)
  */
 void append(char *dest, int buffersize, char *src)
 {
+	if(DEBUG){
+		puts("append():start");
+	}
 	int d;
 	int i;
 
@@ -130,6 +147,9 @@ void append(char *dest, int buffersize, char *src)
 	for(i=0; i<min((int) strlen(src),buffersize-1-d); i++)
 		dest[d+i] = src[i];
 	dest[d+i] = '\0';
+	if(DEBUG){
+		puts("append():return");
+	}
 }
 
 
@@ -141,6 +161,9 @@ void append(char *dest, int buffersize, char *src)
  */
 void lista_diretorio(char *path, char *buffer, int buffersize)
 {
+	if(DEBUG){
+		puts("lista_diretorio():start");
+	}
 	DIR           * dirp;
 	struct dirent * direntry;
 
@@ -149,6 +172,9 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 	{
 		perror("ERRO: chamada opendir(): Erro na abertura do diretorio: ");
 		snprintf(buffer,buffersize,"Erro na listagem diretorio!\n");
+		if(DEBUG){
+			puts("lista_diretorio():return");
+		}
 		return;
 	}
 	buffer[0]='\0';
@@ -167,6 +193,9 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 		}
 	}
 	closedir(dirp);
+	if(DEBUG){
+		puts("lista_diretorio():return");
+	}
 }
 
 
@@ -177,6 +206,9 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
  */
 int transferfile(char *path, int output_fd)
 {
+	if(DEBUG){
+		puts("transferfile():start");
+	}
 	int          input_fd;     // input file descriptor
 	int          status;
 	int          n;
@@ -187,6 +219,9 @@ int transferfile(char *path, int output_fd)
 	if (input_fd < 0)
 	{
 		perror("ERRO chamada open(): Erro na abertura do arquivo: ");
+		if(DEBUG){
+			puts("transferfile():return");
+		}
 		return(-1);
 	}
 
@@ -196,6 +231,9 @@ int transferfile(char *path, int output_fd)
 	{
 		perror("ERRO chamada stat(): Erro no acesso ao arquivo: ");
 		status = close(input_fd);
+		if(DEBUG){
+			puts("transferfile():return");
+		}
 		return(-1);
 	}
 	// sprintf(str,"SIZE=%d\n",statp.st_size);
@@ -209,6 +247,9 @@ int transferfile(char *path, int output_fd)
 		{
 			perror("ERRO: chamada read(): Erro na leitura do arquivo: ");
 			status = close(input_fd);
+			if(DEBUG){
+				puts("transferfile():return");
+			}
 			return(-1);
 		}
 		write(output_fd,buffer,n);
@@ -219,7 +260,13 @@ int transferfile(char *path, int output_fd)
 	if (status == -1)
 	{
 		perror("ERRO: chamada close(): Erro no fechamento do arquivo: " );
+		if(DEBUG){
+			puts("transferfile():return");
+		}
 		return(-1);
+	}
+	if(DEBUG){
+		puts("transferfile():return");
 	}
 	return statp.st_size;
 }
@@ -229,10 +276,17 @@ int transferfile(char *path, int output_fd)
 */
 int parseini(struct config *c) // lê as configurações relacionadas a porta e endereço base do servidor salvas no arquivo server.ini
 {
+	if(DEBUG){
+		puts("parseini():start");
+	}
 	FILE *f;
 	f = fopen("server.ini", "r");
-	if(f == NULL)
+	if(f == NULL){
+		if(DEBUG){
+			puts("parseini():return");
+		}
 		return -1;
+	}
 
 	char line[82];
 	char *strp;
@@ -251,7 +305,9 @@ int parseini(struct config *c) // lê as configurações relacionadas a porta e 
 		else if(!strcmp(line, "base"))
 			strcpy(c->base, strtok(NULL, " "));
 	}
-
+	if(DEBUG){
+		puts("parseini():return");
+	}
 	return 0;
 }
 
@@ -260,10 +316,15 @@ int parseini(struct config *c) // lê as configurações relacionadas a porta e 
 */
 int parseRequest(struct request *req) //decodifica a mensagem HTTP recebida e salva nos parâmetros respectivo do request
 {
+	if(DEBUG){
+		puts("parseRequest():start");
+	}
 	req->cmd  = strtok(req->msg, " "); // Command (GET)
 	req->path = strtok(NULL, " "); // Path
 	req->http = strtok(NULL, "\n"); // HTTP
-
+	if(DEBUG){
+		puts("parseRequest():return");
+	}
 	return 0;
 }
 
@@ -271,17 +332,23 @@ int parseRequest(struct request *req) //decodifica a mensagem HTTP recebida e sa
 */
 int buildResponse(struct request *req, struct response *res)
 {
+	if(DEBUG){
+		puts("buildResponse():start");
+	}
 	int i;
 	int rescode;
 	struct stat statf;
 	FILE *f;
-	//if(composepath(res->base, req->path, res->path) < 0)
-	//	perror("Error creating object path");
-	strcpy(res->path, res->base);
-	strcat(res->path, req->path); //cria o endereço do arquivo
-  //FIXME
-	printf("%s\n", res->path);
+	char nPath[PATH_MAX];
+	nPath[0] = '\0';
+	printf("Path: %s\n", res->path);
+	printf("Base: %s\n", res->base);
+	composepath(res->path, res->base, nPath);
+	printf("Result: %s\n", nPath);
+	strcpy(res->path, nPath);
+	printf("Path: %s\n", res->path);
 	res->http = res->msg;
+
 
 	//análise de msgs de erro
 
@@ -365,6 +432,9 @@ int buildResponse(struct request *req, struct response *res)
 
 	if(rescode == 400 || rescode == 505 || rescode == 404){
 		fclose(f);
+		if(DEBUG){
+			puts("buildResponse():return");
+		}
 		return strlen(res->msg);
 	}
 	else
@@ -377,6 +447,9 @@ int buildResponse(struct request *req, struct response *res)
 				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
 				// gerar 	aqui a listagem dos diretorios //FIXME
 				fclose(f);
+				if(DEBUG){
+					puts("buildResponse():return");
+				}
 				return strlen(res->msg);
 			}
 		else
@@ -427,6 +500,9 @@ int buildResponse(struct request *req, struct response *res)
 			}
 		}
 		fclose(f);
+	}
+	if(DEBUG){
+		puts("buildResponse():return");
 	}
 	return i;
 }
