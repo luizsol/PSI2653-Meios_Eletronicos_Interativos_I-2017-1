@@ -40,6 +40,22 @@ char** pathsplitter(char * path, int * size){
 	if(DEBUG){
 		puts("pathsplitter():start");
 	}
+	if(path == NULL || strlen(path) == 0){
+		*size = 0;
+		if(DEBUG){
+			puts("pathsplitter():return");
+		}
+		return NULL;
+	}
+	if(strcmp(path, ".") == 0 || strcmp(path, "..") == 0){
+		char ** result = malloc(sizeof(char*));
+		result[0] = strdup(path);
+		*size = 1;
+		if(DEBUG){
+			puts("pathsplitter():return");
+		}
+		return result;
+	}
     char * nPath = strdup(path);
     char * buffer[strlen(path)]; //Just a placeholder
     char *token = strtok(nPath, "/");
@@ -53,6 +69,9 @@ char** pathsplitter(char * path, int * size){
     free(nPath);
     if(i == 0){
     	*size = i;
+    	if(DEBUG){
+			puts("pathsplitter():return");
+		}
     	return NULL;
     }
     if(DEBUG){

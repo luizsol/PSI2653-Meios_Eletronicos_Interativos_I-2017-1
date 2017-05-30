@@ -45,31 +45,33 @@ void * worker(void * arg){
 		status = read(E, req.msg, sizeof(req.msg));
 		if(status < 0)
 			perror("Error reading from TCP stream");
-		else if(status > 0)
+		else if(status > 0){
 			printf("%s\n", req.msg);
-		else
+			// Parse request
+			parseRequest(&req);
+
+			// Build response
+			len = buildResponse(&req, &res);
+
+			// HTTP 1.0 response
+			// status = transferfile("index.html", E);
+			// if(status < 0)
+			//	perror("Error writing to TCP stream");
+
+			printf("%s\n", res.msg);
+			status = write(E, res.msg, len);
+			if(status <= 0)
+				perror("Error writing to TCP stream");
+
+			// Close
+			status = close(E);
+			if(status)
+				perror("Error closing socket");
+		} else {
 			printf("Connection closed\n");
+		}
 
-		// Parse request
-		parseRequest(&req);
-
-		// Build response
-		len = buildResponse(&req, &res);
-
-		// HTTP 1.0 response
-		// status = transferfile("index.html", E);
-		// if(status < 0)
-		//	perror("Error writing to TCP stream");
-
-		printf("%s\n", res.msg);
-		status = write(E, res.msg, len);
-		if(status <= 0)
-			perror("Error writing to TCP stream");
-
-		// Close
-		status = close(E);
-		if(status)
-			perror("Error closing socket");
+		
 	}
 	return NULL;
 }
