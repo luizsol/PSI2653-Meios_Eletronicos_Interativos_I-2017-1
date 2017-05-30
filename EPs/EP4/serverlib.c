@@ -29,6 +29,43 @@
 
 #define DEBUG 1
 
+/* Path Splitter: divide um path em seus elementos
+ *    ex: ./home/.././Downloads/diretorio/ => 
+ *        {".", "home", "..", ".", "Downloads", "diretorio"}
+ *    path   : o path a ser avaliado
+ *    size: ponteiro para um inteiro que receberá o tamanho do retorno
+ *    retorno: um array com as strings resultantes da divisão
+ */
+char** pathsplitter(char * path, int * size){
+	if(DEBUG){
+		puts("pathsplitter():start");
+	}
+    char * nPath = strdup(path);
+    char * buffer[strlen(path)]; //Just a placeholder
+    char *token = strtok(nPath, "/");
+    int i = 0;
+    while(token){
+    	puts(token);
+    	buffer[i] = strdup(token);
+    	i++;
+    	token = strtok(NULL, "/");
+    } //TODO: verificar se string do tipo /home/user é processada corret.
+    if(i == 0){
+    	*size = i;
+    	return NULL;
+    }
+    char ** result = malloc(i * sizeof(char*));
+
+    for(int j = 0; j <= i; j++){
+    	result[j] = buffer[j];
+    }
+    *size = i;
+    if(DEBUG){
+		puts("pathsplitter():return");
+	}
+    return result;
+    
+}
 
 /* Compose Path: altera PATH
  *    oldpath: path original (ex: /home/jose/test
@@ -37,77 +74,31 @@
  *    newpath: path resultante da composicao de oldpath e path
  *             (ex: /home/jose, /tmp, /jome/jose/test/prog1)
  */
-int composepath(char *oldpath, char *path, char *newpath)
-{
+int composepath(char *oldpath, char *path, char *newpath){
 	if(DEBUG){
 		puts("composepath():start");
 	}
-	char * olddir;
-	char * oldbase;
-	char * oldpath1;
-	char * oldpath2;
-	char * dir;
-	char * base;
-	char * path1;
-	char * path2;
-	int    status;
-
-	oldpath1 = strdup(oldpath);
-	oldpath2 = strdup(oldpath);
-	olddir   = dirname(oldpath1);
-	oldbase  = basename(oldpath2);
-
-	path1 = strdup(path);
-	path2 = strdup(path);
-	dir   = dirname (path1);
-	base  = basename(path2);
-
-	strcpy(newpath,"/");
-
-	if(path[0]=='/')
-	{
-		strcpy(newpath,path);
-		status=0;
-	}
-	else if((strcmp(dir,".")==0) && (strcmp(base,".")==0))
-	{
-		strcpy(newpath,oldpath);
-		status=0;
-	}
-	else if((strcmp(dir,".")==0) && (strcmp(base,"..")==0))
-	{
-		strcpy(newpath,olddir);
-		status=0;
-	}
-	else if((strcmp(dir,".")==0) && (strcmp(oldbase,"/")==0))
-	{
-		strcpy(newpath,oldpath);
-		strcat(newpath,path);
-		status=0;
-	}
-	else if(strcmp(dir,".")==0)
-	{
-		strcpy(newpath,oldpath);
-		//Evitando a geração de path com duas / consecutivas
-		if(oldpath[strlen(oldpath)-1]!='/'){
-			strcat(newpath,"/");
+	int oldpatharraysize;
+	char ** oldpatharray = pathsplitter(oldpath, &oldpatharraysize);
+	int patharraysize;
+	char ** patharray = pathsplitter(path, &patharraysize);
+	if(oldpatharray != NULL){
+		for(int i = 0; i < oldpatharraysize; i++){
+			strcat(newpath, oldpatharray[i]);
+			strcat(newpath, "/");
 		}
-		strcat(newpath,path);
-		status=0;
 	}
-	else
-	{
-		strcpy(newpath,oldpath);
-		status=-1;
+	if(patharray != NULL){
+		for(int i = 0; i < patharraysize; i++){
+			strcat(newpath, patharray[i]);
+			strcat(newpath, "/");
+		}
 	}
-	free(oldpath1);
-	free(oldpath2);
-	free(path1);
-	free(path2);
+	newpath[strlen(newpath)-1] = '\0';
 	if(DEBUG){
 		puts("composepath():return");
 	}
-	return(status);
+	return 0;
 }
 
 
@@ -339,16 +330,9 @@ int buildResponse(struct request *req, struct response *res)
 	int rescode;
 	struct stat statf;
 	FILE *f;
-	char nPath[PATH_MAX];
-	nPath[0] = '\0';
-	printf("Path: %s\n", res->path);
-	printf("Base: %s\n", res->base);
-	composepath(res->path, res->base, nPath);
-	printf("Result: %s\n", nPath);
-	strcpy(res->path, nPath);
-	printf("Path: %s\n", res->path);
+	res->path[0] = '\0';
+	composepath(res->base, req->path, res->path);
 	res->http = res->msg;
-
 
 	//análise de msgs de erro
 
@@ -416,6 +400,7 @@ int buildResponse(struct request *req, struct response *res)
 		}
 	}
 
+	//OK até aqui
 	//Date:
 	res->date = res->http + strlen(res->http);
 
