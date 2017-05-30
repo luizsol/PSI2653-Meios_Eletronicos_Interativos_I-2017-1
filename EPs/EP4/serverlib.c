@@ -49,11 +49,15 @@ char** pathsplitter(char * path, int * size){
     	buffer[i] = strdup(token);
     	i++;
     	token = strtok(NULL, "/");
-    } //TODO: verificar se string do tipo /home/user é processada corret.
+    }
+    free(nPath);
     if(i == 0){
     	*size = i;
     	return NULL;
     }
+    if(DEBUG){
+		printf("pathsplitter(): i = %d\n", i);
+	}
     char ** result = malloc(i * sizeof(char*));
 
     for(int j = 0; j <= i; j++){
@@ -189,6 +193,47 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 	}
 }
 
+/* diretorioarquivo()
+ *    Define se um determinado path existe e, em caso de
+ *    existência, se ele aponta para um diretório (0), 
+ *    arquivo (1) ou outro (2). Caso não exista retorna
+ *    -1.
+ *    Fonte: https://stackoverflow.com/questions/3543231/how-to-find-out-if-a-file-or-directory-exists
+ */
+int diretorioarquivo(char * path){
+	if(DEBUG){
+		printf("diretorioarquivo(%s):start\n", path);
+	}
+	struct stat info;
+
+	if(lstat(path,&info) != 0) {
+		if(DEBUG){
+			printf("diretorioarquivo(%s):return\n (nao existe)\n", path);
+		}
+		return -1;
+	}
+	//so, it exists.
+
+	if(S_ISDIR(info.st_mode)) {
+		//it's a directory
+		if(DEBUG){
+			printf("diretorioarquivo(%s):return\n (existe: diretorio)\n", path);
+		}
+		return 0;
+	} else if(S_ISREG(info.st_mode)) {
+		//it's a file
+		if(DEBUG){
+			printf("diretorioarquivo(%s):return\n (existe: arquivo)\n", path);
+		}
+		return 1;
+	}
+	if(DEBUG){
+		printf("diretorioarquivo(%s):return\n (existe: outro)\n", path);
+	}
+	return 2;
+
+}
+
 
 /* transferfile()
  *    Realiza a leitura do conteudo de um arquivo, identificado
@@ -271,7 +316,7 @@ int parseini(struct config *c) // lê as configurações relacionadas a porta e 
 		puts("parseini():start");
 	}
 	FILE *f;
-	f = fopen("server.ini", "r");
+	f = fopen("./server.ini", "r");
 	if(f == NULL){
 		if(DEBUG){
 			puts("parseini():return");
@@ -329,7 +374,7 @@ int buildResponse(struct request *req, struct response *res)
 	int i;
 	int rescode;
 	struct stat statf;
-	FILE *f;
+	FILE *f = NULL;
 	res->path[0] = '\0';
 	composepath(res->base, req->path, res->path);
 	res->http = res->msg;
@@ -341,66 +386,73 @@ int buildResponse(struct request *req, struct response *res)
 	{
 		rescode = 400;
 		strcpy(res->http, "HTTP/1.0 400 Bad Request\r\n");
+		if(DEBUG){
+			puts("buildResponse():Bad request");
+		}
 	}
-	else 	if(strncmp(req->http, "HTTP/1.0", 8) != 0)
+	else 	if(strncmp(req->http, "HTTP/1.0", 8) != 0)// && strncmp(req->http, "HTTP/1.1", 8) != 0)
 	{
 		rescode = 505;
 		strcpy(res->http, "HTTP/1.0 505 HTTP Version Not Supported\r\n");
+		if(DEBUG){
+			puts("buildResponse():Not Supported");
+		}
 	}
 	else
 	{
-		f = fopen(res->path, "r");
-		if(f == NULL)
-		{
+		//TODO: primeiro ver se é diretório:
+		int tipo = diretorioarquivo(res->path);
+		
+		if(tipo == -1) {
+			
 			rescode = 404;
 			strcpy(res->http, "HTTP/1.0 404 Not Found\r\n");
-		}
-		else	if(f != NULL)
-		{
-			stat(res->path, &statf);
 
-			// Verificação se o arquivo em res->path é diretorio:
-			if(S_ISDIR(statf.st_mode))
-			{
-				fclose(f);
-				strcpy(res->pathindex, res->path);
-				strcat(res->pathindex, "/index.html"); //FIXME
-
-				f = fopen(res->pathindex, "r");
+		} else {
+			
+			if(tipo == 0){ // res->path é diretorio:
 				// Se sim, verificação se há um arquivo index.html no diretorio
-				if(f == NULL)
-				{
+				composepath(res->path, "/index.html", res->pathindex);
+				int existe = diretorioarquivo(res->pathindex);
+
+				if(existe != 1) {
 					// Se não houver, manda a listagem dos diretorios
 					rescode = 201;
 					perror("Error opening file");
-				}
-				else if (f != NULL)
-				{
+				} else if(existe == 1){
 					// Se houver, manda o index.html
+					f = fopen(res->pathindex, "r");
 					rescode = 200;
 					strcpy(res->path, res->pathindex);
 				}
-			}
-			else if(S_ISREG(statf.st_mode))
-			{		// Verificação do tipo (extensão) do arquivo:
+			} else if(tipo == 1) { //res->path é arquivo:
+				// Verificação do tipo (extensão) do arquivo:
 				strncpy(res->ext, &res->path[strlen(res->path) - 6], 6);
 				res->endext = strtok(res->ext,".");
 				res->endext = strtok(NULL,"");
 
-				if(strncmp(res->endext, "html", 4) == 0)
+				if(strncmp(res->endext, "html", 4) == 0){
 					rescode = 200;
-				else if(strncmp(res->endext, "txt", 3) == 0)
+					f = fopen(res->path, "r"); 
+				}
+				else if(strncmp(res->endext, "txt", 3) == 0){
 					rescode = 202;
-				else if(strncmp(res->endext, "jpg", 3) == 0)
+					f = fopen(res->path, "r"); 
+				}
+				else if(strncmp(res->endext, "jpg", 3) == 0){
 					rescode = 203;
-				else if(strncmp(res->endext, "png", 3) == 0)
+					f = fopen(res->path, "r"); 
+				}
+				else if(strncmp(res->endext, "png", 3) == 0){
 					rescode = 204;
+					f = fopen(res->path, "r"); 
+				}
 			}
 			strcpy(res->http, "HTTP/1.0 200 OK\r\n");
 		}
 	}
 
-	//OK até aqui
+	
 	//Date:
 	res->date = res->http + strlen(res->http);
 
@@ -416,29 +468,27 @@ int buildResponse(struct request *req, struct response *res)
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
 
 	if(rescode == 400 || rescode == 505 || rescode == 404){
-		fclose(f);
+		puts("Entrou no if");
+
+		//fclose(f); //FIXME: segmentation fault nessa linha
 		if(DEBUG){
 			puts("buildResponse():return");
 		}
 		return strlen(res->msg);
-	}
-	else
-	{		//Last Modified:
+	} else {		//Last Modified:
+		puts("Entrou no else");
 		res->lastmod = res->server + strlen(res->server);
-		if(rescode == 201)
-			{		// Se precisar mandar a listagem dos diretorios, lastmod = localtime
-				strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
-				res->type = res->lastmod + strlen(res->lastmod);
-				sprintf(res->type, "Content-Type: text/html\r\n\r\n");
-				// gerar 	aqui a listagem dos diretorios //FIXME
-				fclose(f);
-				if(DEBUG){
-					puts("buildResponse():return");
-				}
-				return strlen(res->msg);
+		if(rescode == 201){		
+			// Se precisar mandar a listagem dos diretorios, lastmod = localtime
+			strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
+			res->type = res->lastmod + strlen(res->lastmod);
+			sprintf(res->type, "Content-Type: text/html\r\n\r\n");
+			generatedirhtml(res->path, res->http);
+			if(DEBUG){
+				puts("buildResponse():return");
 			}
-		else
-		{		// Se não, normal:
+			return strlen(res->msg);
+		} else {		// Se não, normal:
 			stat(res->path, &statf);
 			servertime = gmtime(&statf.st_mtime);
 			strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\r\n",
@@ -460,13 +510,11 @@ int buildResponse(struct request *req, struct response *res)
 			else if(rescode == 203)
 			{
 				sprintf(res->type, "Content-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\n\r\n");
-				fclose(f);
 				f = fopen(res->path, "rb");
 			}
 			else if(rescode == 204)
 			{
 				sprintf(res->type, "Content-Type: image/png\r\nContent-Transfer-Encoding: binary\r\n\r\n");
-				fclose(f);
 				f = fopen(res->path, "rb");
 			}
 
@@ -484,10 +532,12 @@ int buildResponse(struct request *req, struct response *res)
 					i += j;
 			}
 		}
-		fclose(f);
 	}
 	if(DEBUG){
 		puts("buildResponse():return");
+	}
+	if(f != NULL){
+		fclose(f);
 	}
 	return i;
 }

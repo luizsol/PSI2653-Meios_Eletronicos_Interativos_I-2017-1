@@ -11,6 +11,7 @@
 #include "htmllib.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <dirent.h>
 
 #define HTTPADDR "http://localhost:8080"
@@ -86,7 +87,7 @@ int generatepart2(char *path, char *output){
 		int k = i;
 		int erase = 0;
 		for(unsigned int j = 1; j < strlen(pathdiretorios[i]); j++){
-			if(k == 0){
+			if(k == 0 && pathdiretorios[i][j] == '/'){
 				erase = 1;
 			}
 			if(erase){
@@ -106,7 +107,8 @@ int generatepart2(char *path, char *output){
 		//Adicionando as tags html à resposta
 		strcat(output, "<a href=\"");
 		strcat(output, HTTPADDR);
-		strcat(output, pathdiretorios[i]);
+		strcat(output, pathdiretorios[i]+1);
+		strcat(output, "/");
 		strcat(output, "\">");
 		strcat(output, nomediretorios[i]);
 		strcat(output, "</a> ");
@@ -142,7 +144,7 @@ int generatepart4(char *path, char *output){
 				strcmp(dir->d_name,"..")){
 					strcat(output, "<li><a href=\"");
 					strcat(output, HTTPADDR);
-					strcat(output, path);
+					strcat(output, path+1);
 					if(output[strlen(output)-1] != '/'){
 						strcat(output, "/");
 					}
@@ -165,6 +167,14 @@ int generatepart4(char *path, char *output){
  */
 int generatedirhtml(char *path, char *output){
 	strcat(output, HTMLPART1);
+	// char * nPath;
+	// if(strlen(path) > 2){ 
+	// 	if(path[0] == '.' && path[1] == '/'){// ./path/do/arquivo
+	// 		nPath = strdup((path+2));
+	// 	} else {
+	// 		nPath = strdup(path);
+	// 	}
+	// }
 	if(generatepart2(path, output) == -1){
 		return -1;
 	}
