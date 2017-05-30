@@ -107,7 +107,10 @@ int generatepart2(char *path, char *output){
 		//Adicionando as tags html à resposta
 		strcat(output, "<a href=\"");
 		strcat(output, HTTPADDR);
-		strcat(output, pathdiretorios[i]+1);
+		if(pathdiretorios[i][0] == '.'){
+			strcat(output, "/");
+		}
+		strcat(output, pathdiretorios[i]);
 		strcat(output, "/");
 		strcat(output, "\">");
 		strcat(output, nomediretorios[i]);
@@ -144,7 +147,11 @@ int generatepart4(char *path, char *output){
 				strcmp(dir->d_name,"..")){
 					strcat(output, "<li><a href=\"");
 					strcat(output, HTTPADDR);
-					strcat(output, path+1);
+					if(path[0] == '.'){
+						strcat(output, "/");
+					}
+					strcat(output, path);
+					
 					if(output[strlen(output)-1] != '/'){
 						strcat(output, "/");
 					}
