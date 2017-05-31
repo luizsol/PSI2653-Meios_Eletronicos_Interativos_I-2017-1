@@ -75,7 +75,7 @@ char** pathsplitter(char * path, int * size){
     }
     char ** result = malloc(i * sizeof(char*));
 
-    for(int j = 0; j <= i; j++){
+    for(int j = 0; j < i; j++){
     	result[j] = buffer[j];
     }
     *size = i;
@@ -490,7 +490,7 @@ int buildResponse(struct request *req, struct response *res)
 	puts("3");
 	rawtime = time(NULL);
 	puts("4");
-	servertime = gmtime(&rawtime); //FIXME: dá merda aqui!
+	servertime = gmtime(&rawtime);
 	puts("5");
 	strftime(res->date, 90, "Date: %a, %d %b %Y %T %Z\r\n", servertime);
 	puts("6");
