@@ -30,7 +30,7 @@
 #define DEBUG 1
 
 /* Path Splitter: divide um path em seus elementos
- *    ex: ./home/.././Downloads/diretorio/ => 
+ *    ex: ./home/.././Downloads/diretorio/ =>
  *        {".", "home", "..", ".", "Downloads", "diretorio"}
  *    path   : o path a ser avaliado
  *    size: ponteiro para um inteiro que receberá o tamanho do retorno
@@ -83,7 +83,7 @@ char** pathsplitter(char * path, int * size){
 		puts("pathsplitter():return");
 	}
     return result;
-    
+
 }
 
 /* Compose Path: altera PATH
@@ -210,7 +210,7 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
 
 /* diretorioarquivo()
  *    Define se um determinado path existe e, em caso de
- *    existência, se ele aponta para um diretório (0), 
+ *    existência, se ele aponta para um diretório (0),
  *    arquivo (1) ou outro (2). Caso não exista retorna
  *    -1.
  *    Fonte: https://stackoverflow.com/questions/3543231/how-to-find-out-if-a-file-or-directory-exists
@@ -417,7 +417,7 @@ int buildResponse(struct request *req, struct response *res)
 			puts("buildResponse():Request Valido, prosseguindo...");
 		}
 		int tipo = diretorioarquivo(res->path); //Determinando se o path é válido e seu tipo
-		
+
 		if(tipo == -1) { //Path inexistente
 			if(DEBUG){
 				puts("buildResponse():Path inexistente");
@@ -426,7 +426,7 @@ int buildResponse(struct request *req, struct response *res)
 			strcpy(res->http, "HTTP/1.0 404 Not Found\r\n");
 
 		} else { //Path existe
-			
+
 			if(tipo == 0){ // res->path é diretorio:
 				//Verificar se existe um arquivo index.html no diretorio
 				composepath(res->path, "/index.html", res->pathindex);
@@ -480,7 +480,7 @@ int buildResponse(struct request *req, struct response *res)
 	}
 
 
-	
+
 	//Date:
 	res->date = res->http + strlen(res->http);
 	puts("1");
@@ -488,11 +488,11 @@ int buildResponse(struct request *req, struct response *res)
 	puts("2");
 	struct tm *servertime;
 	puts("3");
-	time(&rawtime);
+	rawtime = time(NULL);
 	puts("4");
-	servertime = localtime(&rawtime); //FIXME: dá merda aqui!
+	servertime = gmtime(&rawtime); //FIXME: dá merda aqui!
 	puts("5");
-	strftime(res->date, 90, "Date: %a, %d %b %Y %T %g\r\n", servertime);
+	strftime(res->date, 90, "Date: %a, %d %b %Y %T %Z\r\n", servertime);
 	puts("6");
 	//Server:
 	res->server = res->date + strlen(res->date);
@@ -514,7 +514,7 @@ int buildResponse(struct request *req, struct response *res)
 	} else { //Last Modified:
 		res->lastmod = res->server + strlen(res->server);
 		if(rescode == 201){	//Listando o diretório
-			// Se precisar mandar a listagem dos diretorios, lastmod = localtime
+			// Se precisar mandar a listagem dos diretorios, lastmod = gmtime
 			strftime(res->lastmod, 90, "Last-Modified: %a, %d %b %Y\r\n", servertime);
 			res->type = res->lastmod + strlen(res->lastmod);
 			sprintf(res->type, "Content-Type: text/html\r\n\r\n");
@@ -528,7 +528,7 @@ int buildResponse(struct request *req, struct response *res)
 				puts("buildResponse():Preparando-se para envio do arquivo");
 			}
 			// Se não, normal:
-			stat(res->path, &statf);// Chamada de sistema para obter as informações sobre o arquivo 
+			stat(res->path, &statf);// Chamada de sistema para obter as informações sobre o arquivo
 									// apontado por res->path e armazena as informações em statf
 			servertime = gmtime(&statf.st_mtime);
 			strftime(res->lastmod , 90, "Last-Modified: %a, %d %b %Y\r\n",
@@ -551,7 +551,7 @@ int buildResponse(struct request *req, struct response *res)
 				if(DEBUG){
 					puts("buildResponse():abrindo arquivo HTML");
 				}
-				f = fopen(res->path, "r"); 
+				f = fopen(res->path, "r");
 			} else if(rescode == 202){ //TXT
 				sprintf(res->type, "Content-Type: text\r\n\r\n");
 				if(f != NULL){
@@ -560,7 +560,7 @@ int buildResponse(struct request *req, struct response *res)
 				if(DEBUG){
 					puts("buildResponse():abrindo arquivo TXT");
 				}
-				f = fopen(res->path, "r"); 
+				f = fopen(res->path, "r");
 			} else if(rescode == 203){ //JPEG
 				sprintf(res->type, "Content-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\n\r\n");
 				if(f != NULL){
@@ -582,7 +582,7 @@ int buildResponse(struct request *req, struct response *res)
 			}
 
 			res->object = res->type + strlen(res->type);
-			
+
 			//Lê arquivo a ser enviado
 			i = strlen(res->msg);
 			if(DEBUG){
