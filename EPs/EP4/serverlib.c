@@ -263,7 +263,7 @@ int transferfile(char *path, int output_fd)
 	int          input_fd;     // input file descriptor
 	int          status;
 	int          n;
-	char         buffer[BUFFERSIZE];
+	char         *buffer = malloc(BUFFERSIZE*sizeof(char)); //FIX provisorio para tamanhos maiores de arquivos
 	struct stat  statp;
 
 	input_fd = open(path,O_RDONLY);
@@ -429,6 +429,8 @@ int buildResponse(struct request *req, struct response *res)
 
 			if(tipo == 0){ // res->path é diretorio:
 				//Verificar se existe um arquivo index.html no diretorio
+				memset(res->pathindex,0,strlen(res->pathindex));
+				puts("huehue");
 				composepath(res->path, "/index.html", res->pathindex);
 				int existe = diretorioarquivo(res->pathindex);
 
