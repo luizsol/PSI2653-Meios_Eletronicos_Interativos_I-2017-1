@@ -102,7 +102,7 @@ int generatepart2(char *path, char *output){
 		} else { //Copiando o nome somente do subdiretório
 			nomediretorios[i] = 
 				strdup((pathdiretorios[i] 
-							+ strlen(pathdiretorios[i-1])));
+					+ strlen(pathdiretorios[i-1])));
 		}
 		//Adicionando as tags html à resposta
 		strcat(output, "<a href=\"");
@@ -127,11 +127,12 @@ int generatepart2(char *path, char *output){
  *    Exemplos:
  *    path = "/home/user/arquivos/" =>
  *    output = 
- *    "<li><a href="http://localhost:8080/home/user/arquivos/foto1.jpg">foto1.jpg</a></li>
- *     <li><a href="http://localhost:8080/home/user/arquivos/texto.txt">texto.txt</a></li>
- *     <li><a href="http://localhost:8080/home/user/arquivos/subdiretorio/">subdiretorio/</a></li>  
- *    "
- *
+ *"<li><a 
+href="http://localhost:8080/home/user/arquivos/foto1.jpg">foto1.jpg</a></li>
+ *<li><a 
+href="http://localhost:8080/home/user/arquivos/texto.txt">texto.txt</a></li>
+ *<li><a href=
+http://localhost:8080/home/user/arquivos/subdiretorio/">subdiretorio/</a></li>  
  *    path: diretorio a ser avaliado
  *    output: string na qual sera apensado o resultado
  *    retorno: o resultado da operação

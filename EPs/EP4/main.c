@@ -1,11 +1,11 @@
-/* -----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
  * Version:     0.0 (2017-05-24)
  * Date:        2017-05-24
  * Description: Exercício 4 de PSI2653.
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 
 #include <stdio.h>
@@ -135,7 +135,7 @@ int main()
 		int size, newsd;
 		struct sockaddr_in caddr;
 
-		newsd = accept(sd, (struct sockaddr *) &caddr, (socklen_t *) &size);
+		newsd=accept(sd,(struct sockaddr*) &caddr,(socklen_t *) &size);
 		if(newsd < 0)
 			perror("Error accepting connection");
 

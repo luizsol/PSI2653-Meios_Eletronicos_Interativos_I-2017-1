@@ -19,7 +19,8 @@
 
 struct config
 {
-	char base[PATH_MAX]; // diretório base do servidor complementado pelo path fornecido pela url
+	 
+	char base[PATH_MAX]; // diretório base do servidor
 	unsigned short port; // porta de conexão do servidor
 };
 
@@ -34,7 +35,7 @@ struct request
 struct response
 {
 	char msg[BUFFERSIZE]; // msg a ser enviada
-	char base[PATH_MAX]; // diretório base do servidor complementado pelo path fornecido pela url
+	char base[PATH_MAX]; // diretório base do servidor 
 	char path[PATH_MAX]; // path completo
 	char pathindex[PATH_MAX];
 	char ext[6];
