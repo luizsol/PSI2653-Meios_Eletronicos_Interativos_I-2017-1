@@ -19,8 +19,7 @@ Biblioteca de filas sincronizadas para distribuição de threads.
 
 ## main
 
-Inicializa o servidor, cria os threads, chama as funções de 
-interpretação do serverlib e envia resposta. 
+Responsável por inicializar o servidor, criar os threads, chamar as funções de interpretação do serverlib e enviar resposta.
 
 ## htmllib
 
