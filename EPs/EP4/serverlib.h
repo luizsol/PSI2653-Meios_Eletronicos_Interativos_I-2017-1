@@ -19,7 +19,7 @@
 
 struct config
 {
-	 
+
 	char base[PATH_MAX]; // diretório base do servidor
 	unsigned short port; // porta de conexão do servidor
 };
@@ -35,11 +35,9 @@ struct request
 struct response
 {
 	char msg[BUFFERSIZE]; // msg a ser enviada
-	char base[PATH_MAX]; // diretório base do servidor 
+	char base[PATH_MAX]; // diretório base do servidor
 	char path[PATH_MAX]; // path completo
 	char pathindex[PATH_MAX];
-	char ext[6];
-	char *endext;
 	char *http; // versão do HTTP
 	char *date; // Date
 	char *server; // Server name
@@ -55,6 +53,7 @@ char *getcurrentdir(char *path, int pathsize);
 void append(char *dest, int buffersize, char *src);
 void lista_diretorio(char *path, char *buffer, int buffersize);
 int transferfile(char *path, int output_fd);
+int verifyExtension(char *path);
 int parseini(struct config *c);
 int parseRequest(struct request *req);
 int buildResponse(struct request *req, struct response *res);
