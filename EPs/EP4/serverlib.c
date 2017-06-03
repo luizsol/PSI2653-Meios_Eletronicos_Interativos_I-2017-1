@@ -412,6 +412,10 @@ int verifyExtension(char *path)
 			}
 			return 204;
 		}
+		else
+		{		// Extensão não suportada:
+			return 400;
+		}
 	}
 	return -1;
 }
