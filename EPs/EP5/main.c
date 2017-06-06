@@ -1,11 +1,11 @@
-/* ----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-05-24)
- * Date:        2017-05-24
- * Description: Exercício 4 de PSI2653.
- * ----------------------------------------------------------------------------
+ * Version:     0.0 (2017-06-05)
+ * Date:        2017-06-05
+ * Description: Exercício 5 de PSI2653.
+ * -----------------------------------------------------------------------------
  */
 
 #include <stdio.h>
@@ -22,7 +22,7 @@
 
 #define DEFAULT_PORT 8080
 #define DEFAULT_BASE "."
-#define WORKER_THREADS 1
+#define WORKER_THREADS 3
 
 
 struct queue requestQueue;
@@ -52,11 +52,6 @@ void * worker(void * arg){
 
 			// Build response
 			len = buildResponse(&req, &res);
-
-			// HTTP 1.0 response
-			// status = transferfile("index.html", E);
-			// if(status < 0)
-			//	perror("Error writing to TCP stream");
 
 			printf("%s\n", res.msg);
 			status = write(E, res.msg, len);
