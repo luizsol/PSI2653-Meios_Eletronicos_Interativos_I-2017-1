@@ -1,10 +1,44 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<title> EP5 </title> 
+	<meta charset="UTF-8"> 
+</header>
 <body>
 
-<h1>My First Heading</h1>
+<h1>EP5</h1>
 
-<p>My first paragraph.</p>
+Valor:
+<progress max="100" value="80"></progress>
+<br><br>
+
+<form >
+<fieldset>
+	Intensidade:
+	<input type="range" name="Intensidade" min="0" max="100" value="50" >
+	<input type="submit" value="Enviar">
+</fieldset>
+
+<br>
+
+<fieldset>
+	Modo:
+	<input type="radio" checked="checked" name="Modo" value="Automático">
+	Automático
+	<input type="radio" checked="checked" name="Modo" value="Manual">
+	Manual
+	<input type="submit" value="Enviar">
+</fieldset>
+
+<br>
+
+<fieldset>
+	Limiar:
+	<input type="range" name="Limiar" min="0" max="100" value="50" >
+	<input type="submit" value="Enviar">
+</fieldset>
+
+</form>
 
 </body>
 </html>
