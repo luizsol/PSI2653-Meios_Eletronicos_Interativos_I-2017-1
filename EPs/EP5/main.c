@@ -21,7 +21,7 @@
 
 
 #define DEFAULT_PORT 8080
-#define DEFAULT_BASE "."
+#define DEFAULT_BASE "./html"
 #define WORKER_THREADS 3
 
 
