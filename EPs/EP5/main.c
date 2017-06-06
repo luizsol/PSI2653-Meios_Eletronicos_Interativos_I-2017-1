@@ -116,7 +116,7 @@ int main()
 	}
 
 	// Queue
-	initQueue(&requestQueue);
+	initQueue(&requestQueue, 10);
 
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];

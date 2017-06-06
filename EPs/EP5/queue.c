@@ -3,7 +3,7 @@
  * File:        queue.c
  * Author:      Gabriel Crabbé, Tiago Azevedo
  * Version:     1.0 (2017-05-24)
- * Date:        2017-05-24
+ * Date:        2017-06-05
  * Description: EP 2 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -11,16 +11,19 @@
 #include "queue.h"
 
 
-void initQueue(struct queue *Q)
+void initQueue(struct queue *Q, int qsize)
 {
 	// Struct init
 	Q->first   = 0;
 	Q->last    = 0;
 	Q->nItems  = 0;
-	Q->maxsize = QUEUE_LENGTH;
+	Q->maxsize = qsize;
+
+	// Memory allocation
+	Q->buffer = (int *) malloc(sizeof(int) * qsize);
 
 	// Semaphore init
-	sem_init(&Q->freeItems, 0, QUEUE_LENGTH);
+	sem_init(&Q->freeItems, 0, qsize);
 	sem_init(&Q->fullItems, 0, 0);
 	sem_init(&Q->mutex, 0, 1);
 }
@@ -77,4 +80,11 @@ int removeQueue(struct queue *Q)
 	sem_post(&Q->mutex);
 	sem_post(&Q->freeItems);
 	return item;
+}
+
+
+void deinitQueue(struct queue *Q)
+{
+	// Memory deallocation
+	free((void *)Q->buffer);
 }
