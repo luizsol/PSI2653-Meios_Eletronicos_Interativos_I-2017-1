@@ -213,7 +213,7 @@ void lista_diretorio(char *path, char *buffer, int buffersize)
  *    existência, se ele aponta para um diretório (0),
  *    arquivo (1) ou outro (2). Caso não exista retorna
  *    -1.
- *    Fonte: 
+ *    Fonte:
 goo.gl/K5A3xG
  */
 int diretorioarquivo(char * path){
@@ -265,7 +265,7 @@ int transferfile(char *path, int output_fd)
 	int          status;
 	int          n;
 	//FIX provisorio para tamanhos maiores de arquivos
-	char         *buffer = malloc(BUFFERSIZE*sizeof(char)); 
+	char         *buffer = malloc(BUFFERSIZE*sizeof(char));
 	struct stat  statp;
 
 	input_fd = open(path,O_RDONLY);
@@ -329,7 +329,7 @@ int transferfile(char *path, int output_fd)
 lê as configurações relacionadas a porta e
  endereço base do servidor salvas no arquivo server.ini
 */
-int parseini(struct config *c) 
+int parseini(struct config *c)
 {
 	if(DEBUG){
 		puts("parseini():start");
@@ -367,11 +367,68 @@ int parseini(struct config *c)
 }
 
 
+/**
+ * verifyExtension
+ */
+int verifyExtension(char *path)
+{	// Verificação do tipo (extensão) do arquivo:
+	char ext[6];
+	char *endext;
+	strncpy(ext, &path[strlen(path)-6],6);
+
+	endext = strpbrk(ext,".");
+	if(endext == NULL)
+	{	// arquivo não tem ponto
+		return 400;
+	}
+	else
+	{
+		endext = endext + 1;
+		if(strncmp(endext, "html", 4) == 0)
+		{
+			if(DEBUG)
+			{
+				puts("buildResponse():Path para html");
+			}
+			return 200;
+		}
+		else if(strncmp(endext, "txt", 3) == 0)
+		{
+			if(DEBUG)
+			{
+				puts("buildResponse():Path para txt");
+			}
+			return 202;
+		}
+		else if(strncmp(endext, "jpg", 3) == 0)
+		{
+			if(DEBUG)
+			{
+				puts("buildResponse():Path para jpg");
+			}
+			return 203;
+		}
+		else if(strncmp(endext, "png", 3) == 0)
+		{
+			if(DEBUG){
+				puts("buildResponse():Path para png");
+			}
+			return 204;
+		}
+		else
+		{		// Extensão não suportada:
+			return 400;
+		}
+	}
+	return -1;
+}
+
+
 /* parseRequest()
-decodifica a mensagem HTTP recebida 
+decodifica a mensagem HTTP recebida
 e salva nos parâmetros respectivos do request
 */
-int parseRequest(struct request *req) 
+int parseRequest(struct request *req)
 {
 	if(DEBUG){
 		puts("parseRequest():start");
@@ -387,7 +444,7 @@ int parseRequest(struct request *req)
 
 /* buildResponse()
 Constrói a resposta do servidor
-a partir dos parâmetros do request 
+a partir dos parâmetros do request
 
 */
 int buildResponse(struct request *req, struct response *res)
@@ -415,7 +472,7 @@ int buildResponse(struct request *req, struct response *res)
 	else if(strncmp(req->http, "HTTP/1.0", 8) != 0)
 	{
 		rescode = 505;
-		strcpy(res->http, 
+		strcpy(res->http,
 		"HTTP/1.0 505 HTTP Version Not Supported\r\n");
 
 		if(DEBUG){
@@ -428,7 +485,7 @@ int buildResponse(struct request *req, struct response *res)
 			puts("buildResponse():Request Valido, prosseguindo");
 		}
 		//Determinando se o path é válido e seu tipo
-		int tipo = diretorioarquivo(res->path); 
+		int tipo = diretorioarquivo(res->path);
 
 		if(tipo == -1) { //Path inexistente
 			if(DEBUG){
@@ -443,20 +500,20 @@ int buildResponse(struct request *req, struct response *res)
 			//Verificar se existe arquivo index.html no diretorio
 				memset(res->pathindex,0,
 				strlen(res->pathindex));
-				
+
 				puts("huehue");
 				composepath(res->path,
 				"/index.html",res->pathindex);
 
 				int existe = diretorioarquivo(res->pathindex);
 
-				if(existe != 1) { 
+				if(existe != 1) {
 			//Não existe index.html, enviar a listagem do diretório
 					rescode = 201;
 					if(DEBUG){
 				   puts("buildResponse():dir sem index.html");
 					}
-				} else if(existe == 1){ 
+				} else if(existe == 1){
 				//Existe index.html. Envia-lo
 					rescode = 200;
 					strcpy(res->path, res->pathindex);
@@ -466,59 +523,26 @@ int buildResponse(struct request *req, struct response *res)
 				}
 			} else if(tipo == 1) { //res->path é um arquivo:
 				// Verificação do tipo (extensão) do arquivo:
-				strncpy(res->ext,
-				&res->path[strlen(res->path)-6],6);
-
-				res->endext = strtok(res->ext,".");
-				res->endext = strtok(NULL,"");
-
-				if(strncmp(res->endext, "html", 4) == 0){
-					rescode = 200;
-					if(DEBUG){
-					puts("buildResponse():Path para html");
-					}
-				}
-				else if(strncmp(res->endext, "txt", 3) == 0){
-					rescode = 202;
-					if(DEBUG){
-					puts("buildResponse():Path para txt");
-					}
-				}
-				else if(strncmp(res->endext, "jpg", 3) == 0){
-					rescode = 203;
-					if(DEBUG){
-					puts("buildResponse():Path para jpg");
-					}
-				}
-				else if(strncmp(res->endext, "png", 3) == 0){
-					rescode = 204;
-					if(DEBUG){
-					puts("buildResponse():Path para png");
-					}
-				}
+				rescode = verifyExtension(res->path);
+				if(rescode == -1)
+					printf("Erro na função verifyExtension");
 			}
-			strcpy(res->http, "HTTP/1.0 200 OK\r\n");
+			if(rescode == 400)
+				strcpy(res->http, "HTTP/1.0 400 Bad Request\r\n");
+			else
+				strcpy(res->http, "HTTP/1.0 200 OK\r\n");
 		}
 	}
 
-
-
 	//Date:
 	res->date = res->http + strlen(res->http);
-	puts("1");
 	time_t rawtime;
-	puts("2");
 	struct tm *servertime;
-	puts("3");
 	rawtime = time(NULL);
-	puts("4");
 	servertime = gmtime(&rawtime);
-	puts("5");
 	strftime(res->date, 90, "Date: %a, %d %b %Y %T %Z\r\n", servertime);
-	puts("6");
 	//Server:
 	res->server = res->date + strlen(res->date);
-	puts("7");
 	sprintf(res->server, "Server: MEI/1.0.0 (Unix)\r\n");
 
 	if(DEBUG){
@@ -537,7 +561,7 @@ int buildResponse(struct request *req, struct response *res)
 		res->lastmod = res->server + strlen(res->server);
 		if(rescode == 201){	//Listando o diretório
 		// Se precisar mandar a listagem dos diretorios,lastmod=gmtime
-			strftime(res->lastmod, 90, 
+			strftime(res->lastmod, 90,
 			"Last-Modified: %a, %d %b %Y\r\n", servertime);
 			res->type = res->lastmod + strlen(res->lastmod);
 			sprintf(res->type, "Content-Type: text/html\r\n\r\n");
@@ -552,10 +576,10 @@ int buildResponse(struct request *req, struct response *res)
 			}
 			// Se não, normal:
 
-			// Chamada de sistema para obter 
+			// Chamada de sistema para obter
 			//as informações sobre o arquivo
 			stat(res->path, &statf);
-			//apontado por res->path e 
+			//apontado por res->path e
 			//armazena as informações em statf
 			servertime = gmtime(&statf.st_mtime);
 			strftime(res->lastmod , 90,
@@ -573,7 +597,7 @@ int buildResponse(struct request *req, struct response *res)
 
 			//Content Type:
 			if(rescode == 200){ //HTML
-				sprintf(res->type, 
+				sprintf(res->type,
 				"Content-Type: text/html\r\n\r\n");
 				if(f != NULL){
 					fclose(f);
@@ -592,7 +616,7 @@ int buildResponse(struct request *req, struct response *res)
 				}
 				f = fopen(res->path, "r");
 			} else if(rescode == 203){ //JPEG
-				sprintf(res->type, 
+				sprintf(res->type,
       "Content-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\n\r\n");
 				if(f != NULL){
 					fclose(f);
@@ -602,7 +626,7 @@ int buildResponse(struct request *req, struct response *res)
 				}
 				f = fopen(res->path, "rb");
 			} else if(rescode == 204){ //PNG
-				sprintf(res->type, 
+				sprintf(res->type,
       "Content-Type: image/png\r\nContent-Transfer-Encoding: binary\r\n\r\n");
 				if(f != NULL){
 					fclose(f);
