@@ -11,21 +11,21 @@
 #ifndef LDR_H
 #define LDR_H
 
+#define UPERIOD 500000 // Período entre observações (500[ms])
 
-#include <linux/limits.h>
+#include "lumiarlib.h"
+//Para instalar wiringPi:
+//git clone git://git.drogon.net/wiringPi
+//cd wiringPi
+//./build
 
 
-#define INI_DEFAULT_LDR_HIGH 0xFFFFFFFFu
-#define INI_DEFAULT_LDR_LOW  0x00000000u
-
-/**
- * Guarda os valores de calibração.
- */
-struct calibration
-{
-	unsigned int high;
-	unsigned int low;
-};
-
+/** 
+ * Inicializa e executa a thread responsável por calcular o valor da 
+ * luminosidade calculado pelo ldr
+ *
+ * @return o status da inicialização. 0 => ok, -1 erro
+*/
+int ldr_initandrun(void);
 
 #endif /* LDR_H */

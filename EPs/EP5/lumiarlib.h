@@ -24,6 +24,9 @@
 #define INI_DEFAULT_LDR_HIGH 0xFFFFFFFFu
 #define INI_DEFAULT_LDR_LOW  0x00000000u
 
+#define LDR_OUT_PIN 	1 // Defines dos pinos utilizados pelo LDR
+#define LDR_IN_PIN 		2 // Podemos alterar para que sejam definidos no .ini
+
 
 /**
  * Guarda as configurações do arquivo ini.
@@ -46,6 +49,14 @@ struct calibration
 	unsigned int low;
 };
 
+struct calibration calibracao; // Escrever os valores de calibração aqui
+
+// Variáveis de LDR
+unsigned int luminosidade; // Valor lido pelo LDR baseado na calibração
+unsigned int ldr_driver_running;	// Status da thread do driver de ldr.
+								// Escreva 0 para parar
+
+const int ldr_in_pin, ldr_out_pin; // LDR le essas variáveis para inicializar IO
 
 int parseini(struct config *c);
 

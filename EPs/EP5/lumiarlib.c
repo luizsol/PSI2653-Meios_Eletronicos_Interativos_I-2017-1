@@ -60,6 +60,10 @@ int parseini(struct config *c)
 		else
 			count--; /* Do not increase count in this iteration */
 	}
+	
+	// Definindo valor dos pinos para LDR. Se quiserem, podem definir no parse.ini
+	ldr_in_pin = LDR_IN_PIN;
+	ldr_out_pin = LDR_OUT_PIN;
 
 	return count;
 }
