@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
- * Title:       main
- * File:        main.c
+ * Title:       webserver
+ * File:        webserver.c
  * Author:      Gabriel Crabbé
  * Version:     0.0 (2017-06-05)
  * Date:        2017-06-05
@@ -16,21 +16,19 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include "webserver.h"
 #include "serverlib.h"
 #include "queue.h"
-
-
-#define DEFAULT_PORT 8080
-#define DEFAULT_BASE "./html"
-#define WORKER_THREADS 3
 
 
 struct queue requestQueue;
 
 
-/* worker thread
-*/
-void * worker(void * arg){
+/**
+ * Thread para processamento de request TCP ao servidor.
+ */
+void *worker(void *arg)
+{
 	struct config *sconf = (struct config *) arg;
 	int E, len, status;
 	struct request  req;
@@ -72,9 +70,10 @@ void * worker(void * arg){
 }
 
 
-/* main
-*/
-int main()
+/**
+ * Thread principal de servidor.
+ */
+void *webserver(void *arg)
 {
 	// Socket descriptor
 	int sd = socket(PF_INET, SOCK_STREAM, 0);
