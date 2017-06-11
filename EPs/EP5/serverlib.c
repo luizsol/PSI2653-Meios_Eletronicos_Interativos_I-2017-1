@@ -9,7 +9,6 @@
  */
 
 #include "serverlib.h"
-#include "htmllib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -522,7 +521,7 @@ int buildResponse(struct request *req, struct response *res)
 			"Last-Modified: %a, %d %b %Y\r\n", servertime);
 			res->type = res->lastmod + strlen(res->lastmod);
 			sprintf(res->type, "Content-Type: text/html\r\n\r\n");
-			generatedirhtml(res->path, res->http);
+			// generatedirhtml(res->path, res->http);
 			if(DEBUG){
 				puts("buildResponse():return");
 			}
