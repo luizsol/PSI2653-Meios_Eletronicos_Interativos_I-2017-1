@@ -12,17 +12,8 @@
 #define SERVERLIB_H
 
 
-#include <linux/limits.h>
-
 #define BUFFERSIZE 1000000
 
-
-struct config
-{
-	 
-	char base[PATH_MAX]; // diretório base do servidor
-	unsigned short port; // porta de conexão do servidor
-};
 
 struct request
 {
@@ -55,7 +46,6 @@ char *getcurrentdir(char *path, int pathsize);
 void append(char *dest, int buffersize, char *src);
 void lista_diretorio(char *path, char *buffer, int buffersize);
 int transferfile(char *path, int output_fd);
-int parseini(struct config *c);
 int parseRequest(struct request *req);
 int buildResponse(struct request *req, struct response *res);
 

@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <time.h>
 
-
 #define min(x,y) (((x)<(y))?(x):(y))
 
 #define DEBUG 1
@@ -322,48 +321,6 @@ int transferfile(char *path, int output_fd)
 		puts("transferfile():return");
 	}
 	return statp.st_size;
-}
-
-
-/* parseini()
-lê as configurações relacionadas a porta e
- endereço base do servidor salvas no arquivo server.ini
-*/
-int parseini(struct config *c)
-{
-	if(DEBUG){
-		puts("parseini():start");
-	}
-	FILE *f;
-	f = fopen("./server.ini", "r");
-	if(f == NULL){
-		if(DEBUG){
-			puts("parseini():return");
-		}
-		return -1;
-	}
-
-	char line[82];
-	char *strp;
-
-	for(;;)
-	{
-		strp = fgets(line, sizeof(line), f);
-		if(strp == NULL)
-			break;
-
-		line[strcspn(line, "\n")] = '\0';
-		strp = strtok(line, "=");
-
-		if(!strcmp(line, "port"))
-			sscanf(strtok(NULL, " "), "%hu", &c->port);
-		else if(!strcmp(line, "base"))
-			strcpy(c->base, strtok(NULL, " "));
-	}
-	if(DEBUG){
-		puts("parseini():return");
-	}
-	return 0;
 }
 
 

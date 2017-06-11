@@ -83,21 +83,15 @@ void *webserver(void *arg)
 		exit(1);
 	}
 
-	// Parse .ini
+	// Get config
 	int status;
-	struct config sconf;
+	struct config *sconf = (struct config *) arg;
 	struct sockaddr_in saddr;
-
-	if(parseini(&sconf) < 0)
-	{
-		sconf.port = DEFAULT_PORT;
-		strcpy(sconf.base, DEFAULT_BASE);
-	}
 
 	// Bind
 	saddr.sin_family      = AF_INET;
 	saddr.sin_addr.s_addr = INADDR_ANY;
-	saddr.sin_port        = htons(sconf.port);
+	saddr.sin_port        = htons(sconf->port);
 
 	status = bind(sd, (struct sockaddr *) &saddr, sizeof(saddr));
 	if(status < 0)
@@ -121,7 +115,7 @@ void *webserver(void *arg)
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
 	for(int i = 1; i <= WORKER_THREADS; i++)
-		pthread_create(&myworkers[i], NULL, worker,(void *) &sconf);
+		pthread_create(&myworkers[i], NULL, worker, (void *) sconf);
 
 	// Accept
 	for(;;)

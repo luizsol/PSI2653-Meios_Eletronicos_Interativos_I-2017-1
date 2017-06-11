@@ -11,8 +11,7 @@
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
-#define DEFAULT_PORT 8080
-#define DEFAULT_BASE "./html"
 #define WORKER_THREADS 3
+
 
 #endif /* WEBSERVER_H */
