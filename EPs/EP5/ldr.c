@@ -1,18 +1,24 @@
 /* -----------------------------------------------------------------------------
  * Title:       ldr
  * File:        ldr.c
- * Author:      Luiz Sol
+ * Author:      Luiz Sol, Gabriel Crabbé
  * Version:     0.0 (2017-06-11)
  * Date:        2017-06-11
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
 
-#include "ldr.h"
 #include <pthread.h>
 #include <time.h>
 #include <wiringPi.h>
 
+#include "ldr.h"
+
+
+/**
+ * Variável  de controle do LDR.
+ */
+struct ldrDriver ldr;
 
 // Variáveis locais
 pthread_t _thread_ldr;
@@ -21,13 +27,14 @@ pthread_t _thread_ldr;
 int ldr_init(void);
 int _ldr_run(void);
 
-/** 
- * Inicializa e executa a thread responsável por calcular o valor da 
+/**
+ * Inicializa e executa a thread responsável por calcular o valor da
  * luminosidade calculado pelo ldr
  *
- * @return o status da inicialização. 0 => ok, -1 erro
+ * @param  sconf ponteiro para a struct config
+ * @return       o status da inicialização. 0 => ok, -1 erro
 */
-int ldr_initandrun(void){
+int ldr_initandrun(void *config){
 	ldr_init();
 	_thread_ldr = malloc(sizeof(pthread_t));
 	ldr_driver_running = 1;
@@ -39,13 +46,13 @@ int ldr_init(void){
 	wiringPiSetup();
 	piHiPri(99);// Aumenta a prioridade de execução do programa. Só funciona se o
 				// programa for executado como root, c.c. nada ocorre.
-	
+
 	pinMode(ldr_out_pin, OUTPUT);
 	pullUpDnControl(ldr_out_pin, PUD_OFF);
 
 	pinMode(ldr_in_pin, INPUT);
 	pullUpDnControl(ldr_in_pin, PUD_OFF);
-	
+
 	return 1;
 
 }
@@ -53,7 +60,7 @@ int ldr_init(void){
 void * _ldr_run(void * arg){
 	unsigned long time_stamp1, time_stamp2;
 	int _luminosidade, timediff;
-	
+
 	// Discharge RC circuit for a given time
 	digitalWrite(ldr_out_pin, LOW);
 	delayMicroseconds(UPERIOD);

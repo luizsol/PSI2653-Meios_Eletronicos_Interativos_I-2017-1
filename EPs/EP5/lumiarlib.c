@@ -11,14 +11,14 @@
 #include "lumiarlib.h"
 
 
-/** 
+/**
  * Lê as configurações relacionadas a porta e endereço base do servidor salvas
  * no arquivo lumiar.ini
  *
- * @param  c Ponteiro para a struct config. Deve estar inicializado em zero.
- * @return   O número de configurações lidas, -1 em caso de erro de arquivo.
+ * @param  c Ponteiro para a struct config. Deve estar inicializado.
+ * @return   O número de configurações lidas, negativo em caso de erro.
 */
-int parseini(struct config *c)
+int parseConfig(struct config *c)
 {
 	FILE *f;
 	f = fopen("./lumiar.ini", "r");
@@ -50,20 +50,49 @@ int parseini(struct config *c)
 		else if(!strcmp(line, "base"))
 			strcpy(c->base, strtok(NULL, " "));
 		else if(!strcmp(line, "pwm.high"))
-			sscanf(strtok(NULL, " "), "%u", &c->pwm.high);
+			sscanf(strtok(NULL, " "), "%u", &c->pwm.highValue);
 		else if(!strcmp(line, "pwm.low"))
-			sscanf(strtok(NULL, " "), "%u", &c->pwm.low);
+			sscanf(strtok(NULL, " "), "%u", &c->pwm.lowValue);
+		else if(!strcmp(line, "pwm.out"))
+			sscanf(strtok(NULL, " "), "%hhu", &c->pwm.outputPin);
 		else if(!strcmp(line, "ldr.high"))
-			sscanf(strtok(NULL, " "), "%u", &c->ldr.high);
+			sscanf(strtok(NULL, " "), "%u", &c->ldr.highValue);
 		else if(!strcmp(line, "ldr.low"))
-			sscanf(strtok(NULL, " "), "%u", &c->ldr.low);
+			sscanf(strtok(NULL, " "), "%u", &c->ldr.lowValue);
+		else if(!strcmp(line, "ldr.in"))
+			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.inPin);
+		else if(!strcmp(line, "ldr.out"))
+			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.outputPin);
 		else
 			count--; /* Do not increase count in this iteration */
 	}
-	
-	// Definindo valor dos pinos para LDR. Se quiserem, podem definir no parse.ini
-	ldr_in_pin = LDR_IN_PIN;
-	ldr_out_pin = LDR_OUT_PIN;
 
 	return count;
+}
+
+
+/**
+ * Inicializa as configurações com seus valores padrão;
+ *
+ * @param  c Ponteiro para a struct config.
+ * @return   Zero em caso de sucesso, não nulo em caso de erro.
+*/
+int initConfig(struct config *c)
+{
+	if(c == NULL)
+		return -1;
+
+	c->port = INI_DEFAULT_PORT;
+	strcpy(c->base, INI_DEFAULT_BASE);
+
+	c->pwm.highValue = INI_DEFAULT_PWM_HIGH;
+	c->pwm.lowValue  = INI_DEFAULT_PWM_LOW;
+	c->pwm.outputPin = INI_DEFAULT_PWM_PIN_OUT;
+
+	c->ldr.highValue = INI_DEFAULT_LDR_HIGH;
+	c->ldr.lowValue  = INI_DEFAULT_LDR_LOW;
+	c->ldr.inputPin  = INI_DEFAULT_LDR_PIN_IN;
+	c->ldr.outputPin = INI_DEFAULT_LDR_PIN_OUT;
+
+	return 0;
 }

@@ -24,21 +24,21 @@ int main(int argc, char *argv[])
 {
 	/* Parse configuration file */
 	struct config sconf;
-	if(parseini(&sconf) < 0)
-	{
-		sconf.port = INI_DEFAULT_PORT;
-		strcpy(sconf.base, INI_DEFAULT_BASE);
-
-		sconf.pwm.high = INI_DEFAULT_PWM_HIGH;
-		sconf.pwm.low  = INI_DEFAULT_PWM_LOW; 
-		sconf.ldr.high = INI_DEFAULT_LDR_HIGH;
-		sconf.ldr.low  = INI_DEFAULT_LDR_LOW;
-	}
+	initConfig(&sconf);
+	parseConfig(&sconf);
 
 	/* Create threads */
 	pthread_t pwm, ldr, webserver;
 	printf("Launching dedicated threads\n");
-	pthread_create(&pwm, NULL, worker, (void *) );
+	pthread_create(&pwm, NULL, pwm, (void *) sconf.pwm);
+	pthread_create(&ldr, NULL, ldr_initandrun, (void *) sconf.ldr);
+	pthread_create(&webserver, NULL, webserver, (void *) sconf);
+
+	/* Main loop */
+	for(;;)
+	{
+
+	}
 
 	return 0;
 }
