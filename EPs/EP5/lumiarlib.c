@@ -15,10 +15,10 @@
  * Lê as configurações relacionadas a porta e endereço base do servidor salvas
  * no arquivo lumiar.ini
  *
- * @param  c Ponteiro para a struct config. Deve estar inicializado.
+ * @param  c Ponteiro para a struct lumiarConfig. Deve estar inicializado.
  * @return   O número de configurações lidas, negativo em caso de erro.
 */
-int parseConfig(struct config *c)
+int parseConfig(struct lumiarConfig *c)
 {
 	FILE *f;
 	f = fopen("./lumiar.ini", "r");
@@ -74,10 +74,10 @@ int parseConfig(struct config *c)
 /**
  * Inicializa as configurações com seus valores padrão.
  *
- * @param  c Ponteiro para a struct config.
+ * @param  c Ponteiro para a struct lumiarConfig.
  * @return   Zero em caso de sucesso, não nulo em caso de erro.
 */
-int initConfig(struct config *c)
+int initConfig(struct lumiarConfig *c)
 {
 	if(c == NULL)
 		return -1;

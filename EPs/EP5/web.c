@@ -134,5 +134,15 @@ void *webserver(void *arg)
 	status = close(sd);
 	if(status)
 		perror("Error closing socket");
+}
 
+/**
+ * Inicializa a struct de controle do webserver.
+ */
+int initDriver(struct webDriver *d, struct webConfig *c)
+{
+	d->config = c;
+	sem_init(&d->mutex, 0, 1);
+
+	return 0;
 }

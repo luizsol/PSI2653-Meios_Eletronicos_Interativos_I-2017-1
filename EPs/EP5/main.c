@@ -23,14 +23,18 @@
 int main(int argc, char *argv[])
 {
 	/* Parse configuration file */
-	struct config sconf;
+	struct lumiarConfig sconf;
 	initConfig(&sconf);
 	parseConfig(&sconf);
+
+	/* Webserver driver */
+	struct webDriver wdriver;
+	initDriver(&wdriver, &sconf);
 
 	/* Create threads */
 	pthread_t pwmThread, ldrThread, webThread;
 	printf("Launching dedicated threads\n");
-	// pthread_create(&webThread, NULL, webserver, (void *) &sconf.web);
+	// pthread_create(&webThread, NULL, webserver, (void *) &wdriver);
 	pthread_create(&ldrThread, NULL, ldr_initandrun, (void *) &sconf.ldr);
 	// pthread_create(&pwmThread, NULL, pwm, (void *) &sconf.pwm);
 

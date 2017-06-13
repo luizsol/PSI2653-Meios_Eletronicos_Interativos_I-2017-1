@@ -36,7 +36,7 @@
 /**
  * Guarda as configurações do arquivo ini.
  */
-struct config
+struct lumiarConfig
 {
 	struct webConfig web;
 	struct pwmConfig pwm;
@@ -44,9 +44,20 @@ struct config
 };
 
 
+/**
+ * Guarda as configurações do arquivo ini.
+ */
+struct lumiarState
+{
+	int state;
+	int mode;
+	int value;
+};
+
+
 /* Protótipos de funções */
-int parseConfig(struct config *c);
-int initConfig(struct config *c);
+int parseConfig(struct lumiarConfig *c);
+int initConfig(struct lumiarConfig *c);
 
 
 #endif /* LUMIARLIB_H */
