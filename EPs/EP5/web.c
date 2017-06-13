@@ -1,9 +1,9 @@
 /* -----------------------------------------------------------------------------
  * Title:       web
  * File:        web.c
- * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Author:      Gabriel Crabbé, Tiago Amano
+ * Version:     0.0 (2017-06-13)
+ * Date:        2017-06-13
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -30,16 +30,13 @@
 struct queue requestQueue;
 
 
-#define min(x,y) (((x)<(y))?(x):(y))
-
-#define DEBUG 1
-
-/* Path Splitter: divide um path em seus elementos
+/**
+ * Divide um path em seus elementos
  *    ex: ./home/.././Downloads/diretorio/ =>
  *        {".", "home", "..", ".", "Downloads", "diretorio"}
- *    path   : o path a ser avaliado
- *    size: ponteiro para um inteiro que receberá o tamanho do retorno
- *    retorno: um array com as strings resultantes da divisão
+ * @param  path o path a ser avaliado
+ * @param  size ponteiro para um inteiro que receberá o tamanho do retorno
+ * @return      um array com as strings resultantes da divisão
  */
 char** pathsplitter(char * path, int * size)
 {

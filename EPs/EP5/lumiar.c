@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
- * Title:       lumiarlib
- * File:        lumiarlib.c
+ * Title:       lumiar
+ * File:        lumiar.c
  * Author:      Gabriel Crabbé
  * Version:     0.0 (2017-06-12)
  * Date:        2017-06-12
@@ -8,7 +8,7 @@
  * -----------------------------------------------------------------------------
  */
 
-#include "lumiarlib.h"
+#include "lumiar.h"
 
 
 /**

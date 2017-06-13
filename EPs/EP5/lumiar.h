@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
- * Title:       lumiarlib
- * File:        lumiarlib.h
+ * Title:       lumiar
+ * File:        lumiar.h
  * Author:      Gabriel Crabbé
  * Version:     0.0 (2017-06-12)
  * Date:        2017-06-12
@@ -8,14 +8,16 @@
  * -----------------------------------------------------------------------------
  */
 
-#ifndef LUMIARLIB_H
-#define LUMIARLIB_H
+#ifndef LUMIAR_H
+#define LUMIAR_H
+
 
 #include <linux/limits.h>
 
 #include "ldr.h"
 #include "pwm.h"
 #include "web.h"
+
 
 #define INI_DEFAULT_PORT 8080
 #define INI_DEFAULT_BASE "./html"
@@ -59,4 +61,4 @@ int parseConfig(struct lumiarConfig *c);
 int initConfig(struct lumiarConfig *c);
 
 
-#endif /* LUMIARLIB_H */
+#endif /* LUMIAR_H */

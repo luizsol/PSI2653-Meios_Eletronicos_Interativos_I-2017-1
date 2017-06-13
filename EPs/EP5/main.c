@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "lumiarlib.h"
+#include "lumiar.h"
 
 
 /**
