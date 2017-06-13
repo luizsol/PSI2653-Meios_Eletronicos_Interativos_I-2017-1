@@ -2,9 +2,9 @@
  * Title:       lumiarlib
  * File:        lumiarlib.h
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
- * Description: Eexercício 5 de PSI2653.
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
+ * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
 
@@ -15,6 +15,7 @@
 
 #include "ldr.h"
 #include "pwm.h"
+#include "web.h"
 
 
 #define INI_DEFAULT_PORT 8080
@@ -37,8 +38,7 @@
  */
 struct config
 {
-	char base[PATH_MAX];
-	unsigned short port;
+	struct webConfig web;
 	struct pwmConfig pwm;
 	struct ldrConfig ldr;
 };

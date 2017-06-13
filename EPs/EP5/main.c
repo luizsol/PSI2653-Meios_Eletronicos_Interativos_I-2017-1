@@ -2,8 +2,8 @@
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -28,16 +28,16 @@ int main(int argc, char *argv[])
 	parseConfig(&sconf);
 
 	/* Create threads */
-	pthread_t pwm, ldr, webserver;
+	pthread_t pwmThread, ldrThread, webThread;
 	printf("Launching dedicated threads\n");
-	pthread_create(&pwm, NULL, pwm, (void *) sconf.pwm);
-	pthread_create(&ldr, NULL, ldr_initandrun, (void *) sconf.ldr);
-	pthread_create(&webserver, NULL, webserver, (void *) sconf);
+	// pthread_create(&webThread, NULL, webserver, (void *) &sconf.web);
+	pthread_create(&ldrThread, NULL, ldr_initandrun, (void *) &sconf.ldr);
+	// pthread_create(&pwmThread, NULL, pwm, (void *) &sconf.pwm);
 
 	/* Main loop */
 	for(;;)
 	{
-
+		sem_wait();
 	}
 
 	return 0;

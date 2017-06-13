@@ -2,8 +2,8 @@
  * Title:       ldr
  * File:        ldr.h
  * Author:      Luiz Sol, Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -18,22 +18,8 @@
 #ifndef LDR_H
 #define LDR_H
 
-#include <semaphore.h>
-
 
 #define UPERIOD 500000 // Período entre observações (500[ms])
-
-
-/**
- * Struct de controle do LDR.
- */
-struct ldrDriver
-{
-	int status;
-	int value;
-	struct ldrConfig config;
-	sem_t mutex;
-};
 
 
 /**
@@ -48,14 +34,8 @@ struct ldrConfig
 };
 
 
-/**
- * Variável  de controle do LDR.
- */
-extern struct ldrDriver ldr;
-
-
 /* Protótipos de funções */
-int ldr_initandrun(void *conf);
+void *ldr_initandrun(void *conf);
 
 
 #endif /* LDR_H */

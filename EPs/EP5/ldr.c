@@ -2,8 +2,8 @@
  * Title:       ldr
  * File:        ldr.c
  * Author:      Luiz Sol, Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -14,11 +14,6 @@
 
 #include "ldr.h"
 
-
-/**
- * Variável  de controle do LDR.
- */
-struct ldrDriver ldr;
 
 // Variáveis locais
 pthread_t _thread_ldr;
@@ -32,9 +27,9 @@ int _ldr_run(void);
  * luminosidade calculado pelo ldr
  *
  * @param  sconf ponteiro para a struct config
- * @return       o status da inicialização. 0 => ok, -1 erro
+ * @return       ponteiro NULL
 */
-int ldr_initandrun(void *config){
+void *ldr_initandrun(void *config){
 	ldr_init();
 	_thread_ldr = malloc(sizeof(pthread_t));
 	ldr_driver_running = 1;

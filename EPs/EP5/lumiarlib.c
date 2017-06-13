@@ -2,8 +2,8 @@
  * Title:       lumiarlib
  * File:        lumiarlib.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -46,9 +46,9 @@ int parseConfig(struct config *c)
 		strp = strtok(line, "=");
 
 		if(!strcmp(line, "port"))
-			sscanf(strtok(NULL, " "), "%hu", &c->port);
+			sscanf(strtok(NULL, " "), "%hu", &c->web.port);
 		else if(!strcmp(line, "base"))
-			strcpy(c->base, strtok(NULL, " "));
+			strcpy(c->web.base, strtok(NULL, " "));
 		else if(!strcmp(line, "pwm.high"))
 			sscanf(strtok(NULL, " "), "%u", &c->pwm.highValue);
 		else if(!strcmp(line, "pwm.low"))
@@ -72,7 +72,7 @@ int parseConfig(struct config *c)
 
 
 /**
- * Inicializa as configurações com seus valores padrão;
+ * Inicializa as configurações com seus valores padrão.
  *
  * @param  c Ponteiro para a struct config.
  * @return   Zero em caso de sucesso, não nulo em caso de erro.

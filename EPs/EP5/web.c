@@ -1,9 +1,9 @@
 /* -----------------------------------------------------------------------------
- * Title:       webserver
- * File:        webserver.c
+ * Title:       web
+ * File:        web.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-05)
- * Date:        2017-06-05
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "webserver.h"
+#include "web.h"
 #include "serverlib.h"
 #include "queue.h"
 
@@ -64,7 +64,7 @@ void *worker(void *arg)
 			printf("Connection closed\n");
 		}
 
-		
+
 	}
 	return NULL;
 }

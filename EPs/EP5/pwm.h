@@ -2,8 +2,8 @@
  * Title:       pwm
  * File:        pwm.h
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -24,7 +24,8 @@ struct pwmConfig
 
 
 /* Protótipos de funções */
-int pwmService(void *conf);
+void *pwmService(void *conf);
+int setOperatingPoint(int val);
 
 
 #endif /* PWM_H */

@@ -1,17 +1,24 @@
 /* -----------------------------------------------------------------------------
- * Title:       webserver
- * File:        webserver.h
+ * Title:       web
+ * File:        web.h
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-11)
- * Date:        2017-06-11
+ * Version:     0.0 (2017-06-12)
+ * Date:        2017-06-12
  * Description: Eexercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
 
-#ifndef WEBSERVER_H
-#define WEBSERVER_H
+#ifndef WEB_H
+#define WEB_H
 
 #define WORKER_THREADS 3
 
 
-#endif /* WEBSERVER_H */
+struct webConfig
+{
+	char base[PATH_MAX];
+	unsigned short port;
+};
+
+
+#endif /* WEB_H */

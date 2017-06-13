@@ -86,5 +86,5 @@ int removeQueue(struct queue *Q)
 void deinitQueue(struct queue *Q)
 {
 	// Memory deallocation
-	free((void *)Q->buffer);
+	free((void *) Q->buffer);
 }
