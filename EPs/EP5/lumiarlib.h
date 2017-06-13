@@ -17,7 +17,6 @@
 #include "pwm.h"
 #include "web.h"
 
-
 #define INI_DEFAULT_PORT 8080
 #define INI_DEFAULT_BASE "./html"
 

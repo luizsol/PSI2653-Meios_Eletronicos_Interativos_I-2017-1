@@ -82,8 +82,8 @@ int initConfig(struct lumiarConfig *c)
 	if(c == NULL)
 		return -1;
 
-	c->port = INI_DEFAULT_PORT;
-	strcpy(c->base, INI_DEFAULT_BASE);
+	c->web.port = INI_DEFAULT_PORT;
+	strcpy(c->web.base, INI_DEFAULT_BASE);
 
 	c->pwm.highValue = INI_DEFAULT_PWM_HIGH;
 	c->pwm.lowValue  = INI_DEFAULT_PWM_LOW;

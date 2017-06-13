@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
 	/* Webserver driver */
 	struct webDriver wdriver;
-	initDriver(&wdriver, &sconf);
+	initDriver(&wdriver, &(sconf.web));
 
 	/* Create threads */
 	pthread_t pwmThread, ldrThread, webThread;
