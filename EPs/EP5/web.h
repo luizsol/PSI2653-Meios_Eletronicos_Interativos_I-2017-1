@@ -28,31 +28,45 @@
 #define MANUAL 0
 
 
-#define WORKER_THREADS 3
-#define BUFFERSIZE 1000000
+#define WORKER_THREADS 1
+#define BUFFERSIZE 4096
 
 
+/**
+ * Struct para mensagem recebida pelo webserver.
+ *
+ * Consiste num buffer de 4 KiB para a mensagem em si, e de ponteiros para os
+ * diferentes segmentos desta.
+ */
 struct request
 {
-	char msg[BUFFERSIZE];// msg recebida do client web
-	char *cmd; // command enviado
-	char *path; // url recebido
-	char *http; // versão do HTTP
+	char msg[BUFFERSIZE];
+	char *cmd;                /* Command */
+	char *path;               /* Path */
+	char *http;               /* HTTP version */
 };
 
+
+/**
+ * Struct para mensagem enviada pelo webserver.
+ *
+ * Consiste num buffer de 4 KiB para o header da mensagem, e de ponteiros para
+ * os diferentes segmentos deste.
+ * Um ponteiro adicional aponta para o conteúdo a transmitir.
+ */
 struct response
 {
-	char msg[BUFFERSIZE]; // msg a ser enviada
-	char base[PATH_MAX]; // diretório base do servidor
-	char path[PATH_MAX]; // path completo
+	char msg[BUFFERSIZE];
+	char base[PATH_MAX];      /* Base path */
+	char path[PATH_MAX];      /* Full path */
 	char pathindex[PATH_MAX];
-	char *http; // versão do HTTP
-	char *date; // Date
-	char *server; // Server name
-	char *lastmod; // Last Modified
-	char *length; // Content Length
-	char *type; // Content Type
-	char *object; //arquivo a ser enviado
+	char *http;               /* HTTP version */
+	char *date;               /* Server date */
+	char *server;             /* Server ID */
+	char *lastmod;            /* Last modified */
+	char *length;             /* Content length */
+	char *type;               /* Content type */
+	FILE *object;             /* Content pointer */
 };
 
 
