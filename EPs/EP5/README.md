@@ -1,28 +1,27 @@
-# Exercício Programa 5: Controlador de Iluminação Inteligente
+# Exercício Programa 5: Projeto Lumiar
 
-## serverlib
+## Descrição
 
-A biblioteca serverlib contém a uma reformatação do código fornecido
-e as funções necessárias para interpretar a requisição do cliente web
-e montar a resposta do servido web.
+Lumiar é um controlador de luminosidade inteligente baseado no Raspberry Pi 3.
 
 
-## server.ini
+## Estrutura
+
+### main
+
+
+### web
+
+
+### ldr
+
+
+### pwm
+
+
+### lumiar.ini
 
 Arquivo de configuração.
 
 
-## queue
-
-Biblioteca de filas sincronizadas para distribuição de threads.
-
-
-## main
-
-Inicializa o servidor, cria os threads, chama as funções de 
-interpretação do serverlib e envia resposta. 
-
-
-## htmllib
-
-Biblioteca para geração do html de listagem de diretórios.
+### queue
