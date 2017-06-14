@@ -40,7 +40,7 @@
  */
 struct request
 {
-	char msg[BUFFERSIZE];
+	char msg[BUFFERSIZE];     /* Request message */
 	char *cmd;                /* Command */
 	char *path;               /* Path */
 	char *http;               /* HTTP version */
@@ -56,10 +56,9 @@ struct request
  */
 struct response
 {
-	char msg[BUFFERSIZE];
-	char base[PATH_MAX];      /* Base path */
-	char path[PATH_MAX];      /* Full path */
-	char pathindex[PATH_MAX];
+	char hdr[BUFFERSIZE];     /* Response header */
+	char basePath[PATH_MAX];  /* Base path */
+	char fullPath[PATH_MAX];  /* Full path */
 	char *http;               /* HTTP version */
 	char *date;               /* Server date */
 	char *server;             /* Server ID */

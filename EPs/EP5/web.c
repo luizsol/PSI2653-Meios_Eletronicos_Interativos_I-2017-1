@@ -31,115 +31,58 @@ struct queue requestQueue;
 
 
 /**
- * Divide um path em seus elementos
- *    ex: ./home/.././Downloads/diretorio/ =>
- *        {".", "home", "..", ".", "Downloads", "diretorio"}
- * @param  path o path a ser avaliado
- * @param  size ponteiro para um inteiro que receberá o tamanho do retorno
- * @return      um array com as strings resultantes da divisão
+ * Gera path de tamanho até PATH_MAX (incluindo o '\0' final) completo a partir
+ * de um path base e de um path relativo.
+ *
+ * @param  basepath path base.
+ * @param  relpath  path relativo.
+ * @param  fullpath ponteiro para o path. Deve ter tamanho mínimo PATH_MAX.
+ * @return          0 em caso de sucesso, não-nulo caso contrário.
  */
-char** pathsplitter(char * path, int * size)
+int composePath(const char *basepath, const char *relpath, char *fullpath)
 {
-	if(path == NULL || strlen(path) == 0)
-	{
-		*size = 0;
-		return NULL;
-	}
-	if(strcmp(path, ".") == 0 || strcmp(path, "..") == 0)
-	{
-		char ** result = malloc(sizeof(char*));
-		result[0] = strdup(path);
-		*size = 1;
-		return result;
-	}
-  char * nPath = strdup(path);
-  char * buffer[strlen(path)]; //Just a placeholder
-  char *token = strtok(nPath, "/");
-  int i = 0;
-  while(token)
-	{
-  	buffer[i] = strdup(token);
-  	i++;
-  	token = strtok(NULL, "/");
-  }
-  free(nPath);
-  if(i == 0)
-	{
-  	*size = i;
-  	return NULL;
-  }
-  char ** result = malloc(i * sizeof(char*));
+	if(basepath == NULL || relpath == NULL || fullpath == NULL)
+		return -1;
+	strcpy(fullpath, basepath);
 
-  for(int j = 0; j < i; j++)
-	{
-  	result[j] = buffer[j];
-  }
-  *size = i;
-  return result;
-}
-
-/* Compose Path: altera PATH
- *    oldpath: path original (ex: /home/jose/test
- *    path   : path para ser alterado (ex: "..", "/tmp", "prog1" )
- *             (imagine na forma: "cd ..", "cd /tmp", "cd prog1")
- *    newpath: path resultante da composicao de oldpath e path
- *             (ex: /home/jose, /tmp, /jome/jose/test/prog1)
- */
-int composepath(char *oldpath, char *path, char *newpath)
-{
-	int oldpatharraysize;
-	char ** oldpatharray = pathsplitter(oldpath, &oldpatharraysize);
-	int patharraysize;
-	char ** patharray = pathsplitter(path, &patharraysize);
-	if(oldpatharray != NULL)
-	{
-		for(int i = 0; i < oldpatharraysize; i++)
-		{
-			strcat(newpath, oldpatharray[i]);
-			strcat(newpath, "/");
-		}
-	}
-	if(patharray != NULL)
-	{
-		for(int i = 0; i < patharraysize; i++)
-		{
-			strcat(newpath, patharray[i]);
-			strcat(newpath, "/");
-		}
-	}
-	newpath[strlen(newpath)-1] = '\0';
+	/* Multiple slashes in sequence are not a problem */
+	strncat(fullpath, relpath, PATH_MAX - strlen(fullpath) - 1);
 	return 0;
 }
 
 
-/* parseRequest()
-decodifica a mensagem HTTP recebida
-e salva nos parâmetros respectivos do request
-*/
+/**
+ * Decodifica a mensagem HTTP recebida e identifica os diferentes trechos desta.
+ *
+ * @param  req a struct request da mensagem recebida.
+ * @return     0 em caso de sucesso, não-nulo caso contrário.
+ */
 int parseRequest(struct request *req)
 {
-	req->cmd  = strtok(req->msg, " "); // Command (GET)
-	req->path = strtok(NULL, " "); // Path
-	req->http = strtok(NULL, "\n"); // HTTP
+	req->cmd  = strtok(req->msg, " ");
+	req->path = strtok(NULL, " ");
+	req->http = strtok(NULL, "\n");
 	return 0;
 }
 
-/* buildResponse()
-Constrói a resposta do servidor
-a partir dos parâmetros do request
 
-*/
+/**
+ * Constrói a resposta do servidor a partir dos parâmetros da request.
+ *
+ * @param  req a struct request da mensagem recebida.
+ * @param  res a struct response da mensagem a enviar.
+ * @return     0 em caso de sucesso, não-nulo caso contrário.
+ */
 int buildResponse(struct request *req, struct response *res)
 {
-	int i;
-	int rescode;
+	int i, rescode;
 	struct stat statf = { 0 };
-	FILE *f = NULL;
-	res->path[0] = '\0';
-	composepath(res->base, req->path, res->path);
-	res->http = res->msg;
+	FILE *f;
 
-	//Avaliando HTTP Header:
+	composePath(res->basePath, req->path, res->fullPath);
+	res->http = res->hdr;
+
+	/* Parse request */
 	if (strncmp(req->cmd, "GET", 3) != 0)
 	{
 		rescode = 400;
