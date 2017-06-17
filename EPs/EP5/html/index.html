@@ -18,7 +18,7 @@
 		<input type="radio" name="Estado" value="ON" required="yes">
 		ON
         <br>
-		<input type="radio" checked="checked" name="Estado" value="ST" required="yes">
+		<input type="radio" checked="checked" name="Estado" value="Standby" required="yes">
 		Standby
         <br>
         <br>
@@ -33,10 +33,10 @@
 	<br><br>
 	Set:
 	<br>
-	<input type="radio" checked="checked" name="Modo" value="AU" required="yes">
+	<input type="radio" checked="checked" name="Modo" value="Auto" required="yes">
 	Automático
     <br>
-	<input type="radio" name="Modo" value="MA" required="yes">
+	<input type="radio" name="Modo" value="Manual" required="yes">
 	Manual
     <br>
     <br>
@@ -48,14 +48,21 @@
 <fieldset>
 	<legend>Intensidade:</legend>
 	Atual:
-	<progress max="100" value="050"></progress> <b> 050% </b>
+	<progress max="100" value="050"></progress> <b>  50% </b>
 	<br><br>
 	Set:
 	<br>
-	<input type="range" name="Intensidade" min="0" max="100" value="050" required="yes"> 050%
+	<input type="range" name="Intensidade" min="0" max="100" value="050" required="yes">  50%
     <br>
     <br>
 	<input type="submit" value="Enviar">
+</fieldset>
+
+<br>
+
+<fieldset>
+	<legend>Luminosidade:</legend>
+	<progress max="100" value="050"></progress> <b>  50% </b>
 </fieldset>
 
 <br>
