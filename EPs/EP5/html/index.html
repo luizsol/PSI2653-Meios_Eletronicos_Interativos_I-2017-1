@@ -1,42 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title> EP5 </title> 
-	<meta charset="UTF-8"> 
+	<title> EP5 </title>
+	<meta charset="UTF-8">
 </header>
 <body>
 
-<h1>EP5</h1>
+<h1>Sistema Lumiar</h1>
 
-Valor:
-<progress max="100" value="80"></progress>
-<br><br>
+<form>
+	<fieldset>
+    	<legend> Estado: </legend>
+        Atual: <b> Standby </b>
+        <br><br>
+        Set:
+        <br>
+		<input type="radio" name="Estado" value="ON" required="yes">
+		ON
+        <br>
+		<input type="radio" checked="checked" name="Estado" value="ST" required="yes">
+		Standby
+        <br>
+        <br>
+		<input type="submit" value="Enviar">
+	</fieldset>
 
-<form >
+	<br>
+
 <fieldset>
-	Intensidade:
-	<input type="range" name="Intensidade" min="0" max="100" value="50" >
-	<input type="submit" value="Enviar">
-</fieldset>
-
-<br>
-
-<fieldset>
-	Modo:
-	<input type="radio" checked="checked" name="Modo" value="Automático">
+	<legend>Modo:</legend>
+	Atual: <b> Automático </b>
+	<br><br>
+	Set:
+	<br>
+	<input type="radio" checked="checked" name="Modo" value="AU" required="yes">
 	Automático
-	<input type="radio" checked="checked" name="Modo" value="Manual">
+    <br>
+	<input type="radio" name="Modo" value="MA" required="yes">
 	Manual
+    <br>
+    <br>
 	<input type="submit" value="Enviar">
 </fieldset>
 
 <br>
 
 <fieldset>
-	Limiar:
-	<input type="range" name="Limiar" min="0" max="100" value="50" >
+	<legend>Intensidade:</legend>
+	Atual:
+	<progress max="100" value="050"></progress> <b> 050% </b>
+	<br><br>
+	Set:
+	<br>
+	<input type="range" name="Intensidade" min="0" max="100" value="050" required="yes"> 050%
+    <br>
+    <br>
 	<input type="submit" value="Enviar">
 </fieldset>
+
+<br>
 
 </form>
 
