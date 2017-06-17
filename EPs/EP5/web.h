@@ -65,7 +65,7 @@ struct response
 	char *lastmod;            /* Last modified */
 	char *length;             /* Content length */
 	char *type;               /* Content type */
-	FILE *object;             /* Content pointer */
+	char *object;             /* Content pointer */
 };
 
 

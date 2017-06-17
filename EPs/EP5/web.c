@@ -134,10 +134,10 @@ int buildResponse(struct request *req, struct response *res)
 	{
 		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
-		composepath(res->path, "index.html",res->pathindex);
+		composepath(res->fullPath, "index.html",res->fullPath);
 		// Chamada de sistema para obter
 		//as informações sobre o arquivo
-		stat(res->path, &statf);
+		stat(res->fullPath, &statf);
 		//apontado por res->path e
 		//armazena as informações em statf
 		servertime = gmtime(&statf.st_mtime);
@@ -161,34 +161,68 @@ int buildResponse(struct request *req, struct response *res)
 			strtok(req->path, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "ON") == 0)
-			  sdriver.current.state = ON;
+			{
+				sdriver.current.state = ON;
+				sdriver.current.statechar = "     ON";
+			}
 			else if(strcmp(aux, "Standby") == 0)
+			{
 			  sdriver.current.state = STANDBY;
+				sdriver.current.statechar = "Standby";
+			}
 
 			// Verifica e seta o modo de operação:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "Manual") == 0)
-			  sdriver.current.mode = MANUAL;
+			{
+				sdriver.current.mode = MANUAL;
+				sdriver.current.modechar = "     Manual";
+			}
 			else if(strcmp(aux, "Auto") == 0)
-			  sdriver.current.mode = AUTO;
+			{
+				sdriver.current.mode = AUTO;
+				sdriver.current.modechar = "Automatico";
+			}
 
-			// Verifica e seta o valor de luminosidade:
+
+			// Verifica e seta o valor de Intensidade:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
 			sdriver.current.value = atoi(aux);
+			strcpy(sdriver.current.valuechar, aux);
+
+			sprintf(sdriver.current.luminositychar, "%d",
+				sdriver.current.luminosity);
+
 		}
 		if(rescode == 200)
 		{
 			if(strncmp(req->path, "/", 1) == 0)
-				composepath(res->path, "/index.html", res->path);
+				composepath(res->fullPath, "/index.html", res->fullPath);
 		}
 		// mandar o index.html atualizado
-		f = fopen(res->path, "r");
+		f = fopen(res->fullPath, "r");
 		i = strlen(res->msg);
 		if(f != NULL)
 		{
 			int j = fread(res->object, 1, statf.st_size,f);
+			memcpy(&res->object[189], sdriver.current.statechar,
+				strlen(sdriver.current.statechar));
+			memcpy(&res->object[555], sdriver.current.modechar,
+				strlen(sdriver.current.modechar));
+			memcpy(&res->object[921], sdriver.current.valuechar,
+				strlen(sdriver.current.valuechar));
+			memcpy(&res->object[942], sdriver.current.valuechar,
+				strlen(sdriver.current.valuechar));
+			memcpy(&res->object[1039], sdriver.current.valuechar,
+				strlen(sdriver.current.valuechar));
+			memcpy(&res->object[1060], sdriver.current.valuechar,
+				strlen(sdriver.current.valuechar));
+			memcpy(&res->object[1211], sdriver.current.valuechar,
+				strlen(sdriver.current.luminositychar));
+			memcpy(&res->object[1232], sdriver.current.valuechar,
+				strlen(sdriver.current.luminositychar));
 			res->object[j] = '\0';
 			i = strlen(res->msg);
 		}
@@ -321,6 +355,12 @@ int initDriver(struct webDriver *d, struct webConfig *c)
 	d->current.state = DEFAULT_LUMIAR_STATE;
 	d->current.mode = DEFAULT_LUMIAR_MODE;
 	d->current.value = DEFAULT_LUMIAR_VALUE;
+	d->current.luminosity = DEFAULT_LUMIAR_VALUE;
+
+	d->current.statechar = 'Standby\0';
+	d->current.mode = 'Automático\0';
+	d->current.value = ' 50\0';
+	d->current.luminosity = ' 50\0';
 	sem_init(&d->mutex, 0, 1);
 
 	return 0;

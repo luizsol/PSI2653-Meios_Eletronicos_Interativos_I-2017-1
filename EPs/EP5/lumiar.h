@@ -53,6 +53,11 @@ struct lumiarState
 	int state;
 	int mode;
 	int value;
+	int luminosity;
+	char statechar[11];
+	char modechar[11]
+	char valuechar[11];
+	char luminositychar[11];
 };
 
 
