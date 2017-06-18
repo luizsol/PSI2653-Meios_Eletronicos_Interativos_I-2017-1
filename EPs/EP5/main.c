@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	parseConfig(&sconf);
 
 	/* Webserver driver */
-	struct lumiarState state;
+	struct lumiarState lstate;
 	struct webDriver wdriver;
 	initDriver(&wdriver, &(sconf.web));
 
@@ -44,12 +44,12 @@ int main(int argc, char *argv[])
 	{
 		/* Get request from server */
 		sem_wait(wdriver.mutex);
-		if(memcmp(state, wdriver.current, sizeof(state)))
+		if(memcmp(lstate, wdriver.current, sizeof(lstate)))
 		{
-			memcpy(state, wdriver.current, sizeof(state));
+			memcpy(lstate, wdriver.current, sizeof(lstate));
 			sem_post(wdriver.mutex);
 
-
+			if(lstate.)
 		}
 		else
 		{

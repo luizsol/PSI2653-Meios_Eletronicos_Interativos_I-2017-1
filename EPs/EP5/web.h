@@ -17,17 +17,6 @@
 #include "lumiarlib.h"
 
 
-#define DEFAULT_LUMIAR_STATE 0
-#define DEFAULT_LUMIAR_MODE 1
-#define DEFAULT_LUMIAR_VALUE 50
-
-
-#define ON 1
-#define STANDBY 0
-#define	AUTO 1
-#define MANUAL 0
-
-
 #define WORKER_THREADS 1
 #define BUFFERSIZE 4096
 

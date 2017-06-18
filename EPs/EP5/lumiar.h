@@ -2,8 +2,8 @@
  * Title:       lumiar
  * File:        lumiar.h
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Version:     0.0 (2017-06-18)
+ * Date:        2017-06-18
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -33,6 +33,16 @@
 #define INI_DEFAULT_LDR_PIN_IN 	1
 #define INI_DEFAULT_LDR_PIN_OUT 2
 
+#define LUMIAR_STATE_ON 1
+#define LUMIAR_STATE_STANDBY 0
+#define LUMIAR_STATE_DEFAULT 0
+
+#define	LUMIAR_MODE_AUTO 1
+#define LUMIAR_MODE_MANUAL 0
+#define LUMIAR_MODE_DEFAULT 1
+
+#define LUMIAR_VALUE_DEFAULT 50
+
 
 /**
  * Guarda as configurações do arquivo ini.
@@ -46,7 +56,7 @@ struct lumiarConfig
 
 
 /**
- * Guarda as configurações do arquivo ini.
+ * Guarda as configurações de comando do sistema.
  */
 struct lumiarState
 {
@@ -54,10 +64,6 @@ struct lumiarState
 	int mode;
 	int value;
 	int luminosity;
-	char statechar[11];
-	char modechar[11]
-	char valuechar[11];
-	char luminositychar[11];
 };
 
 

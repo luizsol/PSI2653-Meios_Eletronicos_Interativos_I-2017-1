@@ -352,16 +352,12 @@ void *webService(void *arg)
 int initDriver(struct webDriver *d, struct webConfig *c)
 {
 	d->config = c;
-	d->current.state = DEFAULT_LUMIAR_STATE;
-	d->current.mode = DEFAULT_LUMIAR_MODE;
-	d->current.value = DEFAULT_LUMIAR_VALUE;
-	d->current.luminosity = DEFAULT_LUMIAR_VALUE;
-
-	d->current.statechar = 'Standby\0';
-	d->current.mode = 'Automático\0';
-	d->current.value = ' 50\0';
-	d->current.luminosity = ' 50\0';
 	sem_init(&d->mutex, 0, 1);
+
+	d->current.state = LUMIAR_STATE_DEFAULT;
+	d->current.mode = LUMIAR_MODE_DEFAULT;
+	d->current.value = LUMIAR_VALUE_DEFAULT;
+	d->current.luminosity = 0;
 
 	return 0;
 }
