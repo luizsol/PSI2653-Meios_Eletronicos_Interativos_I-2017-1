@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <time.h>
 
 #include "lumiar.h"
 
@@ -48,13 +49,27 @@ int main(int argc, char *argv[])
 		{
 			memcpy(lstate, wdriver.current, sizeof(lstate));
 			sem_post(wdriver.mutex);
-
-			if(lstate.)
 		}
 		else
 		{
 			sem_post(wdriver.mutex);
 		}
+
+
+		/* Parse lumiarState */
+		if(lstate.state == LUMIAR_STATE_ON)
+		{
+			if(lstate.mode == LUMIAR_MODE_AUTO)
+			{
+				lstate.luminosity = getLuminosity();
+				setOperatingPoint(lstate.luminosity);
+			}
+		}
+		else
+		{
+			sleep(1);
+		}
+
 
 	}
 

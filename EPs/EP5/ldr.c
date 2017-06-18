@@ -91,8 +91,19 @@ void * _ldr_run(void * arg){
  *
  * @param  sconf ponteiro para a struct config
  * @return       ponteiro NULL
-*/
+ */
 void *ldrService(void *config)
 {
 	return NULL
+}
+
+
+/**
+ * Retorna a luminosidade atual. Bloqueante.
+ *
+ * @return luminosidade, entre 0 e 100.
+ */
+int getLuminosity()
+{
+	return 0
 }

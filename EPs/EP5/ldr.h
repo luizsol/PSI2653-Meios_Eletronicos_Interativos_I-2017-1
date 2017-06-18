@@ -36,6 +36,7 @@ struct ldrConfig
 
 /* Protótipos de funções */
 void *ldrService(void *config);
+int getLuminosity();
 
 
 #endif /* LDR_H */
