@@ -78,6 +78,10 @@ int buildResponse(struct request *req, struct response *res)
 	int i, rescode;
 	struct stat statf = { 0 };
 	FILE *f;
+	char state[11];
+	char mode[11];
+	char value[11];
+	char luminosity[11];
 
 	composePath(res->basePath, req->path, res->fullPath);
 	res->http = res->hdr;
@@ -163,12 +167,12 @@ int buildResponse(struct request *req, struct response *res)
 			if(strcmp(aux, "ON") == 0)
 			{
 				sdriver.current.state = ON;
-				sdriver.current.statechar = "     ON";
+				state = "     ON";
 			}
 			else if(strcmp(aux, "Standby") == 0)
 			{
 			  sdriver.current.state = STANDBY;
-				sdriver.current.statechar = "Standby";
+				state = "Standby";
 			}
 
 			// Verifica e seta o modo de operação:
@@ -177,12 +181,12 @@ int buildResponse(struct request *req, struct response *res)
 			if(strcmp(aux, "Manual") == 0)
 			{
 				sdriver.current.mode = MANUAL;
-				sdriver.current.modechar = "     Manual";
+				mode = "     Manual";
 			}
 			else if(strcmp(aux, "Auto") == 0)
 			{
 				sdriver.current.mode = AUTO;
-				sdriver.current.modechar = "Automatico";
+				mode = "Automatico";
 			}
 
 
@@ -190,10 +194,9 @@ int buildResponse(struct request *req, struct response *res)
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
 			sdriver.current.value = atoi(aux);
-			strcpy(sdriver.current.valuechar, aux);
+			strcpy(value, aux);
 
-			sprintf(sdriver.current.luminositychar, "%d",
-				sdriver.current.luminosity);
+			sprintf(luminosity, "%d", sdriver.current.luminosity);
 
 		}
 		if(rescode == 200)
@@ -207,22 +210,14 @@ int buildResponse(struct request *req, struct response *res)
 		if(f != NULL)
 		{
 			int j = fread(res->object, 1, statf.st_size,f);
-			memcpy(&res->object[189], sdriver.current.statechar,
-				strlen(sdriver.current.statechar));
-			memcpy(&res->object[555], sdriver.current.modechar,
-				strlen(sdriver.current.modechar));
-			memcpy(&res->object[921], sdriver.current.valuechar,
-				strlen(sdriver.current.valuechar));
-			memcpy(&res->object[942], sdriver.current.valuechar,
-				strlen(sdriver.current.valuechar));
-			memcpy(&res->object[1039], sdriver.current.valuechar,
-				strlen(sdriver.current.valuechar));
-			memcpy(&res->object[1060], sdriver.current.valuechar,
-				strlen(sdriver.current.valuechar));
-			memcpy(&res->object[1211], sdriver.current.valuechar,
-				strlen(sdriver.current.luminositychar));
-			memcpy(&res->object[1232], sdriver.current.valuechar,
-				strlen(sdriver.current.luminositychar));
+			memcpy(&res->object[189], state, strlen(state));
+			memcpy(&res->object[555], mode, strlen(mode));
+			memcpy(&res->object[921], value, strlen(value));
+			memcpy(&res->object[942], value, strlen(value));
+			memcpy(&res->object[1039], value, strlen(value));
+			memcpy(&res->object[1060], value, strlen(value));
+			memcpy(&res->object[1211], luminosity, strlen(luminosity));
+			memcpy(&res->object[1232], luminosity, strlen(luminosity));
 			res->object[j] = '\0';
 			i = strlen(res->msg);
 		}
