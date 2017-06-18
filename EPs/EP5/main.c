@@ -40,6 +40,16 @@ int main(int argc, char *argv[])
 	pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
 	pthread_create(&pwmThread, NULL, pwmService, (void *) &sconf.pwm);
 
+	/* Local flags and variables */
+	int hasChanged = 0;
+	int readLuminosity;
+	const struct timespec slp =
+	{
+		tv_sec = 0;
+		tv_nsec = 100000000L;  /* 100 ms */
+	};
+
+
 	/* Main loop */
 	for(;;)
 	{
@@ -49,28 +59,50 @@ int main(int argc, char *argv[])
 		{
 			memcpy(lstate, wdriver.current, sizeof(lstate));
 			sem_post(wdriver.mutex);
+			hasChanged = 1;
 		}
 		else
 		{
 			sem_post(wdriver.mutex);
+			hasChanged = 0;
 		}
 
-
-		/* Parse lumiarState */
-		if(lstate.state == LUMIAR_STATE_ON)
+		/* Get luminosity */
+		readLuminosity = getLuminosity();
+		if(lstate.luminosity != readLuminosity)
 		{
-			if(lstate.mode == LUMIAR_MODE_AUTO)
+			lstate.luminosity = readLuminosity;
+			hasChanged = 1;
+		}
+
+		/* Send command */
+		if(hasChanged)
+		{
+			if(lstate.state == LUMIAR_STATE_ON)
 			{
-				lstate.luminosity = getLuminosity();
-				setOperatingPoint(lstate.luminosity);
+				if(lstate.mode == LUMIAR_MODE_AUTO)
+					lstate.pwmValue = LUMIAR_VALUE_MAX - readLuminosity;
+				else
+					lstate.pwmValue = lstate.userValue
 			}
+			else
+			{
+				lstate.pwmValue = LUMIAR_VALUE_MIN;
+			}
+
+			setOperatingPoint(lstate.pwmValue);
 		}
-		else
+
+		/* Send back to server */
+		if(hasChanged)
 		{
-			sleep(1);
+			sem_wait(wdriver.mutex);
+			memcpy(wdriver.current, lstate, sizeof(lstate));
+			sem_post(wdriver.mutex);
 		}
 
-
+		/* Sleep */
+		nanosleep(&slp, (struct timespec *) NULL);
 	}
 
 	return 0;

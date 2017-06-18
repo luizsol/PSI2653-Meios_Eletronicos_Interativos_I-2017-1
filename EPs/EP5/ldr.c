@@ -12,7 +12,7 @@
 #include <time.h>
 #include <wiringPi.h>
 
-#include "ldr.h"
+#include "lumiar.h"
 
 
 // Variáveis locais

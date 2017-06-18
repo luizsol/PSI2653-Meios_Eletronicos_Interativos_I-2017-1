@@ -41,6 +41,8 @@
 #define LUMIAR_MODE_MANUAL 0
 #define LUMIAR_MODE_DEFAULT 1
 
+#define LUMIAR_VALUE_MIN 0
+#define LUMIAR_VALUE_MAX 100
 #define LUMIAR_VALUE_DEFAULT 50
 
 
@@ -60,10 +62,11 @@ struct lumiarConfig
  */
 struct lumiarState
 {
-	int state;
-	int mode;
-	int value;
-	int luminosity;
+	int state;       /* System state */
+	int mode;        /* System operating mode */
+	int pwmValue;    /* PWM value sent to LED (depends on mode) */
+	int userValue;   /* PWM value by user */
+	int luminosity;  /* LDR reading */
 };
 
 
