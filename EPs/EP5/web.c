@@ -165,38 +165,22 @@ int buildResponse(struct request *req, struct response *res)
 			strtok(req->path, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "ON") == 0)
-			{
-				sdriver.current.state = ON;
-				state = "     ON";
-			}
+				sdriver.current.state = LUMIAR_STATE_ON;
 			else if(strcmp(aux, "Standby") == 0)
-			{
-			  sdriver.current.state = STANDBY;
-				state = "Standby";
-			}
+			  sdriver.current.state = LUMIAR_STATE_STANDBY;
 
 			// Verifica e seta o modo de operação:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "Manual") == 0)
-			{
-				sdriver.current.mode = MANUAL;
-				mode = "     Manual";
-			}
+				sdriver.current.mode = LUMIAR_MODE_MANUAL;
 			else if(strcmp(aux, "Auto") == 0)
-			{
-				sdriver.current.mode = AUTO;
-				mode = "Automatico";
-			}
-
+				sdriver.current.mode = LUMIAR_MODE_AUTO;
 
 			// Verifica e seta o valor de Intensidade:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
 			sdriver.current.value = atoi(aux);
-			strcpy(value, aux);
-
-			sprintf(luminosity, "%d", sdriver.current.luminosity);
 
 		}
 		if(rescode == 200)
@@ -204,9 +188,23 @@ int buildResponse(struct request *req, struct response *res)
 			if(strncmp(req->path, "/", 1) == 0)
 				composepath(res->fullPath, "/index.html", res->fullPath);
 		}
+
+
 		// mandar o index.html atualizado
 		f = fopen(res->fullPath, "r");
 		i = strlen(res->msg);
+
+		if(sdriver.current.state == LUMIAR_STATE_ON)
+			state = "     ON";
+		else
+			state = "Standby";
+		if(sdriver.current.mode == LUMIAR_MODE_MANUAL)
+			mode = "     Manual";
+		else
+			mode = "Automatico";
+		sprintf(value, "%d", sdriver.current.value);
+		sprintf(luminosity, "%d", sdriver.current.luminosity);
+
 		if(f != NULL)
 		{
 			int j = fread(res->object, 1, statf.st_size,f);
