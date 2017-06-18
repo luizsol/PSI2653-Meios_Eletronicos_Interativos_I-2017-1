@@ -2,8 +2,8 @@
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Version:     0.0 (2017-06-18)
+ * Date:        2017-06-18
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -28,20 +28,34 @@ int main(int argc, char *argv[])
 	parseConfig(&sconf);
 
 	/* Webserver driver */
+	struct lumiarState state;
 	struct webDriver wdriver;
 	initDriver(&wdriver, &(sconf.web));
 
 	/* Create threads */
 	pthread_t pwmThread, ldrThread, webThread;
 	printf("Launching dedicated threads\n");
-	// pthread_create(&webThread, NULL, webserver, (void *) &wdriver);
-	pthread_create(&ldrThread, NULL, ldr_initandrun, (void *) &sconf.ldr);
-	// pthread_create(&pwmThread, NULL, pwm, (void *) &sconf.pwm);
+	pthread_create(&webThread, NULL, webService, (void *) &wdriver);
+	pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
+	pthread_create(&pwmThread, NULL, pwmService, (void *) &sconf.pwm);
 
 	/* Main loop */
 	for(;;)
 	{
-		sem_wait();
+		/* Get request from server */
+		sem_wait(wdriver.mutex);
+		if(memcmp(state, wdriver.current, sizeof(state)))
+		{
+			memcpy(state, wdriver.current, sizeof(state));
+			sem_post(wdriver.mutex);
+
+
+		}
+		else
+		{
+			sem_post(wdriver.mutex);
+		}
+
 	}
 
 	return 0;

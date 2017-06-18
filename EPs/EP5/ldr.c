@@ -2,8 +2,8 @@
  * Title:       ldr
  * File:        ldr.c
  * Author:      Luiz Sol, Gabriel Crabbé
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Version:     0.0 (2017-06-18)
+ * Date:        2017-06-18
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -22,14 +22,8 @@ pthread_t _thread_ldr;
 int ldr_init(void);
 int _ldr_run(void);
 
-/**
- * Inicializa e executa a thread responsável por calcular o valor da
- * luminosidade calculado pelo ldr
- *
- * @param  sconf ponteiro para a struct config
- * @return       ponteiro NULL
-*/
-void *ldr_initandrun(void *config){
+
+int ldr_initandrun(void){
 	ldr_init();
 	_thread_ldr = malloc(sizeof(pthread_t));
 	ldr_driver_running = 1;
@@ -89,4 +83,16 @@ void * _ldr_run(void * arg){
 	}
 
 	return NULL;
+}
+
+
+/**
+ * Thread principal do driver LDR.
+ *
+ * @param  sconf ponteiro para a struct config
+ * @return       ponteiro NULL
+*/
+void *ldrService(void *config)
+{
+	return NULL
 }

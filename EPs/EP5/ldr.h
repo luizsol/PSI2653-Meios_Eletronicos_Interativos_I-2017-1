@@ -2,8 +2,8 @@
  * Title:       ldr
  * File:        ldr.h
  * Author:      Luiz Sol, Gabriel Crabbé
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Version:     0.0 (2017-06-18)
+ * Date:        2017-06-18
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -35,7 +35,7 @@ struct ldrConfig
 
 
 /* Protótipos de funções */
-void *ldr_initandrun(void *conf);
+void *ldrService(void *config);
 
 
 #endif /* LDR_H */

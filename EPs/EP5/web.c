@@ -2,8 +2,8 @@
  * Title:       web
  * File:        web.c
  * Author:      Gabriel Crabbé, Tiago Amano
- * Version:     0.0 (2017-06-13)
- * Date:        2017-06-13
+ * Version:     0.0 (2017-06-18)
+ * Date:        2017-06-18
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -283,7 +283,7 @@ void *worker(void *arg)
 /**
  * Thread principal de servidor.
  */
-void *webserver(void *arg)
+void *webService(void *arg)
 {
 	// Socket descriptor
 	int sd = socket(PF_INET, SOCK_STREAM, 0);

@@ -2,8 +2,8 @@
  * Title:       web
  * File:        web.h
  * Author:      Gabriel Crabbé, Tiago Amano
- * Version:     0.0 (2017-06-13)
- * Date:        2017-06-13
+ * Version:     0.0 (2017-06-18)
+ * Date:        2017-06-18
  * Description: Eexercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -98,7 +98,7 @@ char *getcurrentdir(char *path, int pathsize);
 int parseRequest(struct request *req);
 int buildResponse(struct request *req, struct response *res);
 
-void *webserver(void *arg);
+void *webService(void *arg);
 
 
 #endif /* WEB_H */
