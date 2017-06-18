@@ -75,6 +75,7 @@ int parseRequest(struct request *req)
  */
 int buildResponse(struct request *req, struct response *res)
 {
+	sem_wait(&(sdriver.mutex));
 	int i, rescode;
 	struct stat statf = { 0 };
 	FILE *f;
@@ -132,6 +133,7 @@ int buildResponse(struct request *req, struct response *res)
 
 	if(rescode == 400 || rescode == 505 || rescode == 404)
 	{
+		sem_post(&(sdriver.mutex));
 		return strlen(res->msg);
 	}
 	else
@@ -180,7 +182,7 @@ int buildResponse(struct request *req, struct response *res)
 			// Verifica e seta o valor de Intensidade:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
-			sdriver.current.value = atoi(aux);
+			sdriver.current.userValue = atoi(aux);
 
 		}
 		if(rescode == 200)
@@ -188,8 +190,8 @@ int buildResponse(struct request *req, struct response *res)
 			if(strncmp(req->path, "/", 1) == 0)
 				composepath(res->fullPath, "/index.html", res->fullPath);
 		}
-
-
+		sem_post(&(sdriver.mutex));
+		sem_wait(&(sdriver.mutex));
 		// mandar o index.html atualizado
 		f = fopen(res->fullPath, "r");
 		i = strlen(res->msg);
@@ -198,11 +200,13 @@ int buildResponse(struct request *req, struct response *res)
 			state = "     ON";
 		else
 			state = "Standby";
+
 		if(sdriver.current.mode == LUMIAR_MODE_MANUAL)
 			mode = "     Manual";
 		else
 			mode = "Automatico";
-		sprintf(value, "%d", sdriver.current.value);
+
+		sprintf(value, "%d", sdriver.current.pwmValue);
 		sprintf(luminosity, "%d", sdriver.current.luminosity);
 
 		if(f != NULL)
@@ -222,6 +226,7 @@ int buildResponse(struct request *req, struct response *res)
 	}
 	if(f != NULL)
 		fclose(f);
+	sem_post(&(sdriver.mutex));
 	return i;
 }
 
@@ -247,7 +252,6 @@ void *worker(void *arg)
 			perror("Error reading from TCP stream");
 		else if(status > 0)
 		{
-			sem_wait(sdriver.mutex);
 			printf("%s\n", req.msg);
 			// Parse request
 			parseRequest(&req);
@@ -264,7 +268,6 @@ void *worker(void *arg)
 			status = close(E);
 			if(status)
 				perror("Error closing socket");
-			sem_post(sdriver.mutex);
 		}
 		else
 			printf("Connection closed\n");

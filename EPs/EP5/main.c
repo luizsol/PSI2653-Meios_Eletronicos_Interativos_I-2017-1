@@ -54,16 +54,16 @@ int main(int argc, char *argv[])
 	for(;;)
 	{
 		/* Get request from server */
-		sem_wait(wdriver.mutex);
+		sem_wait(&(wdriver.mutex));
 		if(memcmp(lstate, wdriver.current, sizeof(lstate)))
 		{
 			memcpy(lstate, wdriver.current, sizeof(lstate));
-			sem_post(wdriver.mutex);
+			sem_post(&(wdriver.mutex));
 			hasChanged = 1;
 		}
 		else
 		{
-			sem_post(wdriver.mutex);
+			sem_post(&(wdriver.mutex));
 			hasChanged = 0;
 		}
 
@@ -96,9 +96,9 @@ int main(int argc, char *argv[])
 		/* Send back to server */
 		if(hasChanged)
 		{
-			sem_wait(wdriver.mutex);
+			sem_wait(&(wdriver.mutex));
 			memcpy(wdriver.current, lstate, sizeof(lstate));
-			sem_post(wdriver.mutex);
+			sem_post(&(wdriver.mutex));
 		}
 
 		/* Sleep */
