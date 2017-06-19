@@ -25,18 +25,26 @@
 /**
  * Struct de configuração do LDR.
  */
-struct ldrConfig
-{
+typedef struct ldrConfig{
 	unsigned int inputPin;
 	unsigned int outputPin;
 	unsigned int lowValue;
 	unsigned int highValue;
-};
+} LDRConfig ;
 
+/**
+ * Thread principal do driver LDR.
+ *
+ * @param  sconf ponteiro para a struct config
+ * @return       ponteiro NULL
+ */
+void * ldrService(void * config);
 
-/* Protótipos de funções */
-void *ldrService(void *config);
-int getLuminosity();
+/* Determina a luminosidade do ambiente
+ *
+ * @return o valor da luminosidade entre 0 e 100
+ */
+int getLuminosity(void);
 
 
 #endif /* LDR_H */
