@@ -64,7 +64,7 @@ int export_gpio(int pin)
      }
      close(arquive);
  
-     return true;
+     return 1;
 }
 
 
@@ -88,7 +88,7 @@ int direction_gpio(int pin, int direction)
              return 0;
      }
      close(arquive);
-     return true;
+     return 1;
 }
 
 
@@ -109,7 +109,7 @@ int direction_gpio(int pin, int direction)
              return 0;
      }
      close(arquive);
-     return true;
+     return 1;
 }
 
 //Libera pino 
