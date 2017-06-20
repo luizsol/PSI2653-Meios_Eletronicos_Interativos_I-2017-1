@@ -4,7 +4,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -std=c11
+CFLAGS = -std=gnu11
 
 # Enable warnings
 CFLAGS += -Wall

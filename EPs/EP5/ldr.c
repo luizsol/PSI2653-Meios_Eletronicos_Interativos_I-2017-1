@@ -8,11 +8,13 @@
  * -----------------------------------------------------------------------------
  */
 
+#include "ldr.h"
 #include <pthread.h>
 #include <time.h>
 #include <wiringPi.h>
 
-#include "lumiar.h"
+
+//#include "lumiar.h"
 
 int _luminosidade;
 
@@ -21,8 +23,8 @@ int ldr_init(LDRConfig * config);
 
 int ldr_init(LDRConfig * config){
 	wiringPiSetup();
-	piHiPri(99);// Aumenta a prioridade de execução do programa. Só funciona se 
-				// o programa for executado como root, c.c. nada ocorre.
+	piHiPri(99);	// Aumenta a prioridade de execução do programa. Só funciona
+				// se o programa for executado como root, c.c. nada ocorre.
 
 	pinMode(config->outputPin, OUTPUT);
 	pullUpDnControl(config->outputPin, PUD_OFF);
@@ -47,15 +49,15 @@ void * ldrService(void * config){
 
 	while(1){
 		// Collect timestamp
-		time_stamp1 = (unsigned long)time(NULL);
+		time_stamp1 = (unsigned long) time(NULL);
 
 		// Charge RC circuit
 		digitalWrite(_config->outputPin, HIGH);
 
 		// Collect timestamp when input = 1
 		do{
-			time_stamp2 = (unsigned long)time(NULL);
-		} while(! digitalRead(_config->inputPin))
+			time_stamp2 = (unsigned long) time(NULL);
+		} while(! digitalRead(_config->inputPin) );
 
 		// Discharge RC circuit for a given time
 		digitalWrite(_config->outputPin, LOW);
@@ -64,12 +66,11 @@ void * ldrService(void * config){
 		timediff = (int) (time_stamp2 - time_stamp1);
 
 		// More light -> less resistance -> less timediff
-		_luminosidade = (100 * (ldr.high - timediff - ldr.low)) / ldr.high;
+		_luminosidade = (100 * (_config->highValue - timediff - _config->lowValue)) 
+								/ _config->highValue;
 
-		if(_luminosidade >= 0){
-			luminosidade = _luminosidade;
-		} else {
-			luminosidade = 0;
+		if(_luminosidade <= 0){
+			_luminosidade = 0;
 		}
 	}
 
