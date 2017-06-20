@@ -17,9 +17,9 @@
  */
 void *pwmService(void *conf)
 {
-	if(export_gpio(16)==false)
+	if(export_gpio(16)==0)
 		perror("Erro no export");
-	if(direction_gpio(16,OUTPUT)==false)
+	if(direction_gpio(16,OUTPUT)==0)
 		perror("Erro em configurar direção");
 	
 	while(1){
@@ -54,13 +54,13 @@ int export_gpio(int pin)
      if (arquive==-1)
      {
              printf("Arquivo abriu incorretamente\n");
-             return false;
+             return 0;
      }
      snprintf(buffer, 3, "%d", pin);
      if(write(arquive, buffer, 3) == -1)
      {
              close(arquive);
-             return false;
+             return 0;
      }
      close(arquive);
  
@@ -79,13 +79,13 @@ int direction_gpio(int pin, int direction)
      arquive = open (path, O_WRONLY);
      if (arquive==-1)
      {
-             return false;
+             return 0;
      }
      snprintf(buffer, 3, "%d", pin);
      if (write( arquive, ((direction == INPUT)?"in":"out"), 3 )==-1)
      {
              close(arquive);
-             return false;
+             return 0;
      }
      close(arquive);
      return true;
@@ -101,12 +101,12 @@ int direction_gpio(int pin, int direction)
      arquive = open(path, O_WRONLY);
      if (arquive == -1)
      {
-             return false;
+             return 0;
      }
      if (write (arquive, ((value == HIGH)?"1":"0"), 1) == -1)
      {
              close(arquive);
-             return false;
+             return 0;
      }
      close(arquive);
      return true;
@@ -119,14 +119,14 @@ int unexport_gpio(int pin)
      if (arquive==-1)
      {
              printf("Arquivo abriu incorretamente\n");
-             return false;
+             return 0;
      }
      if(write(arquive, buffer, 3) == -1)
      {
              close(arquive);
-             return false;
+             return 0;
      }
-     return true;
+     return 1;
 }
 
 
