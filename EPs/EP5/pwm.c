@@ -103,7 +103,7 @@ int direction_gpio(int pin, int direction)
      {
              return 0;
      }
-     if (write (arquive, ((value == HIGH)?"1":"0"), 1) == -1)
+     if (write (arquive, ((value == 1)?"1":"0"), 1) == -1)
      {
              close(arquive);
              return 0;

@@ -15,6 +15,9 @@
 #define INPUT 0
 #define OUTPUT 1
 
+int arquive;
+char buffer[3];
+char path[35];
 /**
  * Struct de configuração do PWM.
  */
