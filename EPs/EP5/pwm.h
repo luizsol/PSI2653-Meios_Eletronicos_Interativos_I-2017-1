@@ -12,19 +12,14 @@
 #define PWM_H
 
 
-#define INPUT 0
-#define OUTPUT 1
-#define O_WRONLY 01
 
-int arquive;
-char buffer[3];
-char path[35];
+
 /**
  * Struct de configuração do PWM.
  */
 struct pwmConfig
 {
-	unsigned int outputPin;
+	unsigned int outputPin=1;
 	unsigned int lowValue;
 	unsigned int highValue;
 };
@@ -33,9 +28,7 @@ struct pwmConfig
 /* Protótipos de funções */
 void *pwmService(void *conf);
 int setOperatingPoint(int val);
-int export_gpio(int pin);
-int direction_gpio(int pin, int direction);
-int unexport_gpio(int pin);
+
 
 
 #endif /* PWM_H */

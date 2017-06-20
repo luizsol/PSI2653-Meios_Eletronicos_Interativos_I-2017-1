@@ -9,6 +9,10 @@
  */
 
 #include "lumiar.h"
+#include <wiringPi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 
 /**
@@ -17,17 +21,12 @@
  */
 void *pwmService(void *conf)
 {
-	if(export_gpio(24)==0)
-		perror("Erro no export");
-	if(direction_gpio(24,OUTPUT)==0)
-		perror("Erro em configurar direção");
-	
-	while(1){
-	value_gpio(24,1);	
-	usleep(1*1000); //tempo em alto
-	value_gpio(24,0);
-	usleep(1*1000); //tempo em baixo
-	}
+
+	if(wiringPiSetup() ==-1)
+		perror("Falha em configurar");
+	pinMode(outputPin,PWM_OUTPUT);
+	lowValue=0;
+	HighValue=1000;
 	return NULL;
 }
 
@@ -38,95 +37,20 @@ void *pwmService(void *conf)
  */
 int setOperatingPoint(int val)
 {
+	val=(highValue-lowValue)*val/100+lowValue; //set range 0 -100		
+	pwmWrite(1,val); 
 	
-		
 
 	return 0;
 }
 
 
-/**
- * Função para exportar pinos 
-*/	
-int export_gpio(int pin)
-{
-     arquive = open ("/sys/class/gpio/export", O_WRONLY);
-     if (arquive==-1)
-     {
-             printf("Arquivo abriu incorretamente\n");
-             return 0;
-     }
-     snprintf(buffer, 3, "%d", pin);
-     if(write(arquive, buffer, 3) == -1)
-     {
-             close(arquive);
-             return 0;
-     }
-     close(arquive);
- 
-     return 1;
-}
 
 
 
-/*
- * Configura direção do pino (in/out)
- */	
-int direction_gpio(int pin, int direction)
-{
-     arquive=0;
-     snprintf(path, 35, "/sys/class/gpio/gpio%d/direction", pin);
-     arquive = open (path, O_WRONLY);
-     if (arquive==-1)
-     {
-             return 0;
-     }
-     snprintf(buffer, 3, "%d", pin);
-     if (write( arquive, ((direction == INPUT)?"in":"out"), 3 )==-1)
-     {
-             close(arquive);
-             return 0;
-     }
-     close(arquive);
-     return 1;
-}
 
 
 
-//  Escreve no pino
- int value_gpio(int pin, int value)
-{
-     arquive=0;
-     snprintf(path, 35, "/sys/class/gpio/gpio%d/value", pin);
-     arquive = open(path, O_WRONLY);
-     if (arquive == -1)
-     {
-             return 0;
-     }
-     if (write (arquive, ((value == 1)?"1":"0"), 1) == -1)
-     {
-             close(arquive);
-             return 0;
-     }
-     close(arquive);
-     return 1;
-}
 
-//Libera pino 
-int unexport_gpio(int pin)
-{
-     arquive = open ("/sys/class/gpio/unexport", O_WRONLY);
-     if (arquive==-1)
-     {
-             printf("Arquivo abriu incorretamente\n");
-             return 0;
-     }
-     if(write(arquive, buffer, 3) == -1)
-     {
-             close(arquive);
-             return 0;
-     }
-     return 1;
-}
 
 
