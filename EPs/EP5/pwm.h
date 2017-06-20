@@ -14,6 +14,7 @@
 
 #define INPUT 0
 #define OUTPUT 1
+#define O_WRONLY 01
 
 int arquive;
 char buffer[3];

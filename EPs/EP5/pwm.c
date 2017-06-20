@@ -17,16 +17,16 @@
  */
 void *pwmService(void *conf)
 {
-	if(export_gpio(16)==0)
+	if(export_gpio(24)==0)
 		perror("Erro no export");
-	if(direction_gpio(16,OUTPUT)==0)
+	if(direction_gpio(24,OUTPUT)==0)
 		perror("Erro em configurar direção");
 	
 	while(1){
-	value_gpio(16,1);	
-	wait(30); //tempo em alto
-	value_gpio(16,0);
-	wait(30); //tempo em baixo
+	value_gpio(24,1);	
+	usleep(1*1000); //tempo em alto
+	value_gpio(24,0);
+	usleep(1*1000); //tempo em baixo
 	}
 	return NULL;
 }
