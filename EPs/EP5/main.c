@@ -2,8 +2,8 @@
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-18)
- * Date:        2017-06-18
+ * Version:     0.0 (2017-06-20)
+ * Date:        2017-06-20
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -37,8 +37,9 @@ int main(int argc, char *argv[])
 	pthread_t pwmThread, ldrThread, webThread;
 	printf("Launching dedicated threads\n");
 	pthread_create(&webThread, NULL, webService, (void *) &wdriver);
-	pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
-	pthread_create(&pwmThread, NULL, pwmService, (void *) &sconf.pwm);
+	/* UNCOMMENT LINES BELOW FOR DEPLOYMENT */
+	// pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
+	// pthread_create(&pwmThread, NULL, pwmService, (void *) &sconf.pwm);
 
 	/* Local flags and variables */
 	int hasChanged = 0;
@@ -68,7 +69,10 @@ int main(int argc, char *argv[])
 		}
 
 		/* Get luminosity */
-		readLuminosity = getLuminosity();
+		/* UNCOMMENT LINE BELOW FOR DEPLOYMENT */
+		//readLuminosity = getLuminosity();
+		/* DELETE LINE BELOW FOR DEPLOYMENT */
+		readLuminosity = (int) time(NULL) % 101;
 		if(lstate.luminosity != readLuminosity)
 		{
 			lstate.luminosity = readLuminosity;
@@ -90,7 +94,8 @@ int main(int argc, char *argv[])
 				lstate.pwmValue = LUMIAR_VALUE_MIN;
 			}
 
-			setOperatingPoint(lstate.pwmValue);
+			/* UNCOMMENT LINE BELOW FOR DEPLOYMENT */
+			// setOperatingPoint(lstate.pwmValue);
 		}
 
 		/* Send back to server */
