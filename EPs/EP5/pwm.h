@@ -29,9 +29,9 @@ struct pwmConfig
 /* Protótipos de funções */
 void *pwmService(void *conf);
 int setOperatingPoint(int val);
-bool export_gpio(int pin);
-bool direction_gpio(int pin, int direction);
-bool unexport_gpio(int pin);
+int export_gpio(int pin);
+int direction_gpio(int pin, int direction);
+int unexport_gpio(int pin);
 
 
 #endif /* PWM_H */

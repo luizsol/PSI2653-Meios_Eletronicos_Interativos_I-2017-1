@@ -48,7 +48,7 @@ int setOperatingPoint(int val)
 /**
  * Função para exportar pinos 
 */	
-bool export_gpio(int pin)
+int export_gpio(int pin)
 {
      arquive = open ("/sys/class/gpio/export", O_WRONLY);
      if (arquive==-1)
@@ -72,7 +72,7 @@ bool export_gpio(int pin)
 /*
  * Configura direção do pino (in/out)
  */	
-bool direction_gpio(int pin, int direction)
+int direction_gpio(int pin, int direction)
 {
      arquive=0;
      snprintf(path, 35, "/sys/class/gpio/gpio%d/direction", pin);
@@ -94,7 +94,7 @@ bool direction_gpio(int pin, int direction)
 
 
 //  Escreve no pino
- bool value_gpio(int pin, int value)
+ int value_gpio(int pin, int value)
 {
      arquive=0;
      snprintf(path, 35, "/sys/class/gpio/gpio%d/value", pin);
@@ -113,7 +113,7 @@ bool direction_gpio(int pin, int direction)
 }
 
 //Libera pino 
-bool unexport_gpio(int pin)
+int unexport_gpio(int pin)
 {
      arquive = open ("/sys/class/gpio/unexport", O_WRONLY);
      if (arquive==-1)
