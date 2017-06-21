@@ -37,11 +37,11 @@ main.o: serverlib.h queue.h main.c
 	$(CC) $(CFLAGS) -c main.c 
 
 # Tests
-test-ldr.o: ldr.h $(TDIR)/test-ldr.c
+test-lrd.o: ldr.h $(TDIR)/test-ldr.c
 	$(CC) $(CFLAGS) -c $(TDIR)/test-ldr.c
 
-test-ldr: test-lrd.o
-	$(CC) $(CFLAGS) test-ldr.o -o test-ldr $(LIBS)
+test-ldr: test-lrd.o ldr.o
+	$(CC) $(CFLAGS) test-ldr.o ldr.o -o test-ldr $(LIBS)
 
 # All
 all main: main.o lumiarlib.o queue.o serverlib.o htmllib.o ldr.o

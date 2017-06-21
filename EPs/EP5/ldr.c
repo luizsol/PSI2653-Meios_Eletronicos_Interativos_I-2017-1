@@ -9,12 +9,9 @@
  */
 
 #include "ldr.h"
-#include <pthread.h>
-#include <time.h>
 #include <wiringPi.h>
-
-
-//#include "lumiar.h"
+#include <unistd.h> 
+#include <stdio.h>
 
 int _luminosidade;
 
@@ -22,7 +19,14 @@ int _luminosidade;
 int ldr_init(LDRConfig * config);
 
 int ldr_init(LDRConfig * config){
-	wiringPiSetup();
+	int setup = wiringPiSetupGpio();
+	
+	if(setup == -1){
+		puts("Erro na inicializacao do GPIO");
+	} else {
+		puts("GPIO inicializado com sucesso");
+	}
+	
 	piHiPri(99);	// Aumenta a prioridade de execução do programa. Só funciona
 				// se o programa for executado como root, c.c. nada ocorre.
 
@@ -40,8 +44,7 @@ void * ldrService(void * config){
 	LDRConfig * _config = (LDRConfig *) config;
 	ldr_init(_config);
 
-	unsigned long time_stamp1, time_stamp2;
-	int timediff;
+	int timediff;  // u seconds;
 
 	// Discharge RC circuit for a given time
 	digitalWrite(_config->outputPin, LOW);
@@ -49,25 +52,27 @@ void * ldrService(void * config){
 
 	while(1){
 		// Collect timestamp
-		time_stamp1 = (unsigned long) time(NULL);
+		timediff = 0;
 
 		// Charge RC circuit
 		digitalWrite(_config->outputPin, HIGH);
 
 		// Collect timestamp when input = 1
 		do{
-			time_stamp2 = (unsigned long) time(NULL);
-		} while(! digitalRead(_config->inputPin) );
+			timediff += SAMPLEPERIOD;
+			usleep(SAMPLEPERIOD);
+		} while(digitalRead(_config->inputPin) == LOW);
 
 		// Discharge RC circuit for a given time
 		digitalWrite(_config->outputPin, LOW);
 		delayMicroseconds(UPERIOD);
 
-		timediff = (int) (time_stamp2 - time_stamp1);
+		timediff = timediff/1000;
 
 		// More light -> less resistance -> less timediff
-		_luminosidade = (100 * (_config->highValue - timediff - _config->lowValue)) 
-								/ _config->highValue;
+		_luminosidade = (100 * 
+						(_config->highValue - timediff - _config->lowValue)) 
+						/ (_config->highValue - _config->lowValue);
 
 		if(_luminosidade <= 0){
 			_luminosidade = 0;

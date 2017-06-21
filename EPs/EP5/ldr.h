@@ -18,9 +18,14 @@
 #ifndef LDR_H
 #define LDR_H
 
-
 #define UPERIOD 500000 // Período entre observações (500[ms])
+#define SAMPLEPERIOD 100 // Periodo entre amostras do pino ([u segundos])
 
+// Possiveis valores standard 
+#define LDRINPUTPIN 13
+#define LDROUTPUTPIN 6
+#define LDRLOWVALUE 1
+#define LDRHIGHVALUE 200
 
 /**
  * Struct de configuração do LDR.
