@@ -39,7 +39,7 @@ void *pwmService(void *conf)
 int setOperatingPoint(int val)
 {
 	val = (highValue - lowValue) * val / 100 + lowValue; //set range 0 -100
-	pwmWrite(1, val);  // Is this a hardwired pin?
+	pwmWrite(outputPin, val);  // Is this a hardwired pin?
 
 	return 0;
 }
