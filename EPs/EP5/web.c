@@ -140,7 +140,7 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 	{
 		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
-		composepath(res->fullPath, "index.html",res->fullPath);
+		composePath(res->fullPath, "index.html", res->fullPath);
 		// Chamada de sistema para obter
 		//as informações sobre o arquivo
 		stat(res->fullPath, &statf);
@@ -188,7 +188,7 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 		if(rescode == 200)
 		{
 			if(strncmp(req->path, "/", 1) == 0)
-				composepath(res->fullPath, "/index.html", res->fullPath);
+				composePath(res->fullPath, "/index.html", res->fullPath);
 		}
 		sem_post(&d->mutex);
 		sem_wait(&d->mutex);
