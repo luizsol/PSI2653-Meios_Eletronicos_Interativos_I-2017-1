@@ -3,6 +3,7 @@
 <head>
 	<title> EP5 </title>
 	<meta charset="UTF-8">
+	<!-- <meta http-equiv="refresh" content="20"> -->
 </header>
 <body>
 
@@ -11,7 +12,7 @@
 <form>
 	<fieldset>
     	<legend> Estado: </legend>
-        Atual: <b> Standby </b>
+        Atual: <b>Standby</b>
         <br><br>
         Set:
         <br>
@@ -20,16 +21,13 @@
         <br>
 		<input type="radio" checked="checked" name="Estado" value="Standby" required="yes">
 		Standby
-        <br>
-        <br>
-		<input type="submit" value="Enviar">
 	</fieldset>
 
 	<br>
 
 <fieldset>
 	<legend>Modo:</legend>
-	Atual: <b> Automatico </b>
+	Atual: <b>Automatico</b>
 	<br><br>
 	Set:
 	<br>
@@ -38,9 +36,6 @@
     <br>
 	<input type="radio" name="Modo" value="Manual" required="yes">
 	Manual
-    <br>
-    <br>
-	<input type="submit" value="Enviar">
 </fieldset>
 
 <br>
@@ -48,23 +43,21 @@
 <fieldset>
 	<legend>Intensidade:</legend>
 	Atual:
-	<progress max="100" value="050"></progress> <b>  50% </b>
+	<progress max="100" value="050"></progress> <b> 50%</b>
 	<br><br>
 	Set:
-	<br>
-	<input type="range" name="Intensidade" min="0" max="100" value="050" required="yes">  50%
-    <br>
-    <br>
-	<input type="submit" value="Enviar">
+	<input type="range" name="Intensidade" min="0" max="100" value="050" required="yes"> <b> 50%</b>
 </fieldset>
 
 <br>
 
 <fieldset>
 	<legend>Luminosidade:</legend>
-	<progress max="100" value="050"></progress> <b>  50% </b>
+	<progress max="100" value="050"></progress> <b> 50%</b>
+<br>
+<br>
+<input type="submit" value="Enviar">
 </fieldset>
-
 <br>
 
 </form>
