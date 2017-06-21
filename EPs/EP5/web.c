@@ -134,7 +134,7 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 	if(rescode == 400 || rescode == 505 || rescode == 404)
 	{
 		sem_post(&d->mutex);
-		return strlen(res->msg);
+		return strlen(res->hdr);
 	}
 	else
 	{
@@ -194,17 +194,17 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 		sem_wait(&d->mutex);
 		// mandar o index.html atualizado
 		f = fopen(res->fullPath, "r");
-		i = strlen(res->msg);
+		i = strlen(res->hdr);
 
 		if(d->current->state == LUMIAR_STATE_ON)
-			state = "     ON";
+			sprintf(state, "     ON");
 		else
-			state = "Standby";
+			sprintf(state, "Standby");
 
 		if(d->current->mode == LUMIAR_MODE_MANUAL)
-			mode = "     Manual";
+			sprintf(mode, "     Manual");
 		else
-			mode = "Automatico";
+			sprintf(mode, "Automatico");
 
 		sprintf(value, "%d", d->current->pwmValue);
 		sprintf(luminosity, "%d", d->current->luminosity);
@@ -221,7 +221,7 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 			memcpy(&res->object[1211], luminosity, strlen(luminosity));
 			memcpy(&res->object[1232], luminosity, strlen(luminosity));
 			res->object[j] = '\0';
-			i = strlen(res->msg);
+			i = strlen(res->hdr);
 		}
 	}
 	if(f != NULL)
@@ -241,7 +241,7 @@ void *worker(void *arg)
 	struct request  req;
 	struct response res;
 
-	strcpy(res.base, sdriver->config->base);
+	strcpy(res.basePath, sdriver->config->base);
 
 	for(;;)
 	{
@@ -259,8 +259,8 @@ void *worker(void *arg)
 			// Build response
 			len = buildResponse(sdriver, &req, &res);
 
-			printf("%s\n", res.msg);
-			status = write(E, res.msg, len);
+			printf("%s\n", res.hdr);
+			status = write(E, res.hdr, len);
 			if(status <= 0)
 				perror("Error writing to TCP stream");
 
@@ -353,7 +353,7 @@ int initDriver(struct webDriver *d, struct lumiarState *s, struct webConfig *c)
 	d->current = s;
 	d->current->state = LUMIAR_STATE_DEFAULT;
 	d->current->mode = LUMIAR_MODE_DEFAULT;
-	d->current->value = LUMIAR_VALUE_DEFAULT;
+	d->current->userValue = LUMIAR_VALUE_DEFAULT;
 	d->current->luminosity = 0;
 
 	return 0;
