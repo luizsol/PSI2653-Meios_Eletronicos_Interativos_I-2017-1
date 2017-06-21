@@ -73,16 +73,18 @@ int parseRequest(struct request *req)
  * @param  res a struct response da mensagem a enviar.
  * @return     0 em caso de sucesso, não-nulo caso contrário.
  */
-int buildResponse(struct webDriver *d, struct request *req, struct response *res)
+int buildResponse(struct webDriver *d, struct request *req,
+	struct response *res)
 {
 	sem_wait(&d->mutex);
 	int i, rescode;
 	struct stat statf;
 	FILE *f;
-	char state[11];
-	char mode[11];
-	char value[11];
-	char luminosity[11];
+	char state[20];
+	char mode[20];
+	char value[20];
+	char luminosity[20];
+	char *aux;
 
 	composePath(res->basePath, "/index.html", res->fullPath);
 	res->http = res->hdr;
@@ -143,7 +145,6 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 		// Chamada de sistema para obter
 		//as informações sobre o arquivo
 		stat(res->fullPath, &statf);
-		printf("%s ----\n %s ----\n %s\n", res->basePath, res->fullPath, req->path);
 
 		//apontado por res->path e
 		//armazena as informações em statf
@@ -162,7 +163,6 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 		res->object = res->type + strlen(res->type);
 		if(rescode == 201)
 		{	// pegar as info
-			char *aux;
 
 			// Verifica e seta o estado:
 			strtok(req->path, "=");
@@ -184,38 +184,68 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
 			d->current->userValue = atoi(aux);
-
 		}
 		sem_post(&d->mutex);
+
+		//nanosleep(&slp, (struct timespec *) NULL);
+		sleep(1);
+
 		sem_wait(&d->mutex);
 		// mandar o index.html atualizado
 		f = fopen(res->fullPath, "r");
 		i = strlen(res->hdr);
 
 		if(d->current->state == LUMIAR_STATE_ON)
-			sprintf(state, "     ON");
+			sprintf(state, "<b>     ON</b>");
 		else
-			sprintf(state, "Standby");
+			sprintf(state, "<b>Standby</b>");
 
 		if(d->current->mode == LUMIAR_MODE_MANUAL)
-			sprintf(mode, "     Manual");
+			sprintf(mode, "<b>    Manual</b>");
 		else
-			sprintf(mode, "Automatico");
+			sprintf(mode, "<b>Automatico</b>");
 
-		sprintf(value, "%d", d->current->pwmValue);
-		sprintf(luminosity, "%d", d->current->luminosity);
+		if(d->current->pwmValue == 100)
+			sprintf(value, "%d", d->current->pwmValue);
+		else if(d->current->pwmValue > 9)
+			sprintf(value, "0%d", d->current->pwmValue);
+		else
+			sprintf(value, "00%d", d->current->pwmValue);
+
+		if(d->current->luminosity == 100)
+			sprintf(luminosity, "%d", d->current->luminosity);
+		else if(d->current->luminosity > 9)
+			sprintf(luminosity, "0%d", d->current->luminosity);
+		else
+			sprintf(luminosity, "00%d", d->current->luminosity);
 
 		if(f != NULL)
 		{
 			int j = fread(res->object, 1, statf.st_size,f);
-			memcpy(&res->object[189], state, strlen(state));
-			memcpy(&res->object[555], mode, strlen(mode));
-			memcpy(&res->object[921], value, strlen(value));
-			memcpy(&res->object[942], value, strlen(value));
-			memcpy(&res->object[1039], value, strlen(value));
-			memcpy(&res->object[1060], value, strlen(value));
-			memcpy(&res->object[1211], luminosity, strlen(luminosity));
-			memcpy(&res->object[1232], luminosity, strlen(luminosity));
+			aux = strstr(res->object, "<b>Standby</b>");
+			memcpy(aux, state, strlen(state));
+
+			aux = strstr(res->object, "<b>Automatico</b>");
+			memcpy(aux, mode, strlen(mode));
+
+			aux = strstr(res->object, "050");
+			memcpy(aux, value, strlen(value));
+
+			aux = strstr(res->object, " 50");
+			memcpy(aux, value, strlen(value));
+
+			aux = strstr(aux, "050");
+			memcpy(aux, value, strlen(value));
+
+			aux = strstr(aux, " 50");
+			memcpy(aux, value, strlen(value));
+
+			aux = strstr(aux, "050");
+			memcpy(aux, luminosity, strlen(luminosity));
+
+			aux = strstr(aux, " 50");
+			memcpy(aux, luminosity, strlen(luminosity));
+
 			res->object[j] = '\0';
 			i = strlen(res->hdr);
 		}
