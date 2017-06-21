@@ -236,18 +236,24 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
  */
 void *worker(void *arg)
 {
+	printf("webworker1\n");
 	struct webDriver *sdriver = (struct webDriver *) arg;
 	int E, len, status;
 	struct request  req;
 	struct response res;
 
-	strcpy(res.basePath, sdriver->config->base);
-
+	printf("webworker2\n");
+	strcpy(res.basePath, sdriver->config->base); // Aqui dá segfault FIXME
+	printf("webworker3\n");
 	for(;;)
 	{
+		printf("webworker4\n");
 		// Receive
 		E = removeQueue(&requestQueue);
+		printf("webworker5\n");
 		status = read(E, req.msg, sizeof(req.msg));
+		printf("webworker6\n");
+		printf("%s\n", req.msg);
 		if(status < 0)
 			perror("Error reading from TCP stream");
 		else if(status > 0)
@@ -281,6 +287,7 @@ void *worker(void *arg)
  */
 void *webService(void *arg)
 {
+	printf("webservice1\n");
 	// Socket descriptor
 	int sd = socket(PF_INET, SOCK_STREAM, 0);
 	if(sd == -1)
@@ -294,11 +301,13 @@ void *webService(void *arg)
 	struct webDriver *sdriver = (struct webDriver *) arg;
 	struct sockaddr_in saddr;
 
+
 	// Bind
 	saddr.sin_family      = AF_INET;
 	saddr.sin_addr.s_addr = INADDR_ANY;
-	saddr.sin_port        = htons(sdriver->config->port);
-
+	printf("webservice2\n");
+	saddr.sin_port        = htons(sdriver->config->port); // Aqui dá segfault FIXME
+	printf("webservice3\n");
 	status = bind(sd, (struct sockaddr *) &saddr, sizeof(saddr));
 	if(status < 0)
 	{
@@ -316,7 +325,6 @@ void *webService(void *arg)
 
 	// Queue
 	initQueue(&requestQueue, 10);
-
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
@@ -326,10 +334,13 @@ void *webService(void *arg)
 	// Accept
 	for(;;)
 	{
+		printf("webservice4\n");
 		int size, newsd;
 		struct sockaddr_in caddr;
 
-		newsd=accept(sd,(struct sockaddr*) &caddr,(socklen_t *) &size);
+		printf("webservice5\n");
+		newsd = accept(sd,(struct sockaddr*) &caddr,(socklen_t *) &size); // FIXME
+		printf("webservice6\n");
 		if(newsd < 0)
 			perror("Error accepting connection");
 
