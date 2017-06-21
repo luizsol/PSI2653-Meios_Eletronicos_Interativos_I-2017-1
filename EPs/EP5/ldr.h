@@ -26,8 +26,8 @@
  * Struct de configuração do LDR.
  */
 typedef struct ldrConfig{
-	unsigned int inputPin;
-	unsigned int outputPin;
+	unsigned char inputPin;
+	unsigned char outputPin;
 	unsigned int lowValue;
 	unsigned int highValue;
 } LDRConfig ;

@@ -2,8 +2,8 @@
  * Title:       web
  * File:        web.h
  * Author:      Gabriel Crabbé, Tiago Amano
- * Version:     0.0 (2017-06-18)
- * Date:        2017-06-18
+ * Version:     0.0 (2017-06-20)
+ * Date:        2017-06-20
  * Description: Eexercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -13,8 +13,6 @@
 
 
 #include <semaphore.h>
-
-#include "lumiarlib.h"
 
 
 #define WORKER_THREADS 1
@@ -73,14 +71,14 @@ struct webConfig
  */
 struct webDriver
 {
-	struct lumiarState current;
+	struct lumiarState *current;
 	struct webConfig *config;
 	sem_t mutex;
 };
 
 
 /* Protótipos de funções */
-int initDriver(struct webDriver *d, struct webConfig *c);
+int initDriver(struct webDriver *d, struct lumiarState *s, struct webConfig *c);
 
 int composepath(char *oldpath, char *path, char *newpath);
 char *getcurrentdir(char *path, int pathsize);

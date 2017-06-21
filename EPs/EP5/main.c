@@ -21,7 +21,7 @@
 /**
  * Main thread.
  */
-int main(int argc, char *argv[])
+int main(void)
 {
 	/* Parse configuration file */
 	struct lumiarConfig sconf;
@@ -30,8 +30,9 @@ int main(int argc, char *argv[])
 
 	/* Webserver driver */
 	struct lumiarState lstate;
+	struct lumiarState ldriver;
 	struct webDriver wdriver;
-	initDriver(&wdriver, &(sconf.web));
+	initDriver(&wdriver, &ldriver, &sconf.web);
 
 	/* Create threads */
 	pthread_t pwmThread, ldrThread, webThread;
@@ -44,27 +45,22 @@ int main(int argc, char *argv[])
 	/* Local flags and variables */
 	int hasChanged = 0;
 	int readLuminosity;
-	const struct timespec slp =
-	{
-		tv_sec = 0;
-		tv_nsec = 100000000L;  /* 100 ms */
-	};
-
+	const struct timespec slp = {0, 100000000L};  /* 100 ms */
 
 	/* Main loop */
 	for(;;)
 	{
 		/* Get request from server */
 		sem_wait(&(wdriver.mutex));
-		if(memcmp(lstate, wdriver.current, sizeof(lstate)))
+		if(memcmp(&lstate, &wdriver.current, sizeof(lstate)))
 		{
-			memcpy(lstate, wdriver.current, sizeof(lstate));
-			sem_post(&(wdriver.mutex));
+			memcpy(&lstate, &wdriver.current, sizeof(lstate));
+			sem_post(&wdriver.mutex);
 			hasChanged = 1;
 		}
 		else
 		{
-			sem_post(&(wdriver.mutex));
+			sem_post(&wdriver.mutex);
 			hasChanged = 0;
 		}
 
@@ -87,7 +83,7 @@ int main(int argc, char *argv[])
 				if(lstate.mode == LUMIAR_MODE_AUTO)
 					lstate.pwmValue = LUMIAR_VALUE_MAX - readLuminosity;
 				else
-					lstate.pwmValue = lstate.userValue
+					lstate.pwmValue = lstate.userValue;
 			}
 			else
 			{
@@ -101,9 +97,9 @@ int main(int argc, char *argv[])
 		/* Send back to server */
 		if(hasChanged)
 		{
-			sem_wait(&(wdriver.mutex));
-			memcpy(wdriver.current, lstate, sizeof(lstate));
-			sem_post(&(wdriver.mutex));
+			sem_wait(&wdriver.mutex);
+			memcpy(&wdriver.current, &lstate, sizeof(lstate));
+			sem_post(&wdriver.mutex);
 		}
 
 		/* Sleep */

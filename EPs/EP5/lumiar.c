@@ -8,6 +8,11 @@
  * -----------------------------------------------------------------------------
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "lumiar.h"
 
 
@@ -60,7 +65,7 @@ int parseConfig(struct lumiarConfig *c)
 		else if(!strcmp(line, "ldr.low"))
 			sscanf(strtok(NULL, " "), "%u", &c->ldr.lowValue);
 		else if(!strcmp(line, "ldr.in"))
-			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.inPin);
+			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.inputPin);
 		else if(!strcmp(line, "ldr.out"))
 			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.outputPin);
 		else

@@ -345,15 +345,16 @@ void *webService(void *arg)
 /**
  * Inicializa a struct de controle do webserver.
  */
-int initDriver(struct webDriver *d, struct webConfig *c)
+int initDriver(struct webDriver *d, struct lumiarState *s, struct webConfig *c)
 {
 	d->config = c;
 	sem_init(&d->mutex, 0, 1);
 
-	d->current.state = LUMIAR_STATE_DEFAULT;
-	d->current.mode = LUMIAR_MODE_DEFAULT;
-	d->current.value = LUMIAR_VALUE_DEFAULT;
-	d->current.luminosity = 0;
+	d->current = s;
+	d->current->state = LUMIAR_STATE_DEFAULT;
+	d->current->mode = LUMIAR_MODE_DEFAULT;
+	d->current->value = LUMIAR_VALUE_DEFAULT;
+	d->current->luminosity = 0;
 
 	return 0;
 }

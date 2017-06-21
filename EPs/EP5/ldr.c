@@ -8,13 +8,12 @@
  * -----------------------------------------------------------------------------
  */
 
-#include "ldr.h"
 #include <pthread.h>
 #include <time.h>
 #include <wiringPi.h>
 
+#include "ldr.h"
 
-//#include "lumiar.h"
 
 int _luminosidade;
 
@@ -66,7 +65,7 @@ void * ldrService(void * config){
 		timediff = (int) (time_stamp2 - time_stamp1);
 
 		// More light -> less resistance -> less timediff
-		_luminosidade = (100 * (_config->highValue - timediff - _config->lowValue)) 
+		_luminosidade = (100 * (_config->highValue - timediff - _config->lowValue))
 								/ _config->highValue;
 
 		if(_luminosidade <= 0){

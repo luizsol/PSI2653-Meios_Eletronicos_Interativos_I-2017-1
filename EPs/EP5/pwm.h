@@ -1,9 +1,9 @@
 /* -----------------------------------------------------------------------------
  * Title:       pwm
  * File:        pwm.h
- * Author:      Gabriel Crabbé -- Caio Pereira
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Author:      Gabriel Crabbé, Caio Pereira
+ * Version:     0.0 (2017-06-20)
+ * Date:        2017-06-20
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -12,14 +12,12 @@
 #define PWM_H
 
 
-
-
 /**
  * Struct de configuração do PWM.
  */
 struct pwmConfig
 {
-	unsigned int outputPin=1;
+	unsigned char outputPin;
 	unsigned int lowValue;
 	unsigned int highValue;
 };
@@ -28,7 +26,6 @@ struct pwmConfig
 /* Protótipos de funções */
 void *pwmService(void *conf);
 int setOperatingPoint(int val);
-
 
 
 #endif /* PWM_H */
