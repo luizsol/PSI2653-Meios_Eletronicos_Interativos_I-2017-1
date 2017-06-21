@@ -73,9 +73,9 @@ int parseRequest(struct request *req)
  * @param  res a struct response da mensagem a enviar.
  * @return     0 em caso de sucesso, não-nulo caso contrário.
  */
-int buildResponse(struct request *req, struct response *res)
+int buildResponse(struct webDriver *d, struct request *req, struct response *res)
 {
-	sem_wait(&(sdriver.mutex));
+	sem_wait(&d->mutex);
 	int i, rescode;
 	struct stat statf = { 0 };
 	FILE *f;
@@ -133,7 +133,7 @@ int buildResponse(struct request *req, struct response *res)
 
 	if(rescode == 400 || rescode == 505 || rescode == 404)
 	{
-		sem_post(&(sdriver.mutex));
+		sem_post(&d->mutex);
 		return strlen(res->msg);
 	}
 	else
@@ -167,22 +167,22 @@ int buildResponse(struct request *req, struct response *res)
 			strtok(req->path, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "ON") == 0)
-				sdriver.current.state = LUMIAR_STATE_ON;
+				d->current->state = LUMIAR_STATE_ON;
 			else if(strcmp(aux, "Standby") == 0)
-			  sdriver.current.state = LUMIAR_STATE_STANDBY;
+				d->current->state = LUMIAR_STATE_STANDBY;
 
 			// Verifica e seta o modo de operação:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "Manual") == 0)
-				sdriver.current.mode = LUMIAR_MODE_MANUAL;
+				d->current->mode = LUMIAR_MODE_MANUAL;
 			else if(strcmp(aux, "Auto") == 0)
-				sdriver.current.mode = LUMIAR_MODE_AUTO;
+				d->current->mode = LUMIAR_MODE_AUTO;
 
 			// Verifica e seta o valor de Intensidade:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
-			sdriver.current.userValue = atoi(aux);
+			d->current->userValue = atoi(aux);
 
 		}
 		if(rescode == 200)
@@ -190,24 +190,24 @@ int buildResponse(struct request *req, struct response *res)
 			if(strncmp(req->path, "/", 1) == 0)
 				composepath(res->fullPath, "/index.html", res->fullPath);
 		}
-		sem_post(&(sdriver.mutex));
-		sem_wait(&(sdriver.mutex));
+		sem_post(&d->mutex);
+		sem_wait(&d->mutex);
 		// mandar o index.html atualizado
 		f = fopen(res->fullPath, "r");
 		i = strlen(res->msg);
 
-		if(sdriver.current.state == LUMIAR_STATE_ON)
+		if(d->current->state == LUMIAR_STATE_ON)
 			state = "     ON";
 		else
 			state = "Standby";
 
-		if(sdriver.current.mode == LUMIAR_MODE_MANUAL)
+		if(d->current->mode == LUMIAR_MODE_MANUAL)
 			mode = "     Manual";
 		else
 			mode = "Automatico";
 
-		sprintf(value, "%d", sdriver.current.pwmValue);
-		sprintf(luminosity, "%d", sdriver.current.luminosity);
+		sprintf(value, "%d", d->current->pwmValue);
+		sprintf(luminosity, "%d", d->current->luminosity);
 
 		if(f != NULL)
 		{
@@ -226,7 +226,7 @@ int buildResponse(struct request *req, struct response *res)
 	}
 	if(f != NULL)
 		fclose(f);
-	sem_post(&(sdriver.mutex));
+	sem_post(&d->mutex);
 	return i;
 }
 
@@ -241,7 +241,7 @@ void *worker(void *arg)
 	struct request  req;
 	struct response res;
 
-	strcpy(res.base, sdriver->config.base);
+	strcpy(res.base, sdriver->config->base);
 
 	for(;;)
 	{
@@ -257,7 +257,7 @@ void *worker(void *arg)
 			parseRequest(&req);
 
 			// Build response
-			len = buildResponse(&req, &res);
+			len = buildResponse(sdriver, &req, &res);
 
 			printf("%s\n", res.msg);
 			status = write(E, res.msg, len);
@@ -297,7 +297,7 @@ void *webService(void *arg)
 	// Bind
 	saddr.sin_family      = AF_INET;
 	saddr.sin_addr.s_addr = INADDR_ANY;
-	saddr.sin_port        = htons(svdriver->config.port);
+	saddr.sin_port        = htons(sdriver->config->port);
 
 	status = bind(sd, (struct sockaddr *) &saddr, sizeof(saddr));
 	if(status < 0)
@@ -307,7 +307,7 @@ void *webService(void *arg)
 	}
 
 	// Listen
-	status = listen(sd, QUEUE_LENGTH);
+	status = listen(sd, 0);
 	if(status)
 	{
 		perror("Error listening to socket");

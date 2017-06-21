@@ -83,7 +83,7 @@ int initDriver(struct webDriver *d, struct lumiarState *s, struct webConfig *c);
 int composepath(char *oldpath, char *path, char *newpath);
 char *getcurrentdir(char *path, int pathsize);
 int parseRequest(struct request *req);
-int buildResponse(struct request *req, struct response *res);
+int buildResponse(struct webDriver *d, struct request *req, struct response *res);
 
 void *webService(void *arg);
 
