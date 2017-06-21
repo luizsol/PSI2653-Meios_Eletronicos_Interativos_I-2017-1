@@ -73,9 +73,9 @@ int parseRequest(struct request *req)
  * @param  res a struct response da mensagem a enviar.
  * @return     0 em caso de sucesso, não-nulo caso contrário.
  */
-int buildResponse(struct request *req, struct response *res)
+int buildResponse(struct webDriver *d, struct request *req, struct response *res)
 {
-	sem_wait(&(sdriver.mutex));
+	sem_wait(&d->mutex);
 	int i, rescode;
 	struct stat statf = { 0 };
 	FILE *f;
@@ -133,14 +133,14 @@ int buildResponse(struct request *req, struct response *res)
 
 	if(rescode == 400 || rescode == 505 || rescode == 404)
 	{
-		sem_post(&(sdriver.mutex));
-		return strlen(res->msg);
+		sem_post(&d->mutex);
+		return strlen(res->hdr);
 	}
 	else
 	{
 		//Last Modified:
 		res->lastmod = res->server + strlen(res->server);
-		composepath(res->fullPath, "index.html",res->fullPath);
+		composePath(res->fullPath, "index.html", res->fullPath);
 		// Chamada de sistema para obter
 		//as informações sobre o arquivo
 		stat(res->fullPath, &statf);
@@ -167,47 +167,47 @@ int buildResponse(struct request *req, struct response *res)
 			strtok(req->path, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "ON") == 0)
-				sdriver.current.state = LUMIAR_STATE_ON;
+				d->current->state = LUMIAR_STATE_ON;
 			else if(strcmp(aux, "Standby") == 0)
-			  sdriver.current.state = LUMIAR_STATE_STANDBY;
+				d->current->state = LUMIAR_STATE_STANDBY;
 
 			// Verifica e seta o modo de operação:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "&");
 			if(strcmp(aux, "Manual") == 0)
-				sdriver.current.mode = LUMIAR_MODE_MANUAL;
+				d->current->mode = LUMIAR_MODE_MANUAL;
 			else if(strcmp(aux, "Auto") == 0)
-				sdriver.current.mode = LUMIAR_MODE_AUTO;
+				d->current->mode = LUMIAR_MODE_AUTO;
 
 			// Verifica e seta o valor de Intensidade:
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
-			sdriver.current.userValue = atoi(aux);
+			d->current->userValue = atoi(aux);
 
 		}
 		if(rescode == 200)
 		{
 			if(strncmp(req->path, "/", 1) == 0)
-				composepath(res->fullPath, "/index.html", res->fullPath);
+				composePath(res->fullPath, "/index.html", res->fullPath);
 		}
-		sem_post(&(sdriver.mutex));
-		sem_wait(&(sdriver.mutex));
+		sem_post(&d->mutex);
+		sem_wait(&d->mutex);
 		// mandar o index.html atualizado
 		f = fopen(res->fullPath, "r");
-		i = strlen(res->msg);
+		i = strlen(res->hdr);
 
-		if(sdriver.current.state == LUMIAR_STATE_ON)
-			state = "     ON";
+		if(d->current->state == LUMIAR_STATE_ON)
+			sprintf(state, "     ON");
 		else
-			state = "Standby";
+			sprintf(state, "Standby");
 
-		if(sdriver.current.mode == LUMIAR_MODE_MANUAL)
-			mode = "     Manual";
+		if(d->current->mode == LUMIAR_MODE_MANUAL)
+			sprintf(mode, "     Manual");
 		else
-			mode = "Automatico";
+			sprintf(mode, "Automatico");
 
-		sprintf(value, "%d", sdriver.current.pwmValue);
-		sprintf(luminosity, "%d", sdriver.current.luminosity);
+		sprintf(value, "%d", d->current->pwmValue);
+		sprintf(luminosity, "%d", d->current->luminosity);
 
 		if(f != NULL)
 		{
@@ -221,12 +221,12 @@ int buildResponse(struct request *req, struct response *res)
 			memcpy(&res->object[1211], luminosity, strlen(luminosity));
 			memcpy(&res->object[1232], luminosity, strlen(luminosity));
 			res->object[j] = '\0';
-			i = strlen(res->msg);
+			i = strlen(res->hdr);
 		}
 	}
 	if(f != NULL)
 		fclose(f);
-	sem_post(&(sdriver.mutex));
+	sem_post(&d->mutex);
 	return i;
 }
 
@@ -236,18 +236,24 @@ int buildResponse(struct request *req, struct response *res)
  */
 void *worker(void *arg)
 {
+	printf("webworker1\n");
 	struct webDriver *sdriver = (struct webDriver *) arg;
 	int E, len, status;
 	struct request  req;
 	struct response res;
 
-	strcpy(res.base, sdriver->config.base);
-
+	printf("webworker2\n");
+	strcpy(res.basePath, sdriver->config->base); // Aqui dá segfault FIXME
+	printf("webworker3\n");
 	for(;;)
 	{
+		printf("webworker4\n");
 		// Receive
 		E = removeQueue(&requestQueue);
+		printf("webworker5\n");
 		status = read(E, req.msg, sizeof(req.msg));
+		printf("webworker6\n");
+		printf("%s\n", req.msg);
 		if(status < 0)
 			perror("Error reading from TCP stream");
 		else if(status > 0)
@@ -257,10 +263,10 @@ void *worker(void *arg)
 			parseRequest(&req);
 
 			// Build response
-			len = buildResponse(&req, &res);
+			len = buildResponse(sdriver, &req, &res);
 
-			printf("%s\n", res.msg);
-			status = write(E, res.msg, len);
+			printf("%s\n", res.hdr);
+			status = write(E, res.hdr, len);
 			if(status <= 0)
 				perror("Error writing to TCP stream");
 
@@ -281,6 +287,7 @@ void *worker(void *arg)
  */
 void *webService(void *arg)
 {
+	printf("webservice1\n");
 	// Socket descriptor
 	int sd = socket(PF_INET, SOCK_STREAM, 0);
 	if(sd == -1)
@@ -294,11 +301,13 @@ void *webService(void *arg)
 	struct webDriver *sdriver = (struct webDriver *) arg;
 	struct sockaddr_in saddr;
 
+
 	// Bind
 	saddr.sin_family      = AF_INET;
 	saddr.sin_addr.s_addr = INADDR_ANY;
-	saddr.sin_port        = htons(svdriver->config.port);
-
+	printf("webservice2\n");
+	saddr.sin_port        = htons(sdriver->config->port); // Aqui dá segfault FIXME
+	printf("webservice3\n");
 	status = bind(sd, (struct sockaddr *) &saddr, sizeof(saddr));
 	if(status < 0)
 	{
@@ -307,7 +316,7 @@ void *webService(void *arg)
 	}
 
 	// Listen
-	status = listen(sd, QUEUE_LENGTH);
+	status = listen(sd, 0);
 	if(status)
 	{
 		perror("Error listening to socket");
@@ -316,7 +325,6 @@ void *webService(void *arg)
 
 	// Queue
 	initQueue(&requestQueue, 10);
-
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];
 	printf("Launching worker threads\n");
@@ -326,10 +334,13 @@ void *webService(void *arg)
 	// Accept
 	for(;;)
 	{
+		printf("webservice4\n");
 		int size, newsd;
 		struct sockaddr_in caddr;
 
-		newsd=accept(sd,(struct sockaddr*) &caddr,(socklen_t *) &size);
+		printf("webservice5\n");
+		newsd = accept(sd,(struct sockaddr*) &caddr,(socklen_t *) &size); // FIXME
+		printf("webservice6\n");
 		if(newsd < 0)
 			perror("Error accepting connection");
 
@@ -345,15 +356,16 @@ void *webService(void *arg)
 /**
  * Inicializa a struct de controle do webserver.
  */
-int initDriver(struct webDriver *d, struct webConfig *c)
+int initDriver(struct webDriver *d, struct lumiarState *s, struct webConfig *c)
 {
 	d->config = c;
 	sem_init(&d->mutex, 0, 1);
 
-	d->current.state = LUMIAR_STATE_DEFAULT;
-	d->current.mode = LUMIAR_MODE_DEFAULT;
-	d->current.value = LUMIAR_VALUE_DEFAULT;
-	d->current.luminosity = 0;
+	d->current = s;
+	d->current->state = LUMIAR_STATE_DEFAULT;
+	d->current->mode = LUMIAR_MODE_DEFAULT;
+	d->current->userValue = LUMIAR_VALUE_DEFAULT;
+	d->current->luminosity = 0;
 
 	return 0;
 }
