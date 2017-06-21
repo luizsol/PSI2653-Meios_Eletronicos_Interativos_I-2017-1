@@ -2,8 +2,8 @@
  * Title:       web
  * File:        web.c
  * Author:      Gabriel Crabbé, Tiago Amano
- * Version:     0.0 (2017-06-18)
- * Date:        2017-06-18
+ * Version:     0.0 (2017-06-21)
+ * Date:        2017-06-21
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -46,11 +46,7 @@ int composePath(const char *basepath, const char *relpath, char *fullpath)
 	strcpy(fullpath, basepath);
 
 	/* Multiple slashes in sequence are not a problem */
-	strcat(fullpath, relpath);
-	printf("full2 %s\n", fullpath);
-	printf("full3 %d\n", strlen(fullpath));
-	for(int i = 0; i < strlen(fullpath); i++)
-		printf("full4 %d\n", fullpath[i]);
+	strncat(fullpath, relpath, PATH_MAX - strlen(fullpath) - 1);
 	return 0;
 }
 

@@ -2,8 +2,8 @@
  * Title:       main
  * File:        main.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-20)
- * Date:        2017-06-20
+ * Version:     0.0 (2017-06-21)
+ * Date:        2017-06-21
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -26,7 +26,7 @@ int main(void)
 	/* Parse configuration file */
 	struct lumiarConfig sconf;
 	initConfig(&sconf);
-	// printf("ini: %d\n", parseConfig(&sconf));
+	parseConfig(&sconf);
 
 	/* Webserver driver */
 	struct lumiarState lstate;

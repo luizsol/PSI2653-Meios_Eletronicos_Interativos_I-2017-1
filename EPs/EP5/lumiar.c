@@ -2,8 +2,8 @@
  * Title:       lumiar
  * File:        lumiar.c
  * Author:      Gabriel Crabbé
- * Version:     0.0 (2017-06-12)
- * Date:        2017-06-12
+ * Version:     0.0 (2017-06-21)
+ * Date:        2017-06-21
  * Description: Exercício 5 de PSI2653.
  * -----------------------------------------------------------------------------
  */
@@ -47,27 +47,25 @@ int parseConfig(struct lumiarConfig *c)
 		}
 
 		/* Parse line */
-		line[strcspn(line, "\n")] = '\0';
 		strp = strtok(line, "=");
-
 		if(!strcmp(line, "port"))
-			sscanf(strtok(NULL, " "), "%hu", &c->web.port);
+			sscanf(strtok(NULL, "\r\n"), "%hu", &c->web.port);
 		else if(!strcmp(line, "base"))
-			strcpy(c->web.base, strtok(NULL, " "));
+			strcpy(c->web.base, strtok(NULL, "\r\n"));
 		else if(!strcmp(line, "pwm.high"))
-			sscanf(strtok(NULL, " "), "%u", &c->pwm.highValue);
+			sscanf(strtok(NULL, "\r\n"), "%u", &c->pwm.highValue);
 		else if(!strcmp(line, "pwm.low"))
-			sscanf(strtok(NULL, " "), "%u", &c->pwm.lowValue);
+			sscanf(strtok(NULL, "\r\n"), "%u", &c->pwm.lowValue);
 		else if(!strcmp(line, "pwm.out"))
-			sscanf(strtok(NULL, " "), "%hhu", &c->pwm.outputPin);
+			sscanf(strtok(NULL, "\r\n"), "%hhu", &c->pwm.outputPin);
 		else if(!strcmp(line, "ldr.high"))
-			sscanf(strtok(NULL, " "), "%u", &c->ldr.highValue);
+			sscanf(strtok(NULL, "\r\n"), "%u", &c->ldr.highValue);
 		else if(!strcmp(line, "ldr.low"))
-			sscanf(strtok(NULL, " "), "%u", &c->ldr.lowValue);
+			sscanf(strtok(NULL, "\r\n"), "%u", &c->ldr.lowValue);
 		else if(!strcmp(line, "ldr.in"))
-			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.inputPin);
+			sscanf(strtok(NULL, "\r\n"), "%hhu", &c->ldr.inputPin);
 		else if(!strcmp(line, "ldr.out"))
-			sscanf(strtok(NULL, " "), "%hhu", &c->ldr.outputPin);
+			sscanf(strtok(NULL, "\r\n"), "%hhu", &c->ldr.outputPin);
 		else
 			count--; /* Do not increase count in this iteration */
 	}
