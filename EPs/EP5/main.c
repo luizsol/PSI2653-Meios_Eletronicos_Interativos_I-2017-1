@@ -26,7 +26,7 @@ int main(void)
 	/* Parse configuration file */
 	struct lumiarConfig sconf;
 	initConfig(&sconf);
-	parseConfig(&sconf);
+	// printf("ini: %d\n", parseConfig(&sconf));
 
 	/* Webserver driver */
 	struct lumiarState lstate;
@@ -36,7 +36,7 @@ int main(void)
 
 	/* Create threads */
 	pthread_t pwmThread, ldrThread, webThread;
-	printf("Launching dedicated threads\n");
+	printf("Launching services\n");
 	pthread_create(&webThread, NULL, webService, (void *) &wdriver);
 	/* UNCOMMENT LINES BELOW FOR DEPLOYMENT */
 	// pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
@@ -51,10 +51,10 @@ int main(void)
 	for(;;)
 	{
 		/* Get request from server */
-		sem_wait(&(wdriver.mutex));
-		if(memcmp(&lstate, &wdriver.current, sizeof(lstate)))
+		sem_wait(&wdriver.mutex);
+		if(memcmp(&lstate, wdriver.current, sizeof(lstate)))
 		{
-			memcpy(&lstate, &wdriver.current, sizeof(lstate));
+			memcpy(&lstate, wdriver.current, sizeof(lstate));
 			sem_post(&wdriver.mutex);
 			hasChanged = 1;
 		}
@@ -98,12 +98,13 @@ int main(void)
 		if(hasChanged)
 		{
 			sem_wait(&wdriver.mutex);
-			memcpy(&wdriver.current, &lstate, sizeof(lstate));
+			memcpy(wdriver.current, &lstate, sizeof(lstate));
 			sem_post(&wdriver.mutex);
 		}
 
 		/* Sleep */
-		nanosleep(&slp, (struct timespec *) NULL);
+		//nanosleep(&slp, (struct timespec *) NULL);
+		sleep(1);
 	}
 
 	return 0;

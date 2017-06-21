@@ -46,7 +46,11 @@ int composePath(const char *basepath, const char *relpath, char *fullpath)
 	strcpy(fullpath, basepath);
 
 	/* Multiple slashes in sequence are not a problem */
-	strncat(fullpath, relpath, PATH_MAX - strlen(fullpath) - 1);
+	strcat(fullpath, relpath);
+	printf("full2 %s\n", fullpath);
+	printf("full3 %d\n", strlen(fullpath));
+	for(int i = 0; i < strlen(fullpath); i++)
+		printf("full4 %d\n", fullpath[i]);
 	return 0;
 }
 
@@ -77,7 +81,7 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 {
 	sem_wait(&d->mutex);
 	int i, rescode;
-	struct stat statf = { 0 };
+	struct stat statf;
 	FILE *f;
 	char state[11];
 	char mode[11];
@@ -143,6 +147,8 @@ int buildResponse(struct webDriver *d, struct request *req, struct response *res
 		// Chamada de sistema para obter
 		//as informações sobre o arquivo
 		stat(res->fullPath, &statf);
+		printf("%s ----\n %s ----\n %s\n", res->basePath, res->fullPath, req->path);
+
 		//apontado por res->path e
 		//armazena as informações em statf
 		servertime = gmtime(&statf.st_mtime);
@@ -235,8 +241,7 @@ void *worker(void *arg)
 	struct request  req;
 	struct response res;
 
-	printf("%s",sdriver->config->base);
-	strcpy(res.basePath, sdriver->config->base); // Aqui dá segfault FIXME
+	strcpy(res.basePath, sdriver->config->base);
 	for(;;)
 	{
 		// Receive
@@ -291,7 +296,7 @@ void *webService(void *arg)
 	// Bind
 	saddr.sin_family      = AF_INET;
 	saddr.sin_addr.s_addr = INADDR_ANY;
-	saddr.sin_port        = htons(sdriver->config->port); // Aqui dá segfault FIXME
+	saddr.sin_port        = htons(sdriver->config->port);
 	status = bind(sd, (struct sockaddr *) &saddr, sizeof(saddr));
 	if(status < 0)
 	{
@@ -311,7 +316,7 @@ void *webService(void *arg)
 	initQueue(&requestQueue, 10);
 	// Create threads
 	pthread_t myworkers[WORKER_THREADS];
-	printf("Launching worker threads\n");
+	printf("Launching TCP worker threads\n");
 	for(int i = 1; i <= WORKER_THREADS; i++)
 		pthread_create(&myworkers[i], NULL, worker, (void *) sdriver);
 
