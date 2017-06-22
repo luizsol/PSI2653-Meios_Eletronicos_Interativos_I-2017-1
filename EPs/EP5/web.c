@@ -184,6 +184,9 @@ int buildResponse(struct webDriver *d, struct request *req,
 			strtok(NULL, "=");
 			aux = strtok(NULL, "\0");
 			d->current->userValue = atoi(aux);
+			printf("c1 - state%d\n",d->current->state);
+			printf("c2 - mode%d\n",d->current->mode);
+			printf("c3 - value%d\n",d->current->userValue);
 		}
 		sem_post(&d->mutex);
 

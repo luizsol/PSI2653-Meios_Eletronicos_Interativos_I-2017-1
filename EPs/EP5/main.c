@@ -33,14 +33,15 @@ int main(void)
 	struct lumiarState ldriver;
 	struct webDriver wdriver;
 	initDriver(&wdriver, &ldriver, &sconf.web);
+	//wiringPiSetup() ;
 
 	/* Create threads */
 	pthread_t pwmThread, ldrThread, webThread;
 	printf("Launching services\n");
 	pthread_create(&webThread, NULL, webService, (void *) &wdriver);
 	/* UNCOMMENT LINES BELOW FOR DEPLOYMENT */
-	// pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
-	// pthread_create(&pwmThread, NULL, pwmService, (void *) &sconf.pwm);
+	 pthread_create(&ldrThread, NULL, ldrService, (void *) &sconf.ldr);
+	 pthread_create(&pwmThread, NULL, pwmService, (void *) &sconf.pwm);
 
 	/* Local flags and variables */
 	int hasChanged = 0;
@@ -53,7 +54,8 @@ int main(void)
 		/* Get request from server */
 		sem_wait(&wdriver.mutex);
 		if(memcmp(&lstate, wdriver.current, sizeof(lstate)))
-		{
+		{	
+			printf("b1");
 			memcpy(&lstate, wdriver.current, sizeof(lstate));
 			sem_post(&wdriver.mutex);
 			hasChanged = 1;
@@ -66,9 +68,9 @@ int main(void)
 
 		/* Get luminosity */
 		/* UNCOMMENT LINE BELOW FOR DEPLOYMENT */
-		//readLuminosity = getLuminosity();
+		readLuminosity = getLuminosity();
 		/* DELETE LINE BELOW FOR DEPLOYMENT */
-		readLuminosity = (int) time(NULL) % 101;
+		//readLuminosity = (int) time(NULL) % 101;
 		if(lstate.luminosity != readLuminosity)
 		{
 			lstate.luminosity = readLuminosity;
@@ -77,7 +79,8 @@ int main(void)
 
 		/* Send command */
 		if(hasChanged)
-		{
+		{	
+			printf("b2");
 			if(lstate.state == LUMIAR_STATE_ON)
 			{
 				if(lstate.mode == LUMIAR_MODE_AUTO)
@@ -91,7 +94,7 @@ int main(void)
 			}
 
 			/* UNCOMMENT LINE BELOW FOR DEPLOYMENT */
-			// setOperatingPoint(lstate.pwmValue);
+			setOperatingPoint(lstate.pwmValue,&sconf.pwm);
 		}
 
 		/* Send back to server */

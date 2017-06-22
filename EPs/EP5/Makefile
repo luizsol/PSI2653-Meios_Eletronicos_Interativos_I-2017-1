@@ -21,19 +21,22 @@ TDIR = test
 .DEFAULT_GOAL := main
 
 # Object files
+pwm.o: pwm.c pwm.h
+	$(CC) $(CFLAGS) -c pwm.c
+
 queue.o: queue.c queue.h
 	$(CC) $(CFLAGS) -c queue.c
 
-lumiarlib.o: lumiarlib.c lumiarlib.h
-	$(CC) $(CFLAGS) -c lumiarlib.c
+web.o: web.c web.h
+	$(CC) $(CFLAGS) -c web.c
 
-serverlib.o: serverlib.c serverlib.h
-	$(CC) $(CFLAGS) -c serverlib.c
+lumiar.o: lumiar.c lumiar.h
+	$(CC) $(CFLAGS) -c lumiar.c
 
 ldr.o: ldr.c ldr.h
 	$(CC) $(CFLAGS) -c ldr.c
 
-main.o: serverlib.h queue.h main.c
+main.o: web.h ldr.h pwm.h queue.h main.c
 	$(CC) $(CFLAGS) -c main.c 
 
 # Tests
@@ -44,8 +47,8 @@ test-ldr: test-lrd.o ldr.o
 	$(CC) $(CFLAGS) test-ldr.o ldr.o -o test-ldr $(LIBS)
 
 # All
-all main: main.o lumiarlib.o queue.o serverlib.o htmllib.o ldr.o
-	$(CC) $(CFLAGS) serverlib.o queue.o htmllib.o main.o lumiarlib.o ldr.o -o web $(LIBS)
+all main: main.o lumiar.o pwm.o queue.o web.o ldr.o
+	$(CC) $(CFLAGS) queue.o web.o pwm.o main.o lumiar.o ldr.o -o web $(LIBS)
 
 clean:
 	rm -f *.o

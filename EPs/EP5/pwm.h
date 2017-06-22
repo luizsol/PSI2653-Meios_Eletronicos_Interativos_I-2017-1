@@ -24,8 +24,8 @@ struct pwmConfig
 
 
 /* Protótipos de funções */
-void *pwmService(void *conf);
-int setOperatingPoint(int val);
+void *pwmService(void *config);
+int setOperatingPoint(int val, struct pwmConfig *p);
 
 
 #endif /* PWM_H */
